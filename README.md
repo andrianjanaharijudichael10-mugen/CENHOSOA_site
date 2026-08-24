@@ -1,2 +1,2 @@
 # CENHOSOA_site
-Application hybride de CENHOSOA( Site web et app mobiile Stage L3)
+Application hybride de CENHOSOA( Site web et app mobile Stage L3)
