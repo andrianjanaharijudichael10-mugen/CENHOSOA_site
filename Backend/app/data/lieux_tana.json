@@ -1,0 +1,5156 @@
+{
+  "zone": "Antananarivo et environs",
+  "source": "© OpenStreetMap contributors, ODbL 1.0",
+  "lieux": [
+    {
+      "id": "67-ha-837558568",
+      "nom": "67 ha",
+      "aliases": [
+        "67 ha, Antananarivo",
+        "67 ha, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9050014,
+      "longitude": 47.5092176,
+      "osm_type": "node",
+      "osm_id": 837558568,
+      "place_type": "suburb"
+    },
+    {
+      "id": "67-ha-atsimo-725856151",
+      "nom": "67 ha Atsimo",
+      "aliases": [
+        "67 ha Atsimo, Antananarivo",
+        "67 ha Atsimo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9095885,
+      "longitude": 47.5076745,
+      "osm_type": "node",
+      "osm_id": 725856151,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "67-ha-avaratra-andrefana-837558567",
+      "nom": "67 ha Avaratra Andrefana",
+      "aliases": [
+        "67 ha Avaratra Andrefana, Antananarivo",
+        "67 ha Avaratra Andrefana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9021422,
+      "longitude": 47.5072684,
+      "osm_type": "node",
+      "osm_id": 837558567,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "67-ha-avaratra-atsinanana-12504457186",
+      "nom": "67 ha Avaratra Atsinanana",
+      "aliases": [
+        "67 ha Avaratra Atsinanana, Antananarivo",
+        "67 ha Avaratra Atsinanana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.902668,
+      "longitude": 47.5119102,
+      "osm_type": "node",
+      "osm_id": 12504457186,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "alakamisy-10008240762",
+      "nom": "Alakamisy",
+      "aliases": [
+        "Alakamisy, Antananarivo",
+        "Alakamisy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7702484,
+      "longitude": 47.5572454,
+      "osm_type": "node",
+      "osm_id": 10008240762,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "alarobia-687168436",
+      "nom": "Alarobia",
+      "aliases": [
+        "Alarobia, Antananarivo",
+        "Alarobia, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8713408,
+      "longitude": 47.5212985,
+      "osm_type": "node",
+      "osm_id": 687168436,
+      "place_type": "suburb"
+    },
+    {
+      "id": "alasora-687180726",
+      "nom": "Alasora",
+      "aliases": [
+        "Alasora, Antananarivo",
+        "Alasora, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9553235,
+      "longitude": 47.5674821,
+      "osm_type": "node",
+      "osm_id": 687180726,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambaniala-5454040963",
+      "nom": "Ambaniala",
+      "aliases": [
+        "Ambaniala, Antananarivo",
+        "Ambaniala, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9198743,
+      "longitude": 47.4889397,
+      "osm_type": "node",
+      "osm_id": 5454040963,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambanidia-5680854302",
+      "nom": "Ambanidia",
+      "aliases": [
+        "Ambanidia, Antananarivo",
+        "Ambanidia, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9188124,
+      "longitude": 47.5391554,
+      "osm_type": "node",
+      "osm_id": 5680854302,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambanilalana-5454040949",
+      "nom": "Ambanilalana",
+      "aliases": [
+        "Ambanilalana, Antananarivo",
+        "Ambanilalana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9165301,
+      "longitude": 47.4809575,
+      "osm_type": "node",
+      "osm_id": 5454040949,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambanin-ampamarinana-12504002875",
+      "nom": "Ambanin'Ampamarinana",
+      "aliases": [
+        "Ambanin'Ampamarinana, Antananarivo",
+        "Ambanin'Ampamarinana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9218762,
+      "longitude": 47.5287491,
+      "osm_type": "node",
+      "osm_id": 12504002875,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambaranjana-688357092",
+      "nom": "Ambaranjana",
+      "aliases": [
+        "Ambaranjana, Antananarivo",
+        "Ambaranjana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9115852,
+      "longitude": 47.540576,
+      "osm_type": "node",
+      "osm_id": 688357092,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambato-5535778698",
+      "nom": "Ambato",
+      "aliases": [
+        "Ambato, Antananarivo",
+        "Ambato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8949618,
+      "longitude": 47.4845686,
+      "osm_type": "node",
+      "osm_id": 5535778698,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatobe-573536052",
+      "nom": "Ambatobe",
+      "aliases": [
+        "Ambatobe, Antananarivo",
+        "Ambatobe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8793892,
+      "longitude": 47.5585948,
+      "osm_type": "node",
+      "osm_id": 573536052,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambatofotsy-avaradrano-7149564249",
+      "nom": "Ambatofotsy Avaradrano",
+      "aliases": [
+        "Ambatofotsy Avaradrano, Antananarivo",
+        "Ambatofotsy Avaradrano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8259732,
+      "longitude": 47.5734923,
+      "osm_type": "node",
+      "osm_id": 7149564249,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambatokaranana-9112918006",
+      "nom": "Ambatokaranana",
+      "aliases": [
+        "Ambatokaranana, Antananarivo",
+        "Ambatokaranana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8971034,
+      "longitude": 47.5486279,
+      "osm_type": "node",
+      "osm_id": 9112918006,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatolampy-4046331598",
+      "nom": "Ambatolampy",
+      "aliases": [
+        "Ambatolampy, Antananarivo",
+        "Ambatolampy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8915901,
+      "longitude": 47.4562646,
+      "osm_type": "node",
+      "osm_id": 4046331598,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatolampy-antehiroka-668739128",
+      "nom": "Ambatolampy Antehiroka",
+      "aliases": [
+        "Ambatolampy Antehiroka, Antananarivo",
+        "Ambatolampy Antehiroka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8457515,
+      "longitude": 47.4875559,
+      "osm_type": "node",
+      "osm_id": 668739128,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambatomafana-5596992377",
+      "nom": "Ambatomafana",
+      "aliases": [
+        "Ambatomafana, Antananarivo",
+        "Ambatomafana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8884012,
+      "longitude": 47.7878612,
+      "osm_type": "node",
+      "osm_id": 5596992377,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatomainty-12504457193",
+      "nom": "Ambatomainty",
+      "aliases": [
+        "Ambatomainty, Antananarivo",
+        "Ambatomainty, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8910075,
+      "longitude": 47.5377667,
+      "osm_type": "node",
+      "osm_id": 12504457193,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambatomaro-681137790",
+      "nom": "Ambatomaro",
+      "aliases": [
+        "Ambatomaro, Antananarivo",
+        "Ambatomaro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9007445,
+      "longitude": 47.5630467,
+      "osm_type": "node",
+      "osm_id": 681137790,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambatombositra-5729708814",
+      "nom": "Ambatombositra",
+      "aliases": [
+        "Ambatombositra, Antananarivo",
+        "Ambatombositra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6863389,
+      "longitude": 47.3713705,
+      "osm_type": "node",
+      "osm_id": 5729708814,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatomena-12504457190",
+      "nom": "Ambatomena",
+      "aliases": [
+        "Ambatomena, Antananarivo",
+        "Ambatomena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9087326,
+      "longitude": 47.5239158,
+      "osm_type": "node",
+      "osm_id": 12504457190,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatomiranty-5729783191",
+      "nom": "Ambatomiranty",
+      "aliases": [
+        "Ambatomiranty, Antananarivo",
+        "Ambatomiranty, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6850532,
+      "longitude": 47.361972,
+      "osm_type": "node",
+      "osm_id": 5729783191,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatonakanga-686543334",
+      "nom": "Ambatonakanga",
+      "aliases": [
+        "Ambatonakanga, Antananarivo",
+        "Ambatonakanga, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9129111,
+      "longitude": 47.5270921,
+      "osm_type": "node",
+      "osm_id": 686543334,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatondralambo-10006414609",
+      "nom": "Ambatondralambo",
+      "aliases": [
+        "Ambatondralambo, Antananarivo",
+        "Ambatondralambo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7719292,
+      "longitude": 47.5996516,
+      "osm_type": "node",
+      "osm_id": 10006414609,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatondratemo-13462289224",
+      "nom": "Ambatondratemo",
+      "aliases": [
+        "Ambatondratemo, Antananarivo",
+        "Ambatondratemo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9301958,
+      "longitude": 47.4765558,
+      "osm_type": "node",
+      "osm_id": 13462289224,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatonilita-7122857438",
+      "nom": "Ambatonilita",
+      "aliases": [
+        "Ambatonilita, Antananarivo",
+        "Ambatonilita, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9108158,
+      "longitude": 47.5215434,
+      "osm_type": "node",
+      "osm_id": 7122857438,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatoroka-694070647",
+      "nom": "Ambatoroka",
+      "aliases": [
+        "Ambatoroka, Antananarivo",
+        "Ambatoroka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9238832,
+      "longitude": 47.5418577,
+      "osm_type": "node",
+      "osm_id": 694070647,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambatoroka-ambany-12504002880",
+      "nom": "Ambatoroka Ambany",
+      "aliases": [
+        "Ambatoroka Ambany, Antananarivo",
+        "Ambatoroka Ambany, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9237334,
+      "longitude": 47.5461244,
+      "osm_type": "node",
+      "osm_id": 12504002880,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambatovinaky-686543332",
+      "nom": "Ambatovinaky",
+      "aliases": [
+        "Ambatovinaky, Antananarivo",
+        "Ambatovinaky, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9149588,
+      "longitude": 47.5295168,
+      "osm_type": "node",
+      "osm_id": 686543332,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambavahadimitafo-686542283",
+      "nom": "Ambavahadimitafo",
+      "aliases": [
+        "Ambavahadimitafo, Antananarivo",
+        "Ambavahadimitafo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9206952,
+      "longitude": 47.5343448,
+      "osm_type": "node",
+      "osm_id": 686542283,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambavahaditokana-931540836",
+      "nom": "Ambavahaditokana",
+      "aliases": [
+        "Ambavahaditokana, Antananarivo",
+        "Ambavahaditokana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9237811,
+      "longitude": 47.4617544,
+      "osm_type": "node",
+      "osm_id": 931540836,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambavahaditokana-afovoany-13462289211",
+      "nom": "Ambavahaditokana Afovoany",
+      "aliases": [
+        "Ambavahaditokana Afovoany, Antananarivo",
+        "Ambavahaditokana Afovoany, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.926121,
+      "longitude": 47.4612808,
+      "osm_type": "node",
+      "osm_id": 13462289211,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ambavahaditokana-andrefana-13462289212",
+      "nom": "Ambavahaditokana Andrefana",
+      "aliases": [
+        "Ambavahaditokana Andrefana, Antananarivo",
+        "Ambavahaditokana Andrefana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9263658,
+      "longitude": 47.4595562,
+      "osm_type": "node",
+      "osm_id": 13462289212,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ambavahaditokana-atsimo-13462289216",
+      "nom": "Ambavahaditokana Atsimo",
+      "aliases": [
+        "Ambavahaditokana Atsimo, Antananarivo",
+        "Ambavahaditokana Atsimo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.928747,
+      "longitude": 47.4591082,
+      "osm_type": "node",
+      "osm_id": 13462289216,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ambilanibe-6830616464",
+      "nom": "Ambilanibe",
+      "aliases": [
+        "Ambilanibe, Antananarivo",
+        "Ambilanibe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9200498,
+      "longitude": 47.5052176,
+      "osm_type": "node",
+      "osm_id": 6830616464,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "amboasary-9599170052",
+      "nom": "Amboasary",
+      "aliases": [
+        "Amboasary, Antananarivo",
+        "Amboasary, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8328173,
+      "longitude": 47.4114668,
+      "osm_type": "node",
+      "osm_id": 9599170052,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "amboatavo-5454040955",
+      "nom": "Amboatavo",
+      "aliases": [
+        "Amboatavo, Antananarivo",
+        "Amboatavo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9199986,
+      "longitude": 47.4665809,
+      "osm_type": "node",
+      "osm_id": 5454040955,
+      "place_type": "suburb"
+    },
+    {
+      "id": "amboavahy-668739134",
+      "nom": "Amboavahy",
+      "aliases": [
+        "Amboavahy, Antananarivo",
+        "Amboavahy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8574147,
+      "longitude": 47.4826431,
+      "osm_type": "node",
+      "osm_id": 668739134,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodavena-931486392",
+      "nom": "Ambodavena",
+      "aliases": [
+        "Ambodavena, Antananarivo",
+        "Ambodavena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.947802,
+      "longitude": 47.4763993,
+      "osm_type": "node",
+      "osm_id": 931486392,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambodiafontsy-687173784",
+      "nom": "Ambodiafontsy",
+      "aliases": [
+        "Ambodiafontsy, Antananarivo",
+        "Ambodiafontsy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9406712,
+      "longitude": 47.463629,
+      "osm_type": "node",
+      "osm_id": 687173784,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodiamberivatry-5454040965",
+      "nom": "Ambodiamberivatry",
+      "aliases": [
+        "Ambodiamberivatry, Antananarivo",
+        "Ambodiamberivatry, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9085778,
+      "longitude": 47.4859008,
+      "osm_type": "node",
+      "osm_id": 5454040965,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodiampanga-itaosy-5454040951",
+      "nom": "Ambodiampanga Itaosy",
+      "aliases": [
+        "Ambodiampanga Itaosy, Antananarivo",
+        "Ambodiampanga Itaosy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9050025,
+      "longitude": 47.4824917,
+      "osm_type": "node",
+      "osm_id": 5454040951,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambodifasika-5454111829",
+      "nom": "Ambodifasika",
+      "aliases": [
+        "Ambodifasika, Antananarivo",
+        "Ambodifasika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9119957,
+      "longitude": 47.4632925,
+      "osm_type": "node",
+      "osm_id": 5454111829,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodifilao-12504457191",
+      "nom": "Ambodifilao",
+      "aliases": [
+        "Ambodifilao, Antananarivo",
+        "Ambodifilao, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9050583,
+      "longitude": 47.525627,
+      "osm_type": "node",
+      "osm_id": 12504457191,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambodihady-668739138",
+      "nom": "Ambodihady",
+      "aliases": [
+        "Ambodihady, Antananarivo",
+        "Ambodihady, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8737435,
+      "longitude": 47.4868757,
+      "osm_type": "node",
+      "osm_id": 668739138,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodihady-carriere-6673192563",
+      "nom": "Ambodihady Carriere",
+      "aliases": [
+        "Ambodihady Carriere, Antananarivo",
+        "Ambodihady Carriere, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.875258,
+      "longitude": 47.4907764,
+      "osm_type": "node",
+      "osm_id": 6673192563,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambodimanga-687191167",
+      "nom": "Ambodimanga",
+      "aliases": [
+        "Ambodimanga, Antananarivo",
+        "Ambodimanga, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9013856,
+      "longitude": 47.5384871,
+      "osm_type": "node",
+      "osm_id": 687191167,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambodimita-668739133",
+      "nom": "Ambodimita",
+      "aliases": [
+        "Ambodimita, Antananarivo",
+        "Ambodimita, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8680654,
+      "longitude": 47.4878271,
+      "osm_type": "node",
+      "osm_id": 668739133,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodinisotry-837558570",
+      "nom": "Ambodinisotry",
+      "aliases": [
+        "Ambodinisotry, Antananarivo",
+        "Ambodinisotry, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9074005,
+      "longitude": 47.5106553,
+      "osm_type": "node",
+      "osm_id": 837558570,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodirano-12504457181",
+      "nom": "Ambodirano",
+      "aliases": [
+        "Ambodirano, Antananarivo",
+        "Ambodirano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9144621,
+      "longitude": 47.5001085,
+      "osm_type": "node",
+      "osm_id": 12504457181,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodirotra-681393250",
+      "nom": "Ambodirotra",
+      "aliases": [
+        "Ambodirotra, Antananarivo",
+        "Ambodirotra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9098911,
+      "longitude": 47.5364959,
+      "osm_type": "node",
+      "osm_id": 681393250,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambodisiarivo-10008240764",
+      "nom": "Ambodisiarivo",
+      "aliases": [
+        "Ambodisiarivo, Antananarivo",
+        "Ambodisiarivo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8041437,
+      "longitude": 47.530801,
+      "osm_type": "node",
+      "osm_id": 10008240764,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "amboditsiry-681447076",
+      "nom": "Amboditsiry",
+      "aliases": [
+        "Amboditsiry, Antananarivo",
+        "Amboditsiry, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8844741,
+      "longitude": 47.5371424,
+      "osm_type": "node",
+      "osm_id": 681447076,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodivoanjo-687168434",
+      "nom": "Ambodivoanjo",
+      "aliases": [
+        "Ambodivoanjo, Antananarivo",
+        "Ambodivoanjo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8733307,
+      "longitude": 47.5336287,
+      "osm_type": "node",
+      "osm_id": 687168434,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodivoly-atsimo-13462289213",
+      "nom": "Ambodivoly Atsimo",
+      "aliases": [
+        "Ambodivoly Atsimo, Antananarivo",
+        "Ambodivoly Atsimo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9256554,
+      "longitude": 47.4596272,
+      "osm_type": "node",
+      "osm_id": 13462289213,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodivoly-avaratra-13462289215",
+      "nom": "Ambodivoly Avaratra",
+      "aliases": [
+        "Ambodivoly Avaratra, Antananarivo",
+        "Ambodivoly Avaratra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9260753,
+      "longitude": 47.4576464,
+      "osm_type": "node",
+      "osm_id": 13462289215,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ambodivona-620818114",
+      "nom": "Ambodivona",
+      "aliases": [
+        "Ambodivona, Antananarivo",
+        "Ambodivona, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8929323,
+      "longitude": 47.5294192,
+      "osm_type": "node",
+      "osm_id": 620818114,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodivondava-7149564265",
+      "nom": "Ambodivondava",
+      "aliases": [
+        "Ambodivondava, Antananarivo",
+        "Ambodivondava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8280688,
+      "longitude": 47.5520783,
+      "osm_type": "node",
+      "osm_id": 7149564265,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambodivonkely-668739147",
+      "nom": "Ambodivonkely",
+      "aliases": [
+        "Ambodivonkely, Antananarivo",
+        "Ambodivonkely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8788474,
+      "longitude": 47.504672,
+      "osm_type": "node",
+      "osm_id": 668739147,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohibao-668739130",
+      "nom": "Ambohibao",
+      "aliases": [
+        "Ambohibao, Antananarivo",
+        "Ambohibao, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8457468,
+      "longitude": 47.4738693,
+      "osm_type": "node",
+      "osm_id": 668739130,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohibarikely-837190453",
+      "nom": "Ambohibarikely",
+      "aliases": [
+        "Ambohibarikely, Antananarivo",
+        "Ambohibarikely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.928559,
+      "longitude": 47.5169492,
+      "osm_type": "node",
+      "osm_id": 837190453,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohibary-9800991836",
+      "nom": "Ambohibary",
+      "aliases": [
+        "Ambohibary, Antananarivo",
+        "Ambohibary, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8609955,
+      "longitude": 47.4041592,
+      "osm_type": "node",
+      "osm_id": 9800991836,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohibary-namehana-7149685723",
+      "nom": "Ambohibary Namehana",
+      "aliases": [
+        "Ambohibary Namehana, Antananarivo",
+        "Ambohibary Namehana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8255998,
+      "longitude": 47.5339043,
+      "osm_type": "node",
+      "osm_id": 7149685723,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohibe-2274967032",
+      "nom": "Ambohibe",
+      "aliases": [
+        "Ambohibe, Antananarivo",
+        "Ambohibe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8798143,
+      "longitude": 47.575424,
+      "osm_type": "node",
+      "osm_id": 2274967032,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohidahy-844907666",
+      "nom": "Ambohidahy",
+      "aliases": [
+        "Ambohidahy, Antananarivo",
+        "Ambohidahy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8950666,
+      "longitude": 47.5562075,
+      "osm_type": "node",
+      "osm_id": 844907666,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohidava-10006028604",
+      "nom": "Ambohidava",
+      "aliases": [
+        "Ambohidava, Antananarivo",
+        "Ambohidava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7606607,
+      "longitude": 47.3609369,
+      "osm_type": "node",
+      "osm_id": 10006028604,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohidavenona-12504457163",
+      "nom": "Ambohidavenona",
+      "aliases": [
+        "Ambohidavenona, Antananarivo",
+        "Ambohidavenona, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8925073,
+      "longitude": 47.4580246,
+      "osm_type": "node",
+      "osm_id": 12504457163,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohidralamabo-13462289217",
+      "nom": "Ambohidralamabo",
+      "aliases": [
+        "Ambohidralamabo, Antananarivo",
+        "Ambohidralamabo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9290413,
+      "longitude": 47.4555677,
+      "osm_type": "node",
+      "osm_id": 13462289217,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ambohidrapeto-5531126587",
+      "nom": "Ambohidrapeto",
+      "aliases": [
+        "Ambohidrapeto, Antananarivo",
+        "Ambohidrapeto, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8981257,
+      "longitude": 47.4735242,
+      "osm_type": "node",
+      "osm_id": 5531126587,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohidraserika-837197787",
+      "nom": "Ambohidraserika",
+      "aliases": [
+        "Ambohidraserika, Antananarivo",
+        "Ambohidraserika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9343476,
+      "longitude": 47.5459205,
+      "osm_type": "node",
+      "osm_id": 837197787,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohidratrimo",
+      "nom": "Ambohidratrimo",
+      "aliases": [
+        "Ambohidratrimo, Antananarivo",
+        "Ambohidratrimo, Madagascar"
+      ],
+      "latitude": -18.6765855,
+      "longitude": 47.426446
+    },
+    {
+      "id": "ambohidrazaka-5796259520",
+      "nom": "Ambohidrazaka",
+      "aliases": [
+        "Ambohidrazaka, Antananarivo",
+        "Ambohidrazaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9459059,
+      "longitude": 47.5700955,
+      "osm_type": "node",
+      "osm_id": 5796259520,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohidroa-668739135",
+      "nom": "Ambohidroa",
+      "aliases": [
+        "Ambohidroa, Antananarivo",
+        "Ambohidroa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8543139,
+      "longitude": 47.4859663,
+      "osm_type": "node",
+      "osm_id": 668739135,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohijafy-5454040964",
+      "nom": "Ambohijafy",
+      "aliases": [
+        "Ambohijafy, Antananarivo",
+        "Ambohijafy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9103236,
+      "longitude": 47.4896318,
+      "osm_type": "node",
+      "osm_id": 5454040964,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohijanahary-antehiroka-12504457176",
+      "nom": "Ambohijanahary Antehiroka",
+      "aliases": [
+        "Ambohijanahary Antehiroka, Antananarivo",
+        "Ambohijanahary Antehiroka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8328147,
+      "longitude": 47.4922872,
+      "osm_type": "node",
+      "osm_id": 12504457176,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohijanamasoandro-12504457162",
+      "nom": "Ambohijanamasoandro",
+      "aliases": [
+        "Ambohijanamasoandro, Antananarivo",
+        "Ambohijanamasoandro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9229317,
+      "longitude": 47.4720794,
+      "osm_type": "node",
+      "osm_id": 12504457162,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohijatovo-686543335",
+      "nom": "Ambohijatovo",
+      "aliases": [
+        "Ambohijatovo, Antananarivo",
+        "Ambohijatovo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9114876,
+      "longitude": 47.5286639,
+      "osm_type": "node",
+      "osm_id": 686543335,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohikely-13462289225",
+      "nom": "Ambohikely",
+      "aliases": [
+        "Ambohikely, Antananarivo",
+        "Ambohikely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9324582,
+      "longitude": 47.4764909,
+      "osm_type": "node",
+      "osm_id": 13462289225,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohimahitsy-681137737",
+      "nom": "Ambohimahitsy",
+      "aliases": [
+        "Ambohimahitsy, Antananarivo",
+        "Ambohimahitsy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8972908,
+      "longitude": 47.5710932,
+      "osm_type": "node",
+      "osm_id": 681137737,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimailala-12851851333",
+      "nom": "Ambohimailala",
+      "aliases": [
+        "Ambohimailala, Antananarivo",
+        "Ambohimailala, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8712803,
+      "longitude": 47.5714392,
+      "osm_type": "node",
+      "osm_id": 12851851333,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimamory-687173778",
+      "nom": "Ambohimamory",
+      "aliases": [
+        "Ambohimamory, Antananarivo",
+        "Ambohimamory, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9310037,
+      "longitude": 47.4816709,
+      "osm_type": "node",
+      "osm_id": 687173778,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimanandray-668739141",
+      "nom": "Ambohimanandray",
+      "aliases": [
+        "Ambohimanandray, Antananarivo",
+        "Ambohimanandray, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8716497,
+      "longitude": 47.4956275,
+      "osm_type": "node",
+      "osm_id": 668739141,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimanarina-667624395",
+      "nom": "Ambohimanarina",
+      "aliases": [
+        "Ambohimanarina, Antananarivo",
+        "Ambohimanarina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8748308,
+      "longitude": 47.5015291,
+      "osm_type": "node",
+      "osm_id": 667624395,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimandroso-668739148",
+      "nom": "Ambohimandroso",
+      "aliases": [
+        "Ambohimandroso, Antananarivo",
+        "Ambohimandroso, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8784109,
+      "longitude": 47.4986317,
+      "osm_type": "node",
+      "osm_id": 668739148,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimandroso-andrefana-13462289218",
+      "nom": "Ambohimandroso Andrefana",
+      "aliases": [
+        "Ambohimandroso Andrefana, Antananarivo",
+        "Ambohimandroso Andrefana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9271841,
+      "longitude": 47.4486798,
+      "osm_type": "node",
+      "osm_id": 13462289218,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohimandroso-atsinanana-13462289219",
+      "nom": "Ambohimandroso Atsinanana",
+      "aliases": [
+        "Ambohimandroso Atsinanana, Antananarivo",
+        "Ambohimandroso Atsinanana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9277524,
+      "longitude": 47.4512869,
+      "osm_type": "node",
+      "osm_id": 13462289219,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimangidy-687173774",
+      "nom": "Ambohimangidy",
+      "aliases": [
+        "Ambohimangidy, Antananarivo",
+        "Ambohimangidy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9549893,
+      "longitude": 47.4783812,
+      "osm_type": "node",
+      "osm_id": 687173774,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimanoa-10008240752",
+      "nom": "Ambohimanoa",
+      "aliases": [
+        "Ambohimanoa, Antananarivo",
+        "Ambohimanoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7811967,
+      "longitude": 47.5782768,
+      "osm_type": "node",
+      "osm_id": 10008240752,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohimanoro-686542284",
+      "nom": "Ambohimanoro",
+      "aliases": [
+        "Ambohimanoro, Antananarivo",
+        "Ambohimanoro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9171865,
+      "longitude": 47.532604,
+      "osm_type": "node",
+      "osm_id": 686542284,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohimarina-13462289221",
+      "nom": "Ambohimarina",
+      "aliases": [
+        "Ambohimarina, Antananarivo",
+        "Ambohimarina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9336233,
+      "longitude": 47.4640489,
+      "osm_type": "node",
+      "osm_id": 13462289221,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohimasina-10008240758",
+      "nom": "Ambohimasina",
+      "aliases": [
+        "Ambohimasina, Antananarivo",
+        "Ambohimasina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7655584,
+      "longitude": 47.5639531,
+      "osm_type": "node",
+      "osm_id": 10008240758,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohimiadana-931486391",
+      "nom": "Ambohimiadana",
+      "aliases": [
+        "Ambohimiadana, Antananarivo",
+        "Ambohimiadana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.955869,
+      "longitude": 47.4634388,
+      "osm_type": "node",
+      "osm_id": 931486391,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimiandra-681393174",
+      "nom": "Ambohimiandra",
+      "aliases": [
+        "Ambohimiandra, Antananarivo",
+        "Ambohimiandra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9297013,
+      "longitude": 47.5435412,
+      "osm_type": "node",
+      "osm_id": 681393174,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimilemaka-9989833669",
+      "nom": "Ambohimilemaka",
+      "aliases": [
+        "Ambohimilemaka, Antananarivo",
+        "Ambohimilemaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7326175,
+      "longitude": 47.3352116,
+      "osm_type": "node",
+      "osm_id": 9989833669,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohimirary-687191172",
+      "nom": "Ambohimirary",
+      "aliases": [
+        "Ambohimirary, Antananarivo",
+        "Ambohimirary, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8967036,
+      "longitude": 47.5507314,
+      "osm_type": "node",
+      "osm_id": 687191172,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimitsinjo-668739150",
+      "nom": "Ambohimitsinjo",
+      "aliases": [
+        "Ambohimitsinjo, Antananarivo",
+        "Ambohimitsinjo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.873948,
+      "longitude": 47.4939165,
+      "osm_type": "node",
+      "osm_id": 668739150,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohimitsinjorano-10003457280",
+      "nom": "Ambohimitsinjorano",
+      "aliases": [
+        "Ambohimitsinjorano, Antananarivo",
+        "Ambohimitsinjorano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7922321,
+      "longitude": 47.5901861,
+      "osm_type": "node",
+      "osm_id": 10003457280,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohinaorina-5316748708",
+      "nom": "Ambohinaorina",
+      "aliases": [
+        "Ambohinaorina, Antananarivo",
+        "Ambohinaorina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8352315,
+      "longitude": 47.5518429,
+      "osm_type": "node",
+      "osm_id": 5316748708,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohipanja-5271851710",
+      "nom": "Ambohipanja",
+      "aliases": [
+        "Ambohipanja, Antananarivo",
+        "Ambohipanja, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8422429,
+      "longitude": 47.5466609,
+      "osm_type": "node",
+      "osm_id": 5271851710,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohipo-5680854300",
+      "nom": "Ambohipo",
+      "aliases": [
+        "Ambohipo, Antananarivo",
+        "Ambohipo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9259831,
+      "longitude": 47.5577342,
+      "osm_type": "node",
+      "osm_id": 5680854300,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohipo-tanana-5680854867",
+      "nom": "Ambohipo Tanàna",
+      "aliases": [
+        "Ambohipo Tanàna, Antananarivo",
+        "Ambohipo Tanàna, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.93141,
+      "longitude": 47.5626254,
+      "osm_type": "node",
+      "osm_id": 5680854867,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohipotsy-12504457189",
+      "nom": "Ambohipotsy",
+      "aliases": [
+        "Ambohipotsy, Antananarivo",
+        "Ambohipotsy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9304113,
+      "longitude": 47.5319302,
+      "osm_type": "node",
+      "osm_id": 12504457189,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohitahara-13816663285",
+      "nom": "Ambohitahara",
+      "aliases": [
+        "Ambohitahara, Antananarivo",
+        "Ambohitahara, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8173038,
+      "longitude": 47.4461833,
+      "osm_type": "node",
+      "osm_id": 13816663285,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ambohitrakely-11224960451",
+      "nom": "Ambohitrakely",
+      "aliases": [
+        "Ambohitrakely, Antananarivo",
+        "Ambohitrakely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9038048,
+      "longitude": 47.5436005,
+      "osm_type": "node",
+      "osm_id": 11224960451,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohitrantenaina-10003457281",
+      "nom": "Ambohitrantenaina",
+      "aliases": [
+        "Ambohitrantenaina, Antananarivo",
+        "Ambohitrantenaina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8001143,
+      "longitude": 47.5919248,
+      "osm_type": "node",
+      "osm_id": 10003457281,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohitrarahaba-687168440",
+      "nom": "Ambohitrarahaba",
+      "aliases": [
+        "Ambohitrarahaba, Antananarivo",
+        "Ambohitrarahaba, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8631504,
+      "longitude": 47.5477687,
+      "osm_type": "node",
+      "osm_id": 687168440,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohitrerana-9662257054",
+      "nom": "Ambohitrerana",
+      "aliases": [
+        "Ambohitrerana, Antananarivo",
+        "Ambohitrerana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.700041,
+      "longitude": 47.6792613,
+      "osm_type": "node",
+      "osm_id": 9662257054,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohitrimanjaka-7176802092",
+      "nom": "Ambohitrimanjaka",
+      "aliases": [
+        "Ambohitrimanjaka, Antananarivo",
+        "Ambohitrimanjaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.867544,
+      "longitude": 47.4538064,
+      "osm_type": "node",
+      "osm_id": 7176802092,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambohitrinibe-i-9766416154",
+      "nom": "Ambohitrinibe I",
+      "aliases": [
+        "Ambohitrinibe I, Antananarivo",
+        "Ambohitrinibe I, Antananarivo, Madagascar"
+      ],
+      "latitude": -19.0893429,
+      "longitude": 47.7767824,
+      "osm_type": "node",
+      "osm_id": 9766416154,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohitrinimanga-689610713",
+      "nom": "Ambohitrinimanga",
+      "aliases": [
+        "Ambohitrinimanga, Antananarivo",
+        "Ambohitrinimanga, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8852399,
+      "longitude": 47.5424469,
+      "osm_type": "node",
+      "osm_id": 689610713,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohitsaratany-9597140097",
+      "nom": "Ambohitsaratany",
+      "aliases": [
+        "Ambohitsaratany, Antananarivo",
+        "Ambohitsaratany, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6992548,
+      "longitude": 47.7856014,
+      "osm_type": "node",
+      "osm_id": 9597140097,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohitsilanosa-9527920219",
+      "nom": "Ambohitsilanosa",
+      "aliases": [
+        "Ambohitsilanosa, Antananarivo",
+        "Ambohitsilanosa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7189396,
+      "longitude": 47.4893582,
+      "osm_type": "node",
+      "osm_id": 9527920219,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambohitsoa-686378273",
+      "nom": "Ambohitsoa",
+      "aliases": [
+        "Ambohitsoa, Antananarivo",
+        "Ambohitsoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9410645,
+      "longitude": 47.5417796,
+      "osm_type": "node",
+      "osm_id": 686378273,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ambolonkandrina-681137785",
+      "nom": "Ambolonkandrina",
+      "aliases": [
+        "Ambolonkandrina, Antananarivo",
+        "Ambolonkandrina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9215439,
+      "longitude": 47.5607642,
+      "osm_type": "node",
+      "osm_id": 681137785,
+      "place_type": "suburb"
+    },
+    {
+      "id": "amboniloha-687168429",
+      "nom": "Amboniloha",
+      "aliases": [
+        "Amboniloha, Antananarivo",
+        "Amboniloha, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8697659,
+      "longitude": 47.5240405,
+      "osm_type": "node",
+      "osm_id": 687168429,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambonisoa-5454040959",
+      "nom": "Ambonisoa",
+      "aliases": [
+        "Ambonisoa, Antananarivo",
+        "Ambonisoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9130666,
+      "longitude": 47.4834573,
+      "osm_type": "node",
+      "osm_id": 5454040959,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ambovavady-13816663284",
+      "nom": "Ambovavady",
+      "aliases": [
+        "Ambovavady, Antananarivo",
+        "Ambovavady, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.820348,
+      "longitude": 47.4515194,
+      "osm_type": "node",
+      "osm_id": 13816663284,
+      "place_type": "quarter"
+    },
+    {
+      "id": "amoronakona-9922907092",
+      "nom": "Amoronakona",
+      "aliases": [
+        "Amoronakona, Antananarivo",
+        "Amoronakona, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9252355,
+      "longitude": 47.5820178,
+      "osm_type": "node",
+      "osm_id": 9922907092,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "amorondria-11923519763",
+      "nom": "Amorondria",
+      "aliases": [
+        "Amorondria, Antananarivo",
+        "Amorondria, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8290525,
+      "longitude": 47.5459877,
+      "osm_type": "node",
+      "osm_id": 11923519763,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ampahibe-681428134",
+      "nom": "Ampahibe",
+      "aliases": [
+        "Ampahibe, Antananarivo",
+        "Ampahibe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9092429,
+      "longitude": 47.5384057,
+      "osm_type": "node",
+      "osm_id": 681428134,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampamantanana-androndrabe-837197786",
+      "nom": "Ampamantanana Androndrabe",
+      "aliases": [
+        "Ampamantanana Androndrabe, Antananarivo",
+        "Ampamantanana Androndrabe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9419992,
+      "longitude": 47.5366079,
+      "osm_type": "node",
+      "osm_id": 837197786,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampandrana-687191170",
+      "nom": "Ampandrana",
+      "aliases": [
+        "Ampandrana, Antananarivo",
+        "Ampandrana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9038641,
+      "longitude": 47.533741,
+      "osm_type": "node",
+      "osm_id": 687191170,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampandrana-atsinanana-688357084",
+      "nom": "Ampandrana Atsinanana",
+      "aliases": [
+        "Ampandrana Atsinanana, Antananarivo",
+        "Ampandrana Atsinanana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9055324,
+      "longitude": 47.5371628,
+      "osm_type": "node",
+      "osm_id": 688357084,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampandrianomby-681428143",
+      "nom": "Ampandrianomby",
+      "aliases": [
+        "Ampandrianomby, Antananarivo",
+        "Ampandrianomby, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9029594,
+      "longitude": 47.5476099,
+      "osm_type": "node",
+      "osm_id": 681428143,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampanefy-931752003",
+      "nom": "Ampanefy",
+      "aliases": [
+        "Ampanefy, Antananarivo",
+        "Ampanefy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9769531,
+      "longitude": 47.4946275,
+      "osm_type": "node",
+      "osm_id": 931752003,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampangabe-5271851713",
+      "nom": "Ampangabe",
+      "aliases": [
+        "Ampangabe, Antananarivo",
+        "Ampangabe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8475964,
+      "longitude": 47.5530553,
+      "osm_type": "node",
+      "osm_id": 5271851713,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampanotokana-10559395465",
+      "nom": "Ampanotokana",
+      "aliases": [
+        "Ampanotokana, Antananarivo",
+        "Ampanotokana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8991511,
+      "longitude": 47.5576144,
+      "osm_type": "node",
+      "osm_id": 10559395465,
+      "place_type": "suburb"
+    },
+    {
+      "id": "amparibe-617857577",
+      "nom": "Amparibe",
+      "aliases": [
+        "Amparibe, Antananarivo",
+        "Amparibe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.916001,
+      "longitude": 47.5262619,
+      "osm_type": "node",
+      "osm_id": 617857577,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampasamadinika-617341774",
+      "nom": "Ampasamadinika",
+      "aliases": [
+        "Ampasamadinika, Antananarivo",
+        "Ampasamadinika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9095601,
+      "longitude": 47.5203564,
+      "osm_type": "node",
+      "osm_id": 617341774,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampasampito-681428140",
+      "nom": "Ampasampito",
+      "aliases": [
+        "Ampasampito, Antananarivo",
+        "Ampasampito, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8966274,
+      "longitude": 47.545835,
+      "osm_type": "node",
+      "osm_id": 681428140,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampasanimalo-11224960455",
+      "nom": "Ampasanimalo",
+      "aliases": [
+        "Ampasanimalo, Antananarivo",
+        "Ampasanimalo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9152684,
+      "longitude": 47.5397428,
+      "osm_type": "node",
+      "osm_id": 11224960455,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampasanisadoda-681393191",
+      "nom": "Ampasanisadoda",
+      "aliases": [
+        "Ampasanisadoda, Antananarivo",
+        "Ampasanisadoda, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9131588,
+      "longitude": 47.5355988,
+      "osm_type": "node",
+      "osm_id": 681393191,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampasika-738247099",
+      "nom": "Ampasika",
+      "aliases": [
+        "Ampasika, Antananarivo",
+        "Ampasika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9099381,
+      "longitude": 47.4967267,
+      "osm_type": "node",
+      "osm_id": 738247099,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampatsakana-663240591",
+      "nom": "Ampatsakana",
+      "aliases": [
+        "Ampatsakana, Antananarivo",
+        "Ampatsakana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9115863,
+      "longitude": 47.5192199,
+      "osm_type": "node",
+      "osm_id": 663240591,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampefiloha-837558571",
+      "nom": "Ampefiloha",
+      "aliases": [
+        "Ampefiloha, Antananarivo",
+        "Ampefiloha, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9132011,
+      "longitude": 47.5170925,
+      "osm_type": "node",
+      "osm_id": 837558571,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ampetsapetsa-687168435",
+      "nom": "Ampetsapetsa",
+      "aliases": [
+        "Ampetsapetsa, Antananarivo",
+        "Ampetsapetsa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.866818,
+      "longitude": 47.5322768,
+      "osm_type": "node",
+      "osm_id": 687168435,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampiadianombalahy-9562807285",
+      "nom": "Ampiadianombalahy",
+      "aliases": [
+        "Ampiadianombalahy, Antananarivo",
+        "Ampiadianombalahy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.920893,
+      "longitude": 47.8094946,
+      "osm_type": "node",
+      "osm_id": 9562807285,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ampitatafika-687173783",
+      "nom": "Ampitatafika",
+      "aliases": [
+        "Ampitatafika, Antananarivo",
+        "Ampitatafika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.936994,
+      "longitude": 47.4783843,
+      "osm_type": "node",
+      "osm_id": 687173783,
+      "place_type": "suburb"
+    },
+    {
+      "id": "analakely",
+      "nom": "Analakely",
+      "aliases": [
+        "Analakely, Antananarivo",
+        "Centre-ville, Antananarivo"
+      ],
+      "latitude": -18.9083181,
+      "longitude": 47.5262845
+    },
+    {
+      "id": "analamahitsy-cite-687168437",
+      "nom": "Analamahitsy Cité",
+      "aliases": [
+        "Analamahitsy Cité, Antananarivo",
+        "Analamahitsy Cité, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8709181,
+      "longitude": 47.5468255,
+      "osm_type": "node",
+      "osm_id": 687168437,
+      "place_type": "suburb"
+    },
+    {
+      "id": "analamahitsy-tanana-5537450303",
+      "nom": "Analamahitsy Tanàna",
+      "aliases": [
+        "Analamahitsy Tanàna, Antananarivo",
+        "Analamahitsy Tanàna, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8764692,
+      "longitude": 47.5468858,
+      "osm_type": "node",
+      "osm_id": 5537450303,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anatihazo-686376932",
+      "nom": "Anatihazo",
+      "aliases": [
+        "Anatihazo, Antananarivo",
+        "Anatihazo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9148772,
+      "longitude": 47.5105423,
+      "osm_type": "node",
+      "osm_id": 686376932,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andafiavaratra-5271851714",
+      "nom": "Andafiavaratra",
+      "aliases": [
+        "Andafiavaratra, Antananarivo",
+        "Andafiavaratra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.860055,
+      "longitude": 47.5507759,
+      "osm_type": "node",
+      "osm_id": 5271851714,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andavamamba",
+      "nom": "Andavamamba",
+      "aliases": [
+        "Andavamamba, Antananarivo"
+      ],
+      "latitude": -18.9182911,
+      "longitude": 47.5084372
+    },
+    {
+      "id": "andohalo",
+      "nom": "Andohalo",
+      "aliases": [
+        "Andohalo, Antananarivo"
+      ],
+      "latitude": -18.9176963,
+      "longitude": 47.5314153
+    },
+    {
+      "id": "andohamandry-12504457187",
+      "nom": "Andohamandry",
+      "aliases": [
+        "Andohamandry, Antananarivo",
+        "Andohamandry, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9317941,
+      "longitude": 47.5336736,
+      "osm_type": "node",
+      "osm_id": 12504457187,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andohaniato-837540703",
+      "nom": "Andohaniato",
+      "aliases": [
+        "Andohaniato, Antananarivo",
+        "Andohaniato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9249692,
+      "longitude": 47.5609037,
+      "osm_type": "node",
+      "osm_id": 837540703,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andohanimananjara-5729581531",
+      "nom": "Andohanimananjara",
+      "aliases": [
+        "Andohanimananjara, Antananarivo",
+        "Andohanimananjara, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6865575,
+      "longitude": 47.3676932,
+      "osm_type": "node",
+      "osm_id": 5729581531,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andohanimandroseza-5680854298",
+      "nom": "Andohanimandroseza",
+      "aliases": [
+        "Andohanimandroseza, Antananarivo",
+        "Andohanimandroseza, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9253048,
+      "longitude": 47.5519406,
+      "osm_type": "node",
+      "osm_id": 5680854298,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andoharanofotsy-687180725",
+      "nom": "Andoharanofotsy",
+      "aliases": [
+        "Andoharanofotsy, Antananarivo",
+        "Andoharanofotsy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9790181,
+      "longitude": 47.5333348,
+      "osm_type": "node",
+      "osm_id": 687180725,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andohatanjona-itaosy-5454111830",
+      "nom": "Andohatanjona Itaosy",
+      "aliases": [
+        "Andohatanjona Itaosy, Antananarivo",
+        "Andohatanjona Itaosy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9067813,
+      "longitude": 47.4476659,
+      "osm_type": "node",
+      "osm_id": 5454111830,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andohatapenaka-686366965",
+      "nom": "Andohatapenaka",
+      "aliases": [
+        "Andohatapenaka, Antananarivo",
+        "Andohatapenaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9044672,
+      "longitude": 47.4987598,
+      "osm_type": "node",
+      "osm_id": 686366965,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andombotany-5271851711",
+      "nom": "Andombotany",
+      "aliases": [
+        "Andombotany, Antananarivo",
+        "Andombotany, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.845025,
+      "longitude": 47.5546378,
+      "osm_type": "node",
+      "osm_id": 5271851711,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andraharo-703740357",
+      "nom": "Andraharo",
+      "aliases": [
+        "Andraharo, Antananarivo",
+        "Andraharo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8842626,
+      "longitude": 47.5087729,
+      "osm_type": "node",
+      "osm_id": 703740357,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andrainarivo-845962440",
+      "nom": "Andrainarivo",
+      "aliases": [
+        "Andrainarivo, Antananarivo",
+        "Andrainarivo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9089546,
+      "longitude": 47.5441288,
+      "osm_type": "node",
+      "osm_id": 845962440,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andraisoro-694182857",
+      "nom": "Andraisoro",
+      "aliases": [
+        "Andraisoro, Antananarivo",
+        "Andraisoro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9053244,
+      "longitude": 47.5555546,
+      "osm_type": "node",
+      "osm_id": 694182857,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andrakaja-9562268439",
+      "nom": "Andrakaja",
+      "aliases": [
+        "Andrakaja, Antananarivo",
+        "Andrakaja, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7999212,
+      "longitude": 47.4388227,
+      "osm_type": "node",
+      "osm_id": 9562268439,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andralanitra-687180728",
+      "nom": "Andralanitra",
+      "aliases": [
+        "Andralanitra, Antananarivo",
+        "Andralanitra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9084212,
+      "longitude": 47.5749414,
+      "osm_type": "node",
+      "osm_id": 687180728,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andramahafoitra-5531126586",
+      "nom": "Andramahafoitra",
+      "aliases": [
+        "Andramahafoitra, Antananarivo",
+        "Andramahafoitra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8969831,
+      "longitude": 47.4744083,
+      "osm_type": "node",
+      "osm_id": 5531126586,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andramahavola-5531126588",
+      "nom": "Andramahavola",
+      "aliases": [
+        "Andramahavola, Antananarivo",
+        "Andramahavola, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9015515,
+      "longitude": 47.4748017,
+      "osm_type": "node",
+      "osm_id": 5531126588,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andrangaranga-837197783",
+      "nom": "Andrangaranga",
+      "aliases": [
+        "Andrangaranga, Antananarivo",
+        "Andrangaranga, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9372398,
+      "longitude": 47.5380777,
+      "osm_type": "node",
+      "osm_id": 837197783,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andranobevava-687164483",
+      "nom": "Andranobevava",
+      "aliases": [
+        "Andranobevava, Antananarivo",
+        "Andranobevava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8819994,
+      "longitude": 47.5421328,
+      "osm_type": "node",
+      "osm_id": 687164483,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andranomanalina-12504457183",
+      "nom": "Andranomanalina",
+      "aliases": [
+        "Andranomanalina, Antananarivo",
+        "Andranomanalina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9100673,
+      "longitude": 47.5117975,
+      "osm_type": "node",
+      "osm_id": 12504457183,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andranomena-5271851712",
+      "nom": "Andranomena",
+      "aliases": [
+        "Andranomena, Antananarivo",
+        "Andranomena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8489392,
+      "longitude": 47.5572073,
+      "osm_type": "node",
+      "osm_id": 5271851712,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andranonahoatra-5454040957",
+      "nom": "Andranonahoatra",
+      "aliases": [
+        "Andranonahoatra, Antananarivo",
+        "Andranonahoatra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9152791,
+      "longitude": 47.4736055,
+      "osm_type": "node",
+      "osm_id": 5454040957,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andranoro-668739132",
+      "nom": "Andranoro",
+      "aliases": [
+        "Andranoro, Antananarivo",
+        "Andranoro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8594669,
+      "longitude": 47.4749373,
+      "osm_type": "node",
+      "osm_id": 668739132,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andranovory-681137746",
+      "nom": "Andranovory",
+      "aliases": [
+        "Andranovory, Antananarivo",
+        "Andranovory, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9259708,
+      "longitude": 47.5723053,
+      "osm_type": "node",
+      "osm_id": 681137746,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andraondrikely-6341066735",
+      "nom": "Andraondrikely",
+      "aliases": [
+        "Andraondrikely, Antananarivo",
+        "Andraondrikely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8080156,
+      "longitude": 47.4869941,
+      "osm_type": "node",
+      "osm_id": 6341066735,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andravako-5414315205",
+      "nom": "Andravako",
+      "aliases": [
+        "Andravako, Antananarivo",
+        "Andravako, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8934094,
+      "longitude": 47.4610314,
+      "osm_type": "node",
+      "osm_id": 5414315205,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "andravoahangy-687191160",
+      "nom": "Andravoahangy",
+      "aliases": [
+        "Andravoahangy, Antananarivo",
+        "Andravoahangy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8984389,
+      "longitude": 47.5311422,
+      "osm_type": "node",
+      "osm_id": 687191160,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andrefan-ambohijanahary-686271702",
+      "nom": "Andrefan'Ambohijanahary",
+      "aliases": [
+        "Andrefan'Ambohijanahary, Antananarivo",
+        "Andrefan'Ambohijanahary, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9228046,
+      "longitude": 47.5209189,
+      "osm_type": "node",
+      "osm_id": 686271702,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andrefantsena-5316748707",
+      "nom": "Andrefantsena",
+      "aliases": [
+        "Andrefantsena, Antananarivo",
+        "Andrefantsena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8367292,
+      "longitude": 47.5546968,
+      "osm_type": "node",
+      "osm_id": 5316748707,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andrianijabo-5729783192",
+      "nom": "Andrianijabo",
+      "aliases": [
+        "Andrianijabo, Antananarivo",
+        "Andrianijabo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6832874,
+      "longitude": 47.361213,
+      "osm_type": "node",
+      "osm_id": 5729783192,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "androhibe-687168433",
+      "nom": "Androhibe",
+      "aliases": [
+        "Androhibe, Antananarivo",
+        "Androhibe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8667272,
+      "longitude": 47.5420598,
+      "osm_type": "node",
+      "osm_id": 687168433,
+      "place_type": "suburb"
+    },
+    {
+      "id": "androndrakely-686378280",
+      "nom": "Androndrakely",
+      "aliases": [
+        "Androndrakely, Antananarivo",
+        "Androndrakely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.946544,
+      "longitude": 47.5330182,
+      "osm_type": "node",
+      "osm_id": 686378280,
+      "place_type": "suburb"
+    },
+    {
+      "id": "andrononobe-697186988",
+      "nom": "Andrononobe",
+      "aliases": [
+        "Andrononobe, Antananarivo",
+        "Andrononobe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8671033,
+      "longitude": 47.5498995,
+      "osm_type": "node",
+      "osm_id": 697186988,
+      "place_type": "suburb"
+    },
+    {
+      "id": "angarangarana-837191410",
+      "nom": "Angarangarana",
+      "aliases": [
+        "Angarangarana, Antananarivo",
+        "Angarangarana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9356629,
+      "longitude": 47.5095784,
+      "osm_type": "node",
+      "osm_id": 837191410,
+      "place_type": "suburb"
+    },
+    {
+      "id": "angodongodona-13816663283",
+      "nom": "Angodongodona",
+      "aliases": [
+        "Angodongodona, Antananarivo",
+        "Angodongodona, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8201994,
+      "longitude": 47.4479692,
+      "osm_type": "node",
+      "osm_id": 13816663283,
+      "place_type": "quarter"
+    },
+    {
+      "id": "anjanahary-687164484",
+      "nom": "Anjanahary",
+      "aliases": [
+        "Anjanahary, Antananarivo",
+        "Anjanahary, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8952195,
+      "longitude": 47.5372416,
+      "osm_type": "node",
+      "osm_id": 687164484,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anjanamasina-9562268433",
+      "nom": "Anjanamasina",
+      "aliases": [
+        "Anjanamasina, Antananarivo",
+        "Anjanamasina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.797509,
+      "longitude": 47.421509,
+      "osm_type": "node",
+      "osm_id": 9562268433,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "anjanatsimiova-931486397",
+      "nom": "Anjanatsimiova",
+      "aliases": [
+        "Anjanatsimiova, Antananarivo",
+        "Anjanatsimiova, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9387095,
+      "longitude": 47.4747256,
+      "osm_type": "node",
+      "osm_id": 931486397,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "anjohy-681393209",
+      "nom": "Anjohy",
+      "aliases": [
+        "Anjohy, Antananarivo",
+        "Anjohy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9178484,
+      "longitude": 47.5337061,
+      "osm_type": "node",
+      "osm_id": 681393209,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankadiaivo-12504457169",
+      "nom": "Ankadiaivo",
+      "aliases": [
+        "Ankadiaivo, Antananarivo",
+        "Ankadiaivo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9487665,
+      "longitude": 47.5464839,
+      "osm_type": "node",
+      "osm_id": 12504457169,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankadifotsy-681227159",
+      "nom": "Ankadifotsy",
+      "aliases": [
+        "Ankadifotsy, Antananarivo",
+        "Ankadifotsy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8978507,
+      "longitude": 47.5258109,
+      "osm_type": "node",
+      "osm_id": 681227159,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadikely-5143429980",
+      "nom": "Ankadikely",
+      "aliases": [
+        "Ankadikely, Antananarivo",
+        "Ankadikely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8489463,
+      "longitude": 47.5535959,
+      "osm_type": "node",
+      "osm_id": 5143429980,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadilalampotsy-12504457166",
+      "nom": "Ankadilalampotsy",
+      "aliases": [
+        "Ankadilalampotsy, Antananarivo",
+        "Ankadilalampotsy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9705719,
+      "longitude": 47.536388,
+      "osm_type": "node",
+      "osm_id": 12504457166,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadilalana-694051796",
+      "nom": "Ankadilalana",
+      "aliases": [
+        "Ankadilalana, Antananarivo",
+        "Ankadilalana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9238614,
+      "longitude": 47.5287785,
+      "osm_type": "node",
+      "osm_id": 694051796,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadimbahoaka-686271703",
+      "nom": "Ankadimbahoaka",
+      "aliases": [
+        "Ankadimbahoaka, Antananarivo",
+        "Ankadimbahoaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9430303,
+      "longitude": 47.5234133,
+      "osm_type": "node",
+      "osm_id": 686271703,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadinandriana-5592523471",
+      "nom": "Ankadinandriana",
+      "aliases": [
+        "Ankadinandriana, Antananarivo",
+        "Ankadinandriana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.967802,
+      "longitude": 47.5436032,
+      "osm_type": "node",
+      "osm_id": 5592523471,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadindramamy-687164486",
+      "nom": "Ankadindramamy",
+      "aliases": [
+        "Ankadindramamy, Antananarivo",
+        "Ankadindramamy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8919636,
+      "longitude": 47.5590641,
+      "osm_type": "node",
+      "osm_id": 687164486,
+      "place_type": "quarter"
+    },
+    {
+      "id": "ankadindratombo-681393181",
+      "nom": "Ankadindratombo",
+      "aliases": [
+        "Ankadindratombo, Antananarivo",
+        "Ankadindratombo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9390319,
+      "longitude": 47.5547258,
+      "osm_type": "node",
+      "osm_id": 681393181,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadindravola-ivato-12504457175",
+      "nom": "Ankadindravola Ivato",
+      "aliases": [
+        "Ankadindravola Ivato, Antananarivo",
+        "Ankadindravola Ivato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8248154,
+      "longitude": 47.4862763,
+      "osm_type": "node",
+      "osm_id": 12504457175,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadirano-5416457563",
+      "nom": "Ankadirano",
+      "aliases": [
+        "Ankadirano, Antananarivo",
+        "Ankadirano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9778985,
+      "longitude": 47.5040594,
+      "osm_type": "node",
+      "osm_id": 5416457563,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankaditany-931486387",
+      "nom": "Ankaditany",
+      "aliases": [
+        "Ankaditany, Antananarivo",
+        "Ankaditany, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9502069,
+      "longitude": 47.4714587,
+      "osm_type": "node",
+      "osm_id": 931486387,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankaditapaka-12504457180",
+      "nom": "Ankaditapaka",
+      "aliases": [
+        "Ankaditapaka, Antananarivo",
+        "Ankaditapaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.899529,
+      "longitude": 47.5240123,
+      "osm_type": "node",
+      "osm_id": 12504457180,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankaditoho-686159724",
+      "nom": "Ankaditoho",
+      "aliases": [
+        "Ankaditoho, Antananarivo",
+        "Ankaditoho, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9396435,
+      "longitude": 47.5297513,
+      "osm_type": "node",
+      "osm_id": 686159724,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadivato-681393255",
+      "nom": "Ankadivato",
+      "aliases": [
+        "Ankadivato, Antananarivo",
+        "Ankadivato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9088275,
+      "longitude": 47.5338925,
+      "osm_type": "node",
+      "osm_id": 681393255,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadivoribe-931752004",
+      "nom": "Ankadivoribe",
+      "aliases": [
+        "Ankadivoribe, Antananarivo",
+        "Ankadivoribe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9908995,
+      "longitude": 47.5010051,
+      "osm_type": "node",
+      "osm_id": 931752004,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankadivory-837200474",
+      "nom": "Ankadivory",
+      "aliases": [
+        "Ankadivory, Antananarivo",
+        "Ankadivory, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9284006,
+      "longitude": 47.5472508,
+      "osm_type": "node",
+      "osm_id": 837200474,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankandrina-8862550402",
+      "nom": "Ankandrina",
+      "aliases": [
+        "Ankandrina, Antananarivo",
+        "Ankandrina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8862013,
+      "longitude": 47.5620156,
+      "osm_type": "node",
+      "osm_id": 8862550402,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankasina-686366969",
+      "nom": "Ankasina",
+      "aliases": [
+        "Ankasina, Antananarivo",
+        "Ankasina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.899991,
+      "longitude": 47.5070299,
+      "osm_type": "node",
+      "osm_id": 686366969,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankatso-13337796213",
+      "nom": "Ankatso",
+      "aliases": [
+        "Ankatso, Antananarivo",
+        "Ankatso, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9146676,
+      "longitude": 47.5493354,
+      "osm_type": "node",
+      "osm_id": 13337796213,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankazo-9989833671",
+      "nom": "Ankazo",
+      "aliases": [
+        "Ankazo, Antananarivo",
+        "Ankazo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7314691,
+      "longitude": 47.355801,
+      "osm_type": "node",
+      "osm_id": 9989833671,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankazobe-12504457170",
+      "nom": "Ankazobe",
+      "aliases": [
+        "Ankazobe, Antananarivo",
+        "Ankazobe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9355896,
+      "longitude": 47.5743225,
+      "osm_type": "node",
+      "osm_id": 12504457170,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankazolava-845947786",
+      "nom": "Ankazolava",
+      "aliases": [
+        "Ankazolava, Antananarivo",
+        "Ankazolava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9454038,
+      "longitude": 47.5415968,
+      "osm_type": "node",
+      "osm_id": 845947786,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankazomanga-690711883",
+      "nom": "Ankazomanga",
+      "aliases": [
+        "Ankazomanga, Antananarivo",
+        "Ankazomanga, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8918482,
+      "longitude": 47.5135602,
+      "osm_type": "node",
+      "osm_id": 690711883,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankazotokana-681393197",
+      "nom": "Ankazotokana",
+      "aliases": [
+        "Ankazotokana, Antananarivo",
+        "Ankazotokana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9176936,
+      "longitude": 47.5356695,
+      "osm_type": "node",
+      "osm_id": 681393197,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankeniheny-2724829809",
+      "nom": "Ankeniheny",
+      "aliases": [
+        "Ankeniheny, Antananarivo",
+        "Ankeniheny, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9514134,
+      "longitude": 47.5240396,
+      "osm_type": "node",
+      "osm_id": 2724829809,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankerakely-5552401830",
+      "nom": "Ankerakely",
+      "aliases": [
+        "Ankerakely, Antananarivo",
+        "Ankerakely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9279959,
+      "longitude": 47.5354706,
+      "osm_type": "node",
+      "osm_id": 5552401830,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankerana-687164481",
+      "nom": "Ankerana",
+      "aliases": [
+        "Ankerana, Antananarivo",
+        "Ankerana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8880879,
+      "longitude": 47.556178,
+      "osm_type": "node",
+      "osm_id": 687164481,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankorahotra-688357090",
+      "nom": "Ankorahotra",
+      "aliases": [
+        "Ankorahotra, Antananarivo",
+        "Ankorahotra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9140766,
+      "longitude": 47.5368673,
+      "osm_type": "node",
+      "osm_id": 688357090,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ankoroby-13462289220",
+      "nom": "Ankoroby",
+      "aliases": [
+        "Ankoroby, Antananarivo",
+        "Ankoroby, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9319387,
+      "longitude": 47.4679542,
+      "osm_type": "node",
+      "osm_id": 13462289220,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ankorondrano",
+      "nom": "Ankorondrano",
+      "aliases": [
+        "Ankorondrano, Antananarivo"
+      ],
+      "latitude": -18.8859714,
+      "longitude": 47.522924
+    },
+    {
+      "id": "anosibe-686376916",
+      "nom": "Anosibe",
+      "aliases": [
+        "Anosibe, Antananarivo",
+        "Anosibe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9249254,
+      "longitude": 47.5143932,
+      "osm_type": "node",
+      "osm_id": 686376916,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anosimasina-5454040967",
+      "nom": "Anosimasina",
+      "aliases": [
+        "Anosimasina, Antananarivo",
+        "Anosimasina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9123434,
+      "longitude": 47.4927512,
+      "osm_type": "node",
+      "osm_id": 5454040967,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anosipatrana-9878925459",
+      "nom": "Anosipatrana",
+      "aliases": [
+        "Anosipatrana, Antananarivo",
+        "Anosipatrana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9289111,
+      "longitude": 47.4966245,
+      "osm_type": "node",
+      "osm_id": 9878925459,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anosisoa-12504457178",
+      "nom": "Anosisoa",
+      "aliases": [
+        "Anosisoa, Antananarivo",
+        "Anosisoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8714049,
+      "longitude": 47.4920082,
+      "osm_type": "node",
+      "osm_id": 12504457178,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anosivavaka-668739151",
+      "nom": "Anosivavaka",
+      "aliases": [
+        "Anosivavaka, Antananarivo",
+        "Anosivavaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8746851,
+      "longitude": 47.5057825,
+      "osm_type": "node",
+      "osm_id": 668739151,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anosizato-andrefana-686376924",
+      "nom": "Anosizato Andrefana",
+      "aliases": [
+        "Anosizato Andrefana, Antananarivo",
+        "Anosizato Andrefana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9391335,
+      "longitude": 47.4971223,
+      "osm_type": "node",
+      "osm_id": 686376924,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anosizato-atsinanana-728268650",
+      "nom": "Anosizato Atsinanana",
+      "aliases": [
+        "Anosizato Atsinanana, Antananarivo",
+        "Anosizato Atsinanana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9373987,
+      "longitude": 47.5013558,
+      "osm_type": "node",
+      "osm_id": 728268650,
+      "place_type": "suburb"
+    },
+    {
+      "id": "anosy",
+      "nom": "Anosy",
+      "aliases": [
+        "Anosy, Antananarivo",
+        "Lac Anosy, Antananarivo"
+      ],
+      "latitude": -18.9156496,
+      "longitude": 47.520382
+    },
+    {
+      "id": "antalata-5281966844",
+      "nom": "Antalata",
+      "aliases": [
+        "Antalata, Antananarivo",
+        "Antalata, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9824222,
+      "longitude": 47.5017258,
+      "osm_type": "node",
+      "osm_id": 5281966844,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antanandrano-5271851715",
+      "nom": "Antanandrano",
+      "aliases": [
+        "Antanandrano, Antananarivo",
+        "Antanandrano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8496601,
+      "longitude": 47.536726,
+      "osm_type": "node",
+      "osm_id": 5271851715,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antandrokomby-5454040950",
+      "nom": "Antandrokomby",
+      "aliases": [
+        "Antandrokomby, Antananarivo",
+        "Antandrokomby, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.908626,
+      "longitude": 47.490034,
+      "osm_type": "node",
+      "osm_id": 5454040950,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antanetibe-7368355098",
+      "nom": "Antanetibe",
+      "aliases": [
+        "Antanetibe, Antananarivo",
+        "Antanetibe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6806088,
+      "longitude": 47.2830205,
+      "osm_type": "node",
+      "osm_id": 7368355098,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antanetibe-ii-5729615229",
+      "nom": "Antanetibe II",
+      "aliases": [
+        "Antanetibe II, Antananarivo",
+        "Antanetibe II, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6846112,
+      "longitude": 47.3570234,
+      "osm_type": "node",
+      "osm_id": 5729615229,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antanetibekely-8109024840",
+      "nom": "Antanetibekely",
+      "aliases": [
+        "Antanetibekely, Antananarivo",
+        "Antanetibekely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9650118,
+      "longitude": 47.737272,
+      "osm_type": "node",
+      "osm_id": 8109024840,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antanetilava-10006028609",
+      "nom": "Antanetilava",
+      "aliases": [
+        "Antanetilava, Antananarivo",
+        "Antanetilava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7542009,
+      "longitude": 47.3520731,
+      "osm_type": "node",
+      "osm_id": 10006028609,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antanety-668739139",
+      "nom": "Antanety",
+      "aliases": [
+        "Antanety, Antananarivo",
+        "Antanety, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8728576,
+      "longitude": 47.4989474,
+      "osm_type": "node",
+      "osm_id": 668739139,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antanety-atsimo-5271851716",
+      "nom": "Antanety Atsimo",
+      "aliases": [
+        "Antanety Atsimo, Antananarivo",
+        "Antanety Atsimo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8494215,
+      "longitude": 47.5489193,
+      "osm_type": "node",
+      "osm_id": 5271851716,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antanety-avaratra-5271851717",
+      "nom": "Antanety Avaratra",
+      "aliases": [
+        "Antanety Avaratra, Antananarivo",
+        "Antanety Avaratra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8452231,
+      "longitude": 47.546162,
+      "osm_type": "node",
+      "osm_id": 5271851717,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antanimena-843310804",
+      "nom": "Antanimena",
+      "aliases": [
+        "Antanimena, Antananarivo",
+        "Antanimena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8976398,
+      "longitude": 47.5207728,
+      "osm_type": "node",
+      "osm_id": 843310804,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antaninarenina",
+      "nom": "Antaninarenina",
+      "aliases": [
+        "Antaninarenina, Antananarivo"
+      ],
+      "latitude": -18.9102957,
+      "longitude": 47.5250179
+    },
+    {
+      "id": "antanjombe-668739152",
+      "nom": "Antanjombe",
+      "aliases": [
+        "Antanjombe, Antananarivo",
+        "Antanjombe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8721205,
+      "longitude": 47.5044936,
+      "osm_type": "node",
+      "osm_id": 668739152,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antanjona-13462289214",
+      "nom": "Antanjona",
+      "aliases": [
+        "Antanjona, Antananarivo",
+        "Antanjona, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9225917,
+      "longitude": 47.4566312,
+      "osm_type": "node",
+      "osm_id": 13462289214,
+      "place_type": "quarter"
+    },
+    {
+      "id": "antohomadinika-690711890",
+      "nom": "Antohomadinika",
+      "aliases": [
+        "Antohomadinika, Antananarivo",
+        "Antohomadinika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.90466,
+      "longitude": 47.5153853,
+      "osm_type": "node",
+      "osm_id": 690711890,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antombotokana-9662489854",
+      "nom": "Antombotokana",
+      "aliases": [
+        "Antombotokana, Antananarivo",
+        "Antombotokana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8919185,
+      "longitude": 47.794151,
+      "osm_type": "node",
+      "osm_id": 9662489854,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antongombato-est-10006028605",
+      "nom": "Antongombato Est",
+      "aliases": [
+        "Antongombato Est, Antananarivo",
+        "Antongombato Est, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7519506,
+      "longitude": 47.3571096,
+      "osm_type": "node",
+      "osm_id": 10006028605,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsahabe-11224960454",
+      "nom": "Antsahabe",
+      "aliases": [
+        "Antsahabe, Antananarivo",
+        "Antsahabe, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9151853,
+      "longitude": 47.5336951,
+      "osm_type": "node",
+      "osm_id": 11224960454,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsahakely-5531126585",
+      "nom": "Antsahakely",
+      "aliases": [
+        "Antsahakely, Antananarivo",
+        "Antsahakely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8922042,
+      "longitude": 47.4785811,
+      "osm_type": "node",
+      "osm_id": 5531126585,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsahamaina-5271851704",
+      "nom": "Antsahamaina",
+      "aliases": [
+        "Antsahamaina, Antananarivo",
+        "Antsahamaina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8597118,
+      "longitude": 47.5529587,
+      "osm_type": "node",
+      "osm_id": 5271851704,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsahamamy-686539609",
+      "nom": "Antsahamamy",
+      "aliases": [
+        "Antsahamamy, Antananarivo",
+        "Antsahamamy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9180882,
+      "longitude": 47.5592986,
+      "osm_type": "node",
+      "osm_id": 686539609,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsahamarofoza-7149685720",
+      "nom": "Antsahamarofoza",
+      "aliases": [
+        "Antsahamarofoza, Antananarivo",
+        "Antsahamarofoza, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8301745,
+      "longitude": 47.5979984,
+      "osm_type": "node",
+      "osm_id": 7149685720,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antsahameva-5680854299",
+      "nom": "Antsahameva",
+      "aliases": [
+        "Antsahameva, Antananarivo",
+        "Antsahameva, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9102098,
+      "longitude": 47.5487971,
+      "osm_type": "node",
+      "osm_id": 5680854299,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsahasoa-10567187961",
+      "nom": "Antsahasoa",
+      "aliases": [
+        "Antsahasoa, Antananarivo",
+        "Antsahasoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9674139,
+      "longitude": 47.5341055,
+      "osm_type": "node",
+      "osm_id": 10567187961,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antsahatsiresy-7149685730",
+      "nom": "Antsahatsiresy",
+      "aliases": [
+        "Antsahatsiresy, Antananarivo",
+        "Antsahatsiresy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8282452,
+      "longitude": 47.5620782,
+      "osm_type": "node",
+      "osm_id": 7149685730,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antsahavola-9758897058",
+      "nom": "Antsahavola",
+      "aliases": [
+        "Antsahavola, Antananarivo",
+        "Antsahavola, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9093201,
+      "longitude": 47.522344,
+      "osm_type": "node",
+      "osm_id": 9758897058,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsahavolakely-668739136",
+      "nom": "Antsahavolakely",
+      "aliases": [
+        "Antsahavolakely, Antananarivo",
+        "Antsahavolakely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8523181,
+      "longitude": 47.4890572,
+      "osm_type": "node",
+      "osm_id": 668739136,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsakaviro-688357091",
+      "nom": "Antsakaviro",
+      "aliases": [
+        "Antsakaviro, Antananarivo",
+        "Antsakaviro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9113363,
+      "longitude": 47.5365023,
+      "osm_type": "node",
+      "osm_id": 688357091,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antsalovana-837558569",
+      "nom": "Antsalovana",
+      "aliases": [
+        "Antsalovana, Antananarivo",
+        "Antsalovana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8989708,
+      "longitude": 47.5130263,
+      "osm_type": "node",
+      "osm_id": 837558569,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsampandrano-12504457172",
+      "nom": "Antsampandrano",
+      "aliases": [
+        "Antsampandrano, Antananarivo",
+        "Antsampandrano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8452586,
+      "longitude": 47.5746524,
+      "osm_type": "node",
+      "osm_id": 12504457172,
+      "place_type": "suburb"
+    },
+    {
+      "id": "antsobolo-681137748",
+      "nom": "Antsobolo",
+      "aliases": [
+        "Antsobolo, Antananarivo",
+        "Antsobolo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9128661,
+      "longitude": 47.568352,
+      "osm_type": "node",
+      "osm_id": 681137748,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "antsofinondry-5538613938",
+      "nom": "Antsofinondry",
+      "aliases": [
+        "Antsofinondry, Antananarivo",
+        "Antsofinondry, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8288436,
+      "longitude": 47.5575048,
+      "osm_type": "node",
+      "osm_id": 5538613938,
+      "place_type": "suburb"
+    },
+    {
+      "id": "atendro-12066924735",
+      "nom": "Atendro",
+      "aliases": [
+        "Atendro, Antananarivo",
+        "Atendro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.825054,
+      "longitude": 47.5512072,
+      "osm_type": "node",
+      "osm_id": 12066924735,
+      "place_type": "suburb"
+    },
+    {
+      "id": "atsimombohitra-931486395",
+      "nom": "Atsimombohitra",
+      "aliases": [
+        "Atsimombohitra, Antananarivo",
+        "Atsimombohitra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9425657,
+      "longitude": 47.4785343,
+      "osm_type": "node",
+      "osm_id": 931486395,
+      "place_type": "suburb"
+    },
+    {
+      "id": "atsimontsena-sud-9623053468",
+      "nom": "Atsimontsena Sud",
+      "aliases": [
+        "Atsimontsena Sud, Antananarivo",
+        "Atsimontsena Sud, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7677666,
+      "longitude": 47.7578393,
+      "osm_type": "node",
+      "osm_id": 9623053468,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "atsinanantsena-5316748706",
+      "nom": "Atsinanantsena",
+      "aliases": [
+        "Atsinanantsena, Antananarivo",
+        "Atsinanantsena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8373283,
+      "longitude": 47.5580978,
+      "osm_type": "node",
+      "osm_id": 5316748706,
+      "place_type": "suburb"
+    },
+    {
+      "id": "atsinanantsena-ambohidrapeto-5454040948",
+      "nom": "Atsinanantsena Ambohidrapeto",
+      "aliases": [
+        "Atsinanantsena Ambohidrapeto, Antananarivo",
+        "Atsinanantsena Ambohidrapeto, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.905033,
+      "longitude": 47.4780259,
+      "osm_type": "node",
+      "osm_id": 5454040948,
+      "place_type": "suburb"
+    },
+    {
+      "id": "avarabohitra-687173779",
+      "nom": "Avarabohitra",
+      "aliases": [
+        "Avarabohitra, Antananarivo",
+        "Avarabohitra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9267142,
+      "longitude": 47.4778339,
+      "osm_type": "node",
+      "osm_id": 687173779,
+      "place_type": "suburb"
+    },
+    {
+      "id": "avaradoha-681428137",
+      "nom": "Avaradoha",
+      "aliases": [
+        "Avaradoha, Antananarivo",
+        "Avaradoha, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9001063,
+      "longitude": 47.5438721,
+      "osm_type": "node",
+      "osm_id": 681428137,
+      "place_type": "suburb"
+    },
+    {
+      "id": "avarajozoro-10618580514",
+      "nom": "Avarajozoro",
+      "aliases": [
+        "Avarajozoro, Antananarivo",
+        "Avarajozoro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8001316,
+      "longitude": 47.5181554,
+      "osm_type": "node",
+      "osm_id": 10618580514,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "avarakady-10008240759",
+      "nom": "Avarakady",
+      "aliases": [
+        "Avarakady, Antananarivo",
+        "Avarakady, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7585324,
+      "longitude": 47.5655477,
+      "osm_type": "node",
+      "osm_id": 10008240759,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "avaratanana-668739129",
+      "nom": "Avaratanàna",
+      "aliases": [
+        "Avaratanàna, Antananarivo",
+        "Avaratanàna, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8420488,
+      "longitude": 47.4868865,
+      "osm_type": "node",
+      "osm_id": 668739129,
+      "place_type": "suburb"
+    },
+    {
+      "id": "avaratetezana-10568170733",
+      "nom": "Avaratetezana",
+      "aliases": [
+        "Avaratetezana, Antananarivo",
+        "Avaratetezana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8585911,
+      "longitude": 47.4848172,
+      "osm_type": "node",
+      "osm_id": 10568170733,
+      "place_type": "suburb"
+    },
+    {
+      "id": "avaratr-antanimora-681428157",
+      "nom": "Avaratr'Antanimora",
+      "aliases": [
+        "Avaratr'Antanimora, Antananarivo",
+        "Avaratr'Antanimora, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9133773,
+      "longitude": 47.5420605,
+      "osm_type": "node",
+      "osm_id": 681428157,
+      "place_type": "suburb"
+    },
+    {
+      "id": "avaratsena-10003457274",
+      "nom": "Avaratsena",
+      "aliases": [
+        "Avaratsena, Antananarivo",
+        "Avaratsena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7449319,
+      "longitude": 47.6487434,
+      "osm_type": "node",
+      "osm_id": 10003457274,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "avaratsena-ambohidrapeto-5454040952",
+      "nom": "Avaratsena Ambohidrapeto",
+      "aliases": [
+        "Avaratsena Ambohidrapeto, Antananarivo",
+        "Avaratsena Ambohidrapeto, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9090473,
+      "longitude": 47.4745846,
+      "osm_type": "node",
+      "osm_id": 5454040952,
+      "place_type": "suburb"
+    },
+    {
+      "id": "behenjy-5454040956",
+      "nom": "Behenjy",
+      "aliases": [
+        "Behenjy, Antananarivo",
+        "Behenjy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9122444,
+      "longitude": 47.4718327,
+      "osm_type": "node",
+      "osm_id": 5454040956,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "behoririka-837567373",
+      "nom": "Behoririka",
+      "aliases": [
+        "Behoririka, Antananarivo",
+        "Behoririka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9023148,
+      "longitude": 47.5256863,
+      "osm_type": "node",
+      "osm_id": 837567373,
+      "place_type": "suburb"
+    },
+    {
+      "id": "bejofo-10006028603",
+      "nom": "Bejofo",
+      "aliases": [
+        "Bejofo, Antananarivo",
+        "Bejofo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7256327,
+      "longitude": 47.3480115,
+      "osm_type": "node",
+      "osm_id": 10006028603,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "bekiraro-686366959",
+      "nom": "Bekiraro",
+      "aliases": [
+        "Bekiraro, Antananarivo",
+        "Bekiraro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9081912,
+      "longitude": 47.5143,
+      "osm_type": "node",
+      "osm_id": 686366959,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "bel-air-11224960453",
+      "nom": "Bel'air",
+      "aliases": [
+        "Bel'air, Antananarivo",
+        "Bel'air, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9064159,
+      "longitude": 47.5331613,
+      "osm_type": "node",
+      "osm_id": 11224960453,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "belanitra-4206843240",
+      "nom": "Belanitra",
+      "aliases": [
+        "Belanitra, Antananarivo",
+        "Belanitra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8408895,
+      "longitude": 47.5297001,
+      "osm_type": "node",
+      "osm_id": 4206843240,
+      "place_type": "suburb"
+    },
+    {
+      "id": "bemasoandro-5454040966",
+      "nom": "Bemasoandro",
+      "aliases": [
+        "Bemasoandro, Antananarivo",
+        "Bemasoandro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9130158,
+      "longitude": 47.485925,
+      "osm_type": "node",
+      "osm_id": 5454040966,
+      "place_type": "suburb"
+    },
+    {
+      "id": "besarety-688379376",
+      "nom": "Besarety",
+      "aliases": [
+        "Besarety, Antananarivo",
+        "Besarety, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9016339,
+      "longitude": 47.5362974,
+      "osm_type": "node",
+      "osm_id": 688379376,
+      "place_type": "suburb"
+    },
+    {
+      "id": "betafo-668739140",
+      "nom": "Betafo",
+      "aliases": [
+        "Betafo, Antananarivo",
+        "Betafo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8777358,
+      "longitude": 47.5026551,
+      "osm_type": "node",
+      "osm_id": 668739140,
+      "place_type": "suburb"
+    },
+    {
+      "id": "betongolo-681428130",
+      "nom": "Betongolo",
+      "aliases": [
+        "Betongolo, Antananarivo",
+        "Betongolo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9051156,
+      "longitude": 47.5397786,
+      "osm_type": "node",
+      "osm_id": 681428130,
+      "place_type": "suburb"
+    },
+    {
+      "id": "bevalala-687180724",
+      "nom": "Bevalala",
+      "aliases": [
+        "Bevalala, Antananarivo",
+        "Bevalala, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9766078,
+      "longitude": 47.516485,
+      "osm_type": "node",
+      "osm_id": 687180724,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "bibilava-5680854873",
+      "nom": "Bibilava",
+      "aliases": [
+        "Bibilava, Antananarivo",
+        "Bibilava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9169301,
+      "longitude": 47.5638797,
+      "osm_type": "node",
+      "osm_id": 5680854873,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "cite-itaosy-akany-sambatra-5454040953",
+      "nom": "Cité Itaosy Akany Sambatra",
+      "aliases": [
+        "Cité Itaosy Akany Sambatra, Antananarivo",
+        "Cité Itaosy Akany Sambatra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9091031,
+      "longitude": 47.4778891,
+      "osm_type": "node",
+      "osm_id": 5454040953,
+      "place_type": "suburb"
+    },
+    {
+      "id": "cite-planton-688359813",
+      "nom": "Cité Planton",
+      "aliases": [
+        "Cité Planton, Antananarivo",
+        "Cité Planton, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9097014,
+      "longitude": 47.5403358,
+      "osm_type": "node",
+      "osm_id": 688359813,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "faliarivo-687173785",
+      "nom": "Faliarivo",
+      "aliases": [
+        "Faliarivo, Antananarivo",
+        "Faliarivo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9472438,
+      "longitude": 47.4620656,
+      "osm_type": "node",
+      "osm_id": 687173785,
+      "place_type": "suburb"
+    },
+    {
+      "id": "faliarivo-ii-13462289226",
+      "nom": "Faliarivo II",
+      "aliases": [
+        "Faliarivo II, Antananarivo",
+        "Faliarivo II, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9311829,
+      "longitude": 47.4741188,
+      "osm_type": "node",
+      "osm_id": 13462289226,
+      "place_type": "suburb"
+    },
+    {
+      "id": "faravohitra-686545015",
+      "nom": "Faravohitra",
+      "aliases": [
+        "Faravohitra, Antananarivo",
+        "Faravohitra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9097137,
+      "longitude": 47.5297512,
+      "osm_type": "node",
+      "osm_id": 686545015,
+      "place_type": "suburb"
+    },
+    {
+      "id": "fasan-ny-karana-12504002878",
+      "nom": "Fasan'ny Karàna",
+      "aliases": [
+        "Fasan'ny Karàna, Antananarivo",
+        "Fasan'ny Karàna, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.946288,
+      "longitude": 47.5153756,
+      "osm_type": "node",
+      "osm_id": 12504002878,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "fenomanana-837197788",
+      "nom": "Fenomanana",
+      "aliases": [
+        "Fenomanana, Antananarivo",
+        "Fenomanana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9333085,
+      "longitude": 47.5424811,
+      "osm_type": "node",
+      "osm_id": 837197788,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "fiadanana-837191897",
+      "nom": "Fiadanana",
+      "aliases": [
+        "Fiadanana, Antananarivo",
+        "Fiadanana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9339924,
+      "longitude": 47.5245164,
+      "osm_type": "node",
+      "osm_id": 837191897,
+      "place_type": "suburb"
+    },
+    {
+      "id": "fiadanankely-10004228311",
+      "nom": "Fiadanankely",
+      "aliases": [
+        "Fiadanankely, Antananarivo",
+        "Fiadanankely, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.75926,
+      "longitude": 47.3373815,
+      "osm_type": "node",
+      "osm_id": 10004228311,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "fiekena-10008240761",
+      "nom": "Fiekena",
+      "aliases": [
+        "Fiekena, Antananarivo",
+        "Fiekena, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.791347,
+      "longitude": 47.5720237,
+      "osm_type": "node",
+      "osm_id": 10008240761,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "fierenana-8956517860",
+      "nom": "Fierenana",
+      "aliases": [
+        "Fierenana, Antananarivo",
+        "Fierenana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7031644,
+      "longitude": 47.7897286,
+      "osm_type": "node",
+      "osm_id": 8956517860,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "fiombonana-5531126582",
+      "nom": "Fiombonana",
+      "aliases": [
+        "Fiombonana, Antananarivo",
+        "Fiombonana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8952376,
+      "longitude": 47.4763592,
+      "osm_type": "node",
+      "osm_id": 5531126582,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "fokontany-ambohidavenona-7563610920",
+      "nom": "Fokontany Ambohidavenona",
+      "aliases": [
+        "Fokontany Ambohidavenona, Antananarivo",
+        "Fokontany Ambohidavenona, Antananarivo, Madagascar"
+      ],
+      "latitude": -19.1031,
+      "longitude": 47.5428,
+      "osm_type": "node",
+      "osm_id": 7563610920,
+      "place_type": "quarter"
+    },
+    {
+      "id": "fokontany-amboniandrefana-7563627466",
+      "nom": "Fokontany Amboniandrefana",
+      "aliases": [
+        "Fokontany Amboniandrefana, Antananarivo",
+        "Fokontany Amboniandrefana, Antananarivo, Madagascar"
+      ],
+      "latitude": -19.1045,
+      "longitude": 47.5291,
+      "osm_type": "node",
+      "osm_id": 7563627466,
+      "place_type": "quarter"
+    },
+    {
+      "id": "fokontany-manankasina-6313190685",
+      "nom": "Fokontany Manankasina",
+      "aliases": [
+        "Fokontany Manankasina, Antananarivo",
+        "Fokontany Manankasina, Antananarivo, Madagascar"
+      ],
+      "latitude": -19.0962043,
+      "longitude": 47.5383219,
+      "osm_type": "node",
+      "osm_id": 6313190685,
+      "place_type": "quarter"
+    },
+    {
+      "id": "fort-duchesne-5680854869",
+      "nom": "Fort Duchesne",
+      "aliases": [
+        "Fort Duchesne, Antananarivo",
+        "Fort Duchesne, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9126975,
+      "longitude": 47.5478055,
+      "osm_type": "node",
+      "osm_id": 5680854869,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "golan-6673050118",
+      "nom": "Golan",
+      "aliases": [
+        "Golan, Antananarivo",
+        "Golan, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8733748,
+      "longitude": 47.4915291,
+      "osm_type": "node",
+      "osm_id": 6673050118,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "haute-ville-12504457188",
+      "nom": "Haute Ville",
+      "aliases": [
+        "Haute Ville, Antananarivo",
+        "Haute Ville, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9274809,
+      "longitude": 47.5316057,
+      "osm_type": "node",
+      "osm_id": 12504457188,
+      "place_type": "suburb"
+    },
+    {
+      "id": "iadiambola-687164487",
+      "nom": "Iadiambola",
+      "aliases": [
+        "Iadiambola, Antananarivo",
+        "Iadiambola, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.893801,
+      "longitude": 47.5495101,
+      "osm_type": "node",
+      "osm_id": 687164487,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "iavoloha-687180731",
+      "nom": "Iavoloha",
+      "aliases": [
+        "Iavoloha, Antananarivo",
+        "Iavoloha, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9968572,
+      "longitude": 47.5370593,
+      "osm_type": "node",
+      "osm_id": 687180731,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ifarihy-12504457167",
+      "nom": "Ifarihy",
+      "aliases": [
+        "Ifarihy, Antananarivo",
+        "Ifarihy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9623001,
+      "longitude": 47.5442898,
+      "osm_type": "node",
+      "osm_id": 12504457167,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ikianja-12504457174",
+      "nom": "Ikianja",
+      "aliases": [
+        "Ikianja, Antananarivo",
+        "Ikianja, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9080627,
+      "longitude": 47.5806606,
+      "osm_type": "node",
+      "osm_id": 12504457174,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ilafy-12504457173",
+      "nom": "Ilafy",
+      "aliases": [
+        "Ilafy, Antananarivo",
+        "Ilafy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8532646,
+      "longitude": 47.5621882,
+      "osm_type": "node",
+      "osm_id": 12504457173,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ilanivato-686376928",
+      "nom": "Ilanivato",
+      "aliases": [
+        "Ilanivato, Antananarivo",
+        "Ilanivato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.923307,
+      "longitude": 47.5010319,
+      "osm_type": "node",
+      "osm_id": 686376928,
+      "place_type": "suburb"
+    },
+    {
+      "id": "imanja-8764738301",
+      "nom": "Imanja",
+      "aliases": [
+        "Imanja, Antananarivo",
+        "Imanja, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7739143,
+      "longitude": 47.5528719,
+      "osm_type": "node",
+      "osm_id": 8764738301,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "imerimanjaka-12506457104",
+      "nom": "Imerimanjaka",
+      "aliases": [
+        "Imerimanjaka, Antananarivo",
+        "Imerimanjaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9797615,
+      "longitude": 47.546441,
+      "osm_type": "node",
+      "osm_id": 12506457104,
+      "place_type": "suburb"
+    },
+    {
+      "id": "imerinafovoany-672735040",
+      "nom": "Imerinafovoany",
+      "aliases": [
+        "Imerinafovoany, Antananarivo",
+        "Imerinafovoany, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8419134,
+      "longitude": 47.4667291,
+      "osm_type": "node",
+      "osm_id": 672735040,
+      "place_type": "suburb"
+    },
+    {
+      "id": "imeritsiafindra-10008240757",
+      "nom": "Imeritsiafindra",
+      "aliases": [
+        "Imeritsiafindra, Antananarivo",
+        "Imeritsiafindra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.78981,
+      "longitude": 47.5563995,
+      "osm_type": "node",
+      "osm_id": 10008240757,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "isahafa-10008240755",
+      "nom": "Isahafa",
+      "aliases": [
+        "Isahafa, Antananarivo",
+        "Isahafa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7981286,
+      "longitude": 47.5450543,
+      "osm_type": "node",
+      "osm_id": 10008240755,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "isaingy-931752002",
+      "nom": "Isaingy",
+      "aliases": [
+        "Isaingy, Antananarivo",
+        "Isaingy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9732195,
+      "longitude": 47.4982539,
+      "osm_type": "node",
+      "osm_id": 931752002,
+      "place_type": "suburb"
+    },
+    {
+      "id": "isoraka",
+      "nom": "Isoraka",
+      "aliases": [
+        "Isoraka, Antananarivo"
+      ],
+      "latitude": -18.9118395,
+      "longitude": 47.5208522
+    },
+    {
+      "id": "isotry-574265718",
+      "nom": "Isotry",
+      "aliases": [
+        "Isotry, Antananarivo",
+        "Isotry, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9099527,
+      "longitude": 47.5161466,
+      "osm_type": "node",
+      "osm_id": 574265718,
+      "place_type": "suburb"
+    },
+    {
+      "id": "itaosy-687175200",
+      "nom": "Itaosy",
+      "aliases": [
+        "Itaosy, Antananarivo",
+        "Itaosy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9181185,
+      "longitude": 47.4708415,
+      "osm_type": "node",
+      "osm_id": 687175200,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ivandry",
+      "nom": "Ivandry",
+      "aliases": [
+        "Ivandry, Antananarivo"
+      ],
+      "latitude": -18.8758484,
+      "longitude": 47.5236374
+    },
+    {
+      "id": "ivato-7218266391",
+      "nom": "Ivato",
+      "aliases": [
+        "Ivato, Antananarivo",
+        "Ivato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8082449,
+      "longitude": 47.4816019,
+      "osm_type": "node",
+      "osm_id": 7218266391,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ivoanjo-9562257906",
+      "nom": "Ivoanjo",
+      "aliases": [
+        "Ivoanjo, Antananarivo",
+        "Ivoanjo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7896007,
+      "longitude": 47.418462,
+      "osm_type": "node",
+      "osm_id": 9562257906,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "ivolaniray-12504457184",
+      "nom": "Ivolaniray",
+      "aliases": [
+        "Ivolaniray, Antananarivo",
+        "Ivolaniray, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9266487,
+      "longitude": 47.5061917,
+      "osm_type": "node",
+      "osm_id": 12504457184,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "madera-namontana-686271708",
+      "nom": "Madera Namontana",
+      "aliases": [
+        "Madera Namontana, Antananarivo",
+        "Madera Namontana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9363166,
+      "longitude": 47.5185995,
+      "osm_type": "node",
+      "osm_id": 686271708,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mahabo-12506457106",
+      "nom": "Mahabo",
+      "aliases": [
+        "Mahabo, Antananarivo",
+        "Mahabo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.986011,
+      "longitude": 47.5358516,
+      "osm_type": "node",
+      "osm_id": 12506457106,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mahalavolona-12504457164",
+      "nom": "Mahalavolona",
+      "aliases": [
+        "Mahalavolona, Antananarivo",
+        "Mahalavolona, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9848646,
+      "longitude": 47.5291997,
+      "osm_type": "node",
+      "osm_id": 12504457164,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mahamasina",
+      "nom": "Mahamasina",
+      "aliases": [
+        "Mahamasina, Antananarivo"
+      ],
+      "latitude": -18.9184037,
+      "longitude": 47.5248045
+    },
+    {
+      "id": "mahamasina-atsimo-12504002876",
+      "nom": "Mahamasina Atsimo",
+      "aliases": [
+        "Mahamasina Atsimo, Antananarivo",
+        "Mahamasina Atsimo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9225054,
+      "longitude": 47.5256002,
+      "osm_type": "node",
+      "osm_id": 12504002876,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mahatony-687168427",
+      "nom": "Mahatony",
+      "aliases": [
+        "Mahatony, Antananarivo",
+        "Mahatony, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8655845,
+      "longitude": 47.5235945,
+      "osm_type": "node",
+      "osm_id": 687168427,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mahatsara-3682650472",
+      "nom": "Mahatsara",
+      "aliases": [
+        "Mahatsara, Antananarivo",
+        "Mahatsara, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.883423,
+      "longitude": 47.5899488,
+      "osm_type": "node",
+      "osm_id": 3682650472,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mahatsinjo-10003570276",
+      "nom": "Mahatsinjo",
+      "aliases": [
+        "Mahatsinjo, Antananarivo",
+        "Mahatsinjo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.780327,
+      "longitude": 47.5299373,
+      "osm_type": "node",
+      "osm_id": 10003570276,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mahavoky-687191168",
+      "nom": "Mahavoky",
+      "aliases": [
+        "Mahavoky, Antananarivo",
+        "Mahavoky, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8993603,
+      "longitude": 47.53398,
+      "osm_type": "node",
+      "osm_id": 687191168,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mahazaza-ii-5729708813",
+      "nom": "Mahazaza II",
+      "aliases": [
+        "Mahazaza II, Antananarivo",
+        "Mahazaza II, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.6829875,
+      "longitude": 47.3706436,
+      "osm_type": "node",
+      "osm_id": 5729708813,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mahazo-687164485",
+      "nom": "Mahazo",
+      "aliases": [
+        "Mahazo, Antananarivo",
+        "Mahazo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8949784,
+      "longitude": 47.5614083,
+      "osm_type": "node",
+      "osm_id": 687164485,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mahazoarivo-686378306",
+      "nom": "Mahazoarivo",
+      "aliases": [
+        "Mahazoarivo, Antananarivo",
+        "Mahazoarivo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.938896,
+      "longitude": 47.5459118,
+      "osm_type": "node",
+      "osm_id": 686378306,
+      "place_type": "suburb"
+    },
+    {
+      "id": "maibahoaka-7184912074",
+      "nom": "Maibahoaka",
+      "aliases": [
+        "Maibahoaka, Antananarivo",
+        "Maibahoaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8294506,
+      "longitude": 47.4614313,
+      "osm_type": "node",
+      "osm_id": 7184912074,
+      "place_type": "suburb"
+    },
+    {
+      "id": "malaho-12504457165",
+      "nom": "Malaho",
+      "aliases": [
+        "Malaho, Antananarivo",
+        "Malaho, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9747571,
+      "longitude": 47.5083402,
+      "osm_type": "node",
+      "osm_id": 12504457165,
+      "place_type": "suburb"
+    },
+    {
+      "id": "malaza-687180730",
+      "nom": "Malaza",
+      "aliases": [
+        "Malaza, Antananarivo",
+        "Malaza, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.970505,
+      "longitude": 47.5292764,
+      "osm_type": "node",
+      "osm_id": 687180730,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mamory-ivato-12504457177",
+      "nom": "Mamory Ivato",
+      "aliases": [
+        "Mamory Ivato, Antananarivo",
+        "Mamory Ivato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8062435,
+      "longitude": 47.4705827,
+      "osm_type": "node",
+      "osm_id": 12504457177,
+      "place_type": "suburb"
+    },
+    {
+      "id": "manakambahiny-845962439",
+      "nom": "Manakambahiny",
+      "aliases": [
+        "Manakambahiny, Antananarivo",
+        "Manakambahiny, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9309737,
+      "longitude": 47.5366168,
+      "osm_type": "node",
+      "osm_id": 845962439,
+      "place_type": "suburb"
+    },
+    {
+      "id": "manampisoa-13462289223",
+      "nom": "Manampisoa",
+      "aliases": [
+        "Manampisoa, Antananarivo",
+        "Manampisoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9333493,
+      "longitude": 47.4614632,
+      "osm_type": "node",
+      "osm_id": 13462289223,
+      "place_type": "suburb"
+    },
+    {
+      "id": "manandona-9526189873",
+      "nom": "Manandona",
+      "aliases": [
+        "Manandona, Antananarivo",
+        "Manandona, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9866578,
+      "longitude": 47.5441597,
+      "osm_type": "node",
+      "osm_id": 9526189873,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "manandriana-avaradrano-7149564234",
+      "nom": "Manandriana Avaradrano",
+      "aliases": [
+        "Manandriana Avaradrano, Antananarivo",
+        "Manandriana Avaradrano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8092833,
+      "longitude": 47.5911741,
+      "osm_type": "node",
+      "osm_id": 7149564234,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mananjara-837191898",
+      "nom": "Mananjara",
+      "aliases": [
+        "Mananjara, Antananarivo",
+        "Mananjara, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9291628,
+      "longitude": 47.5225067,
+      "osm_type": "node",
+      "osm_id": 837191898,
+      "place_type": "suburb"
+    },
+    {
+      "id": "manankasina-10002341919",
+      "nom": "Manankasina",
+      "aliases": [
+        "Manankasina, Antananarivo",
+        "Manankasina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7838009,
+      "longitude": 47.554855,
+      "osm_type": "node",
+      "osm_id": 10002341919,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "manarintsoa-12504457182",
+      "nom": "Manarintsoa",
+      "aliases": [
+        "Manarintsoa, Antananarivo",
+        "Manarintsoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9125971,
+      "longitude": 47.5133988,
+      "osm_type": "node",
+      "osm_id": 12504457182,
+      "place_type": "suburb"
+    },
+    {
+      "id": "manarintsoa-namehana-7149685724",
+      "nom": "Manarintsoa Namehana",
+      "aliases": [
+        "Manarintsoa Namehana, Antananarivo",
+        "Manarintsoa Namehana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8273871,
+      "longitude": 47.5385016,
+      "osm_type": "node",
+      "osm_id": 7149685724,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mandrangobato-837190450",
+      "nom": "Mandrangobato",
+      "aliases": [
+        "Mandrangobato, Antananarivo",
+        "Mandrangobato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9283027,
+      "longitude": 47.5121372,
+      "osm_type": "node",
+      "osm_id": 837190450,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mandriambero-637715766",
+      "nom": "Mandriambero",
+      "aliases": [
+        "Mandriambero, Antananarivo",
+        "Mandriambero, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8223862,
+      "longitude": 47.4485449,
+      "osm_type": "node",
+      "osm_id": 637715766,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mandroseza-686378314",
+      "nom": "Mandroseza",
+      "aliases": [
+        "Mandroseza, Antananarivo",
+        "Mandroseza, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9343683,
+      "longitude": 47.550035,
+      "osm_type": "node",
+      "osm_id": 686378314,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mandrosoa-687191164",
+      "nom": "Mandrosoa",
+      "aliases": [
+        "Mandrosoa, Antananarivo",
+        "Mandrosoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9104698,
+      "longitude": 47.5291691,
+      "osm_type": "node",
+      "osm_id": 687191164,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mandrosoa-ivato-7798554173",
+      "nom": "Mandrosoa Ivato",
+      "aliases": [
+        "Mandrosoa Ivato, Antananarivo",
+        "Mandrosoa Ivato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8228732,
+      "longitude": 47.4699497,
+      "osm_type": "node",
+      "osm_id": 7798554173,
+      "place_type": "suburb"
+    },
+    {
+      "id": "mangarivotra-686545016",
+      "nom": "Mangarivotra",
+      "aliases": [
+        "Mangarivotra, Antananarivo",
+        "Mangarivotra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9097672,
+      "longitude": 47.5319924,
+      "osm_type": "node",
+      "osm_id": 686545016,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "manjaka-ilafy-687168432",
+      "nom": "Manjaka Ilafy",
+      "aliases": [
+        "Manjaka Ilafy, Antananarivo",
+        "Manjaka Ilafy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8579724,
+      "longitude": 47.5569989,
+      "osm_type": "node",
+      "osm_id": 687168432,
+      "place_type": "suburb"
+    },
+    {
+      "id": "manjakaray-687168439",
+      "nom": "Manjakaray",
+      "aliases": [
+        "Manjakaray, Antananarivo",
+        "Manjakaray, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8904911,
+      "longitude": 47.5333981,
+      "osm_type": "node",
+      "osm_id": 687168439,
+      "place_type": "suburb"
+    },
+    {
+      "id": "marobiby-5531126580",
+      "nom": "Marobiby",
+      "aliases": [
+        "Marobiby, Antananarivo",
+        "Marobiby, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8952154,
+      "longitude": 47.4803566,
+      "osm_type": "node",
+      "osm_id": 5531126580,
+      "place_type": "suburb"
+    },
+    {
+      "id": "marohoho-686159725",
+      "nom": "Marohoho",
+      "aliases": [
+        "Marohoho, Antananarivo",
+        "Marohoho, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9362656,
+      "longitude": 47.5336896,
+      "osm_type": "node",
+      "osm_id": 686159725,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "marovohitra-9620294054",
+      "nom": "Marovohitra",
+      "aliases": [
+        "Marovohitra, Antananarivo",
+        "Marovohitra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8967998,
+      "longitude": 47.7749249,
+      "osm_type": "node",
+      "osm_id": 9620294054,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "mascar-687191161",
+      "nom": "Mascar",
+      "aliases": [
+        "Mascar, Antananarivo",
+        "Mascar, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8966786,
+      "longitude": 47.5326855,
+      "osm_type": "node",
+      "osm_id": 687191161,
+      "place_type": "suburb"
+    },
+    {
+      "id": "masinandriana-7149685718",
+      "nom": "Masinandriana",
+      "aliases": [
+        "Masinandriana, Antananarivo",
+        "Masinandriana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8772956,
+      "longitude": 47.5665844,
+      "osm_type": "node",
+      "osm_id": 7149685718,
+      "place_type": "suburb"
+    },
+    {
+      "id": "miadampahonina-10006028600",
+      "nom": "Miadampahonina",
+      "aliases": [
+        "Miadampahonina, Antananarivo",
+        "Miadampahonina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7346115,
+      "longitude": 47.3486803,
+      "osm_type": "node",
+      "osm_id": 10006028600,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "miadana-12504002877",
+      "nom": "Miadana",
+      "aliases": [
+        "Miadana, Antananarivo",
+        "Miadana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9403363,
+      "longitude": 47.5113818,
+      "osm_type": "node",
+      "osm_id": 12504002877,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "miandrarivo-9758912238",
+      "nom": "Miandrarivo",
+      "aliases": [
+        "Miandrarivo, Antananarivo",
+        "Miandrarivo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9242967,
+      "longitude": 47.5373108,
+      "osm_type": "node",
+      "osm_id": 9758912238,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "morarano-837197782",
+      "nom": "Morarano",
+      "aliases": [
+        "Morarano, Antananarivo",
+        "Morarano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9351352,
+      "longitude": 47.5401717,
+      "osm_type": "node",
+      "osm_id": 837197782,
+      "place_type": "suburb"
+    },
+    {
+      "id": "morondava-668739131",
+      "nom": "Morondava",
+      "aliases": [
+        "Morondava, Antananarivo",
+        "Morondava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8511496,
+      "longitude": 47.4692883,
+      "osm_type": "node",
+      "osm_id": 668739131,
+      "place_type": "suburb"
+    },
+    {
+      "id": "namehana-7149685729",
+      "nom": "Namehana",
+      "aliases": [
+        "Namehana, Antananarivo",
+        "Namehana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8299461,
+      "longitude": 47.543115,
+      "osm_type": "node",
+      "osm_id": 7149685729,
+      "place_type": "suburb"
+    },
+    {
+      "id": "nandihizana-6734634364",
+      "nom": "Nandihizana",
+      "aliases": [
+        "Nandihizana, Antananarivo",
+        "Nandihizana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7403224,
+      "longitude": 47.3502984,
+      "osm_type": "node",
+      "osm_id": 6734634364,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "nanganehana-5596992379",
+      "nom": "Nanganehana",
+      "aliases": [
+        "Nanganehana, Antananarivo",
+        "Nanganehana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8890673,
+      "longitude": 47.7962377,
+      "osm_type": "node",
+      "osm_id": 5596992379,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "nanisana-681434750",
+      "nom": "Nanisana",
+      "aliases": [
+        "Nanisana, Antananarivo",
+        "Nanisana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8898644,
+      "longitude": 47.5488231,
+      "osm_type": "node",
+      "osm_id": 681434750,
+      "place_type": "suburb"
+    },
+    {
+      "id": "ouest-mananjara-12504457185",
+      "nom": "Ouest Mananjara",
+      "aliases": [
+        "Ouest Mananjara, Antananarivo",
+        "Ouest Mananjara, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9319438,
+      "longitude": 47.5174946,
+      "osm_type": "node",
+      "osm_id": 12504457185,
+      "place_type": "suburb"
+    },
+    {
+      "id": "sakanambazo-5531126579",
+      "nom": "Sakanambazo",
+      "aliases": [
+        "Sakanambazo, Antananarivo",
+        "Sakanambazo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8987136,
+      "longitude": 47.4832521,
+      "osm_type": "node",
+      "osm_id": 5531126579,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "sambaina-ambony-9662489852",
+      "nom": "Sambaina Ambony",
+      "aliases": [
+        "Sambaina Ambony, Antananarivo",
+        "Sambaina Ambony, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8884114,
+      "longitude": 47.7824056,
+      "osm_type": "node",
+      "osm_id": 9662489852,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "saropody-12061261553",
+      "nom": "Saropody",
+      "aliases": [
+        "Saropody, Antananarivo",
+        "Saropody, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9519934,
+      "longitude": 47.5371578,
+      "osm_type": "node",
+      "osm_id": 12061261553,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "seranina-5271851709",
+      "nom": "Seranina",
+      "aliases": [
+        "Seranina, Antananarivo",
+        "Seranina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8410091,
+      "longitude": 47.5401431,
+      "osm_type": "node",
+      "osm_id": 5271851709,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "soamanandrariny-687164488",
+      "nom": "Soamanandrariny",
+      "aliases": [
+        "Soamanandrariny, Antananarivo",
+        "Soamanandrariny, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8910451,
+      "longitude": 47.5654386,
+      "osm_type": "node",
+      "osm_id": 687164488,
+      "place_type": "suburb"
+    },
+    {
+      "id": "soamonina-10008240754",
+      "nom": "Soamonina",
+      "aliases": [
+        "Soamonina, Antananarivo",
+        "Soamonina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7744926,
+      "longitude": 47.5861752,
+      "osm_type": "node",
+      "osm_id": 10008240754,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "soaniadanana-7149685731",
+      "nom": "Soaniadanana",
+      "aliases": [
+        "Soaniadanana, Antananarivo",
+        "Soaniadanana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.838887,
+      "longitude": 47.5597715,
+      "osm_type": "node",
+      "osm_id": 7149685731,
+      "place_type": "suburb"
+    },
+    {
+      "id": "soanierana-686271697",
+      "nom": "Soanierana",
+      "aliases": [
+        "Soanierana, Antananarivo",
+        "Soanierana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9381282,
+      "longitude": 47.524023,
+      "osm_type": "node",
+      "osm_id": 686271697,
+      "place_type": "suburb"
+    },
+    {
+      "id": "soarano-837567376",
+      "nom": "Soarano",
+      "aliases": [
+        "Soarano, Antananarivo",
+        "Soarano, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9039603,
+      "longitude": 47.521745,
+      "osm_type": "node",
+      "osm_id": 837567376,
+      "place_type": "suburb"
+    },
+    {
+      "id": "soavimasoandro-687168430",
+      "nom": "Soavimasoandro",
+      "aliases": [
+        "Soavimasoandro, Antananarivo",
+        "Soavimasoandro, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8627913,
+      "longitude": 47.5182153,
+      "osm_type": "node",
+      "osm_id": 687168430,
+      "place_type": "suburb"
+    },
+    {
+      "id": "soavimbahoaka-681434761",
+      "nom": "Soavimbahoaka",
+      "aliases": [
+        "Soavimbahoaka, Antananarivo",
+        "Soavimbahoaka, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.891385,
+      "longitude": 47.5408412,
+      "osm_type": "node",
+      "osm_id": 681434761,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "soavina-931752010",
+      "nom": "Soavina",
+      "aliases": [
+        "Soavina, Antananarivo",
+        "Soavina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9593135,
+      "longitude": 47.5032816,
+      "osm_type": "node",
+      "osm_id": 931752010,
+      "place_type": "suburb"
+    },
+    {
+      "id": "soavinandriana-12504457192",
+      "nom": "Soavinandriana",
+      "aliases": [
+        "Soavinandriana, Antananarivo",
+        "Soavinandriana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8979379,
+      "longitude": 47.5410068,
+      "osm_type": "node",
+      "osm_id": 12504457192,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "talatamaty-672735082",
+      "nom": "Talatamaty",
+      "aliases": [
+        "Talatamaty, Antananarivo",
+        "Talatamaty, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8399189,
+      "longitude": 47.4602622,
+      "osm_type": "node",
+      "osm_id": 672735082,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tangaina-687173781",
+      "nom": "Tangaina",
+      "aliases": [
+        "Tangaina, Antananarivo",
+        "Tangaina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9430493,
+      "longitude": 47.4824439,
+      "osm_type": "node",
+      "osm_id": 687173781,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "tanjombato-687180729",
+      "nom": "Tanjombato",
+      "aliases": [
+        "Tanjombato, Antananarivo",
+        "Tanjombato, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9578923,
+      "longitude": 47.528189,
+      "osm_type": "node",
+      "osm_id": 687180729,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tongarivo-694218753",
+      "nom": "Tongarivo",
+      "aliases": [
+        "Tongarivo, Antananarivo",
+        "Tongarivo, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9676391,
+      "longitude": 47.5277716,
+      "osm_type": "node",
+      "osm_id": 694218753,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tsarafara-5316748705",
+      "nom": "Tsarafara",
+      "aliases": [
+        "Tsarafara, Antananarivo",
+        "Tsarafara, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8361251,
+      "longitude": 47.5612306,
+      "osm_type": "node",
+      "osm_id": 5316748705,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tsarafaritra-tsimbazaza-681393166",
+      "nom": "Tsarafaritra Tsimbazaza",
+      "aliases": [
+        "Tsarafaritra Tsimbazaza, Antananarivo",
+        "Tsarafaritra Tsimbazaza, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9349872,
+      "longitude": 47.5289801,
+      "osm_type": "node",
+      "osm_id": 681393166,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tsarahonenana-5680854207",
+      "nom": "Tsarahonenana",
+      "aliases": [
+        "Tsarahonenana, Antananarivo",
+        "Tsarahonenana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9037083,
+      "longitude": 47.55076,
+      "osm_type": "node",
+      "osm_id": 5680854207,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tsaralalana-574539686",
+      "nom": "Tsaralalàna",
+      "aliases": [
+        "Tsaralalàna, Antananarivo",
+        "Tsaralalàna, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9065351,
+      "longitude": 47.5203307,
+      "osm_type": "node",
+      "osm_id": 574539686,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tsaramasay-844529031",
+      "nom": "Tsaramasay",
+      "aliases": [
+        "Tsaramasay, Antananarivo",
+        "Tsaramasay, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8914428,
+      "longitude": 47.5162534,
+      "osm_type": "node",
+      "osm_id": 844529031,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "tsararay-lailava-13462289210",
+      "nom": "Tsararay Lailava",
+      "aliases": [
+        "Tsararay Lailava, Antananarivo",
+        "Tsararay Lailava, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9249792,
+      "longitude": 47.4609952,
+      "osm_type": "node",
+      "osm_id": 13462289210,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tsararivotra-11987385329",
+      "nom": "Tsararivotra",
+      "aliases": [
+        "Tsararivotra, Antananarivo",
+        "Tsararivotra, Antananarivo, Madagascar"
+      ],
+      "latitude": -19.0732442,
+      "longitude": 47.5551662,
+      "osm_type": "node",
+      "osm_id": 11987385329,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "tsarasaotra-687168431",
+      "nom": "Tsarasaotra",
+      "aliases": [
+        "Tsarasaotra, Antananarivo",
+        "Tsarasaotra, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8665134,
+      "longitude": 47.5179941,
+      "osm_type": "node",
+      "osm_id": 687168431,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "tsiadana-681400105",
+      "nom": "Tsiadana",
+      "aliases": [
+        "Tsiadana, Antananarivo",
+        "Tsiadana, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9182962,
+      "longitude": 47.5449553,
+      "osm_type": "node",
+      "osm_id": 681400105,
+      "place_type": "suburb"
+    },
+    {
+      "id": "tsilazaina-12506457103",
+      "nom": "Tsilazaina",
+      "aliases": [
+        "Tsilazaina, Antananarivo",
+        "Tsilazaina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9806594,
+      "longitude": 47.5687355,
+      "osm_type": "node",
+      "osm_id": 12506457103,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "tsimialonjafy-12504002874",
+      "nom": "Tsimialonjafy",
+      "aliases": [
+        "Tsimialonjafy, Antananarivo",
+        "Tsimialonjafy, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9193744,
+      "longitude": 47.5293124,
+      "osm_type": "node",
+      "osm_id": 12504002874,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "vakinampasika-10008240753",
+      "nom": "Vakinampasika",
+      "aliases": [
+        "Vakinampasika, Antananarivo",
+        "Vakinampasika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.7810317,
+      "longitude": 47.555885,
+      "osm_type": "node",
+      "osm_id": 10008240753,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "village-akamasoa-6782874587",
+      "nom": "Village Akamasoa",
+      "aliases": [
+        "Village Akamasoa, Antananarivo",
+        "Village Akamasoa, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8923499,
+      "longitude": 47.5755161,
+      "osm_type": "node",
+      "osm_id": 6782874587,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "vinany-13462289227",
+      "nom": "Vinany",
+      "aliases": [
+        "Vinany, Antananarivo",
+        "Vinany, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9266633,
+      "longitude": 47.4722234,
+      "osm_type": "node",
+      "osm_id": 13462289227,
+      "place_type": "suburb"
+    },
+    {
+      "id": "volosarika-681393224",
+      "nom": "Volosarika",
+      "aliases": [
+        "Volosarika, Antananarivo",
+        "Volosarika, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9216501,
+      "longitude": 47.5390936,
+      "osm_type": "node",
+      "osm_id": 681393224,
+      "place_type": "neighbourhood"
+    },
+    {
+      "id": "volotara-12509205379",
+      "nom": "Volotara",
+      "aliases": [
+        "Volotara, Antananarivo",
+        "Volotara, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.9777933,
+      "longitude": 47.5255948,
+      "osm_type": "node",
+      "osm_id": 12509205379,
+      "place_type": "suburb"
+    },
+    {
+      "id": "vonelina-5531126581",
+      "nom": "Vonelina",
+      "aliases": [
+        "Vonelina, Antananarivo",
+        "Vonelina, Antananarivo, Madagascar"
+      ],
+      "latitude": -18.8915887,
+      "longitude": 47.4758541,
+      "osm_type": "node",
+      "osm_id": 5531126581,
+      "place_type": "neighbourhood"
+    }
+  ]
+}

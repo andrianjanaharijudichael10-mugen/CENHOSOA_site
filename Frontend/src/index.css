@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+@import "tailwindcss";
+@import "tailwind-animations";
+
+body {
+  font-family: 'Inter', ui-sans-serif, sans-serif;
+}
+
+.font-display {
+  font-family: 'Sora', ui-sans-serif, sans-serif;
+}
+
+.font-body {
+  font-family: 'Inter', ui-sans-serif, sans-serif;
+}
+
+.font-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
