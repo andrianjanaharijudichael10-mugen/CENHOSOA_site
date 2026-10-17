@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AlertCircle, Ambulance, ArrowLeft, Bell, Calendar, Camera, CheckCircle2, ChevronLeft,
-  ChevronRight, ClipboardList, Clock, FileDown, FileText, LogOut, Menu, Plus, Search,
-  Stethoscope, UserPlus, UserRound, X, XCircle, BookOpenText,
+  ChevronRight, ClipboardList, Clock, LogOut, Menu, Plus, Search,
+  Stethoscope, UserPlus, UserRound, X, XCircle,
 } from 'lucide-react';
 import {
   ajouterPatientCreneau,
   creerCreneau,
-  creerConsultation,
   listerCreneaux,
   listerPatientsPourCreneau,
-  obtenirDossierMedical,
   obtenirTokenStocke,
   listerRendezVous,
   marquerNotificationRendezVousLue,
@@ -22,19 +20,16 @@ import {
   supprimerPhotoProfilPatient,
   reserverCreneau,
 } from '../services/api';
-import SeanceRendezVous from './SeanceRendezVous';
 import logoCenhosoa from '../assets/logo/logo.jpeg';
-import DossierPatient from './DossierPatient';
 import { StylesEspace, Compteur, BandeauPage, BTN_CLAIR, BTN_VERRE } from './StylesEspace';
 import CarteRendezVous from './CarteRendezVous';
 import StatutBadge from './StatutBadge';
 import { ecouterDonneesModifiees } from '../services/tempsReel';
+import FenetreFormulaire from './FenetreFormulaire';
 import {
   cleDateLocale,
-  formaterQuantiteMedicament,
   formaterRendezVous,
   obtenirNomUtilisateur,
-  telechargerOrdonnancePdf,
   versDateLocaleInput,
 } from './rendezVousUtils';
 
@@ -101,7 +96,7 @@ function CalendrierCreneaux({
         </div>
       </div>
       <div className="overflow-x-auto p-3 sm:p-5">
-        <div className="min-w-[760px]">
+        <div className="min-w-[680px] md:min-w-[760px]">
           <div className="grid grid-cols-6 border-b border-slate-100 pb-2 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
             {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map((jour) => <div key={jour} className="py-2">{jour}</div>)}
           </div>
@@ -134,7 +129,10 @@ function CalendrierCreneaux({
                   <div className="space-y-1.5">
                     {creneauxJour.map((creneau) => {
                       const estSelectionne = creneauSelectionne?.id === creneau.id;
-                      const estPasse = new Date(creneau.date_heure) <= new Date();
+                      const maintenant = new Date();
+                      const estPasse = creneau.date_fin
+                        ? new Date(creneau.date_fin).getTime() + 60000 <= maintenant.getTime()
+                        : new Date(creneau.date_heure) <= maintenant;
                       const reservable = creneau.est_ouvert && !estPasse;
                       return (
                         <button
@@ -147,13 +145,13 @@ function CalendrierCreneaux({
                               : reservable ? 'bg-[#1F7A8C]/10 text-[#0F3D52] hover:scale-[1.03] hover:bg-[#1F7A8C]/20'
                                 : 'bg-slate-100 text-slate-400'
                           } disabled:cursor-not-allowed`}
-                          title={`${creneau.est_ouvert ? 'Ouvert' : 'Fermé'} · ${creneau.nombre_patients} patient(s) en file`}
+                          title={`${creneau.est_ouvert ? 'Ouvert' : 'Fermé'} · ${creneau.nombre_patients} patient(s) sur ce créneau · ${creneau.nombre_patients_jour}/${creneau.quota_journalier || 'sans limite'} pour le jour`}
                         >
                           <span>
                             {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(creneau.date_heure))}
                             {creneau.date_fin && `–${new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(creneau.date_fin))}`}
                           </span>
-                          <span className="truncate font-medium">{creneau.est_ouvert ? `${creneau.nombre_patients} patient(s)` : 'Fermé'}</span>
+                          <span className="truncate font-medium">{creneau.est_ouvert ? `${creneau.nombre_patients_jour}/${creneau.quota_journalier || '∞'} jour` : 'Fermé'}</span>
                         </button>
                       );
                     })}
@@ -194,8 +192,6 @@ export default function GestionRendezVous({
   const photoProfilUrl = useRef('');
   const [erreurPhoto, setErreurPhoto] = useState('');
   const [enregistrementPhoto, setEnregistrementPhoto] = useState(false);
-  const [seanceOuverte, setSeanceOuverte] = useState(null);
-  const [dossierPatientOuvert, setDossierPatientOuvert] = useState(null);
   const [profilPatient, setProfilPatient] = useState({
     nom: profil?.patient?.nom || '',
     prenoms: profil?.patient?.prenoms || '',
@@ -207,9 +203,6 @@ export default function GestionRendezVous({
   const [erreurProfil, setErreurProfil] = useState('');
   const [succesProfil, setSuccesProfil] = useState('');
   const [datesConfirmation, setDatesConfirmation] = useState({});
-  const [dossiersMedicaux, setDossiersMedicaux] = useState({});
-  const [formulairesConsultation, setFormulairesConsultation] = useState({});
-  const [dossiersOuverts, setDossiersOuverts] = useState({});
   const [listeRendezVous, setListeRendezVous] = useState('aujourdhui');
   const [pagePersonnel, setPagePersonnel] = useState('accueil');
   const [navigationPersonnelOuverte, setNavigationPersonnelOuverte] = useState(false);
@@ -229,11 +222,17 @@ export default function GestionRendezVous({
   const [formulaireCreneauOuvert, setFormulaireCreneauOuvert] = useState(false);
   const [modificationHorairesCreneau, setModificationHorairesCreneau] = useState(null);
   const [patientAffecteId, setPatientAffecteId] = useState('');
+  const [modePatientAffecte, setModePatientAffecte] = useState('existant');
+  const [nouveauPatientAffecte, setNouveauPatientAffecte] = useState({ nom: '', prenoms: '', telephone: '' });
+  const [quotaJournalierModif, setQuotaJournalierModif] = useState('20');
+  const [ajoutPatientOuvert, setAjoutPatientOuvert] = useState(false);
+  const [modificationQuotaOuverte, setModificationQuotaOuverte] = useState(false);
   const [motifFile, setMotifFile] = useState('');
   const [filtreMesRdv, setFiltreMesRdv] = useState('a_venir');
   const [nouveauCreneau, setNouveauCreneau] = useState({
     heureDebut: '09:00',
     heureFin: '10:00',
+    quota_journalier: '20',
     patient_id: '',
     motif: '',
   });
@@ -253,7 +252,7 @@ export default function GestionRendezVous({
   const creneauSelectionne = creneaux.find((creneau) => creneau.id === creneauSelectionneId) || null;
 
   useEffect(() => ecouterDonneesModifiees(
-    ['dossiers', 'patients', 'rendez-vous', 'services'],
+    ['patients', 'rendez-vous', 'services'],
     () => setActualisationTempsReel((precedent) => precedent + 1),
   ), []);
 
@@ -421,34 +420,6 @@ export default function GestionRendezVous({
   }, [actualisationTempsReel, token]);
 
   useEffect(() => {
-    const patientId = profil?.role === 'patient' ? profil.patient?.id : null;
-    if (!patientId) return undefined;
-    let actif = true;
-    obtenirDossierMedical(token, patientId)
-      .then((dossier) => {
-        if (actif) {
-          setDossiersMedicaux((precedents) => ({
-            ...precedents,
-            [patientId]: { chargement: false, erreur: '', donnees: dossier },
-          }));
-        }
-      })
-      .catch((err) => {
-        if (actif) {
-          setDossiersMedicaux((precedents) => ({
-            ...precedents,
-            [patientId]: {
-              chargement: false,
-              erreur: err.message || 'Impossible de charger votre dossier médical.',
-              donnees: null,
-            },
-          }));
-        }
-      });
-    return () => { actif = false; };
-  }, [actualisationTempsReel, profil?.patient?.id, profil?.role, token]);
-
-  useEffect(() => {
     if (estGestionnaireRdv) return undefined;
     let actif = true;
     const actualiserNotifications = async () => {
@@ -480,17 +451,24 @@ export default function GestionRendezVous({
     Promise.resolve().then(() => {
       if (actif) setChargementCreneaux(true);
     });
-    listerCreneaux(token, serviceCalendrier.id)
-      .then((donnees) => {
+    const actualiser = async () => {
+      try {
+        const donnees = await listerCreneaux(token, serviceCalendrier.id);
         if (actif) setCreneaux(donnees);
-      })
-      .catch((err) => {
+      } catch (err) {
         if (actif) setErreur(err.message || 'Impossible de charger le calendrier.');
-      })
-      .finally(() => {
+      } finally {
         if (actif) setChargementCreneaux(false);
-      });
-    return () => { actif = false; };
+      }
+    };
+    void actualiser();
+    const intervalle = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void actualiser();
+    }, 10000);
+    return () => {
+      actif = false;
+      window.clearInterval(intervalle);
+    };
   }, [actualisationTempsReel, serviceCalendrier?.id, token]);
 
   const chargerPatientsDisponibles = useCallback(async () => {
@@ -550,8 +528,10 @@ export default function GestionRendezVous({
     try {
       const cree = await creerCreneau(token, {
         service_id: serviceCalendrier.id,
+        date_jour: dateFormulaireCreneau,
         date_heure: new Date(`${dateFormulaireCreneau}T${nouveauCreneau.heureDebut}`).toISOString(),
         date_fin: new Date(`${dateFormulaireCreneau}T${nouveauCreneau.heureFin}`).toISOString(),
+        quota_journalier: Number(nouveauCreneau.quota_journalier),
         ...(nouveauCreneau.patient_id && {
           patient_id: nouveauCreneau.patient_id,
           motif: nouveauCreneau.motif,
@@ -559,7 +539,7 @@ export default function GestionRendezVous({
       });
       await actualiserCreneaux();
       await actualiserRendezVous();
-      setNouveauCreneau({ heureDebut: '09:00', heureFin: '10:00', patient_id: '', motif: '' });
+      setNouveauCreneau({ heureDebut: '09:00', heureFin: '10:00', quota_journalier: '20', patient_id: '', motif: '' });
       setFormulaireCreneauOuvert(false);
       setSucces(nouveauCreneau.patient_id
         ? `Créneau créé et patient ajouté à la file numéro 1.`
@@ -574,22 +554,57 @@ export default function GestionRendezVous({
 
   const ajouterPatientAuCreneau = async (evenement) => {
     evenement.preventDefault();
-    if (!creneauSelectionne || !patientAffecteId) return;
+    if (!creneauSelectionne) return;
+    if (modePatientAffecte === 'existant' && !patientAffecteId) {
+      setErreur('Choisissez un patient existant.');
+      return;
+    }
+    if (modePatientAffecte === 'nouveau' && !Object.values(nouveauPatientAffecte).every((valeur) => valeur.trim())) {
+      setErreur('Renseignez le nom, les prénoms et le téléphone du patient.');
+      return;
+    }
     setErreur('');
     setSucces('');
     setEnregistrement(true);
     try {
       const cree = await ajouterPatientCreneau(token, creneauSelectionne.id, {
-        patient_id: patientAffecteId,
+        ...(modePatientAffecte === 'existant'
+          ? { patient_id: patientAffecteId }
+          : { nouveau_patient: nouveauPatientAffecte }),
         motif: motifFile,
       });
       await actualiserRendezVous();
       await actualiserCreneaux();
       setPatientAffecteId('');
+      setNouveauPatientAffecte({ nom: '', prenoms: '', telephone: '' });
       setMotifFile('');
+      setAjoutPatientOuvert(false);
       setSucces(`Patient ajouté à la file avec le numéro ${cree.numero_file}.`);
     } catch (err) {
       setErreur(err.message || 'Impossible d’ajouter le patient à la file.');
+    } finally {
+      setEnregistrement(false);
+    }
+  };
+
+  const modifierQuotaJournalier = async (evenement) => {
+    evenement.preventDefault();
+    if (!creneauSelectionne) return;
+    const limite = Number(quotaJournalierModif);
+    if (!Number.isInteger(limite) || limite < 1 || limite > 10000) {
+      setErreur('Le quota doit être un nombre entier entre 1 et 10 000.');
+      return;
+    }
+    setErreur('');
+    setSucces('');
+    setEnregistrement(true);
+    try {
+      await modifierCreneau(token, creneauSelectionne.id, { quota_journalier: limite });
+      await actualiserCreneaux();
+      setModificationQuotaOuverte(false);
+      setSucces('Le quota journalier du service a été mis à jour.');
+    } catch (err) {
+      setErreur(err.message || 'Impossible de modifier le quota journalier.');
     } finally {
       setEnregistrement(false);
     }
@@ -626,8 +641,10 @@ export default function GestionRendezVous({
       const actualise = await modifierCreneau(token, creneauSelectionne.id, {
         date_heure: dateHeure.toISOString(),
         date_fin: dateFin.toISOString(),
+        date_jour: modificationHorairesCreneau.dateHeure.slice(0, 10),
       });
       setCreneaux((precedents) => precedents.map((item) => item.id === actualise.id ? actualise : item));
+      setModificationHorairesCreneau(null);
       await actualiserRendezVous();
       setModificationHorairesCreneau(null);
       setSucces('Les horaires du créneau et les rendez-vous qui y sont associés ont été déplacés.');
@@ -635,74 +652,6 @@ export default function GestionRendezVous({
       setErreur(err.message || 'Impossible de modifier les horaires du créneau.');
     } finally {
       setEnregistrement(false);
-    }
-  };
-
-  const modifierMedicament = (rendezVousId, index, champ, valeur) => {
-    setFormulairesConsultation((precedents) => ({
-      ...precedents,
-      [rendezVousId]: {
-        ...precedents[rendezVousId],
-        medicaments_prescrits: precedents[rendezVousId].medicaments_prescrits.map((medicament, numero) => {
-          if (numero !== index) return medicament;
-          if (champ === 'forme' && valeur !== 'solution_buvable') {
-            return {
-              ...medicament,
-              forme: valeur,
-              matin: medicament.matin === '' ? '' : String(Math.round(Number(medicament.matin))),
-              midi: medicament.midi === '' ? '' : String(Math.round(Number(medicament.midi))),
-              soir: medicament.soir === '' ? '' : String(Math.round(Number(medicament.soir))),
-            };
-          }
-          return { ...medicament, [champ]: valeur };
-        }),
-      },
-    }));
-  };
-
-  const ajouterMedicament = (rendezVousId) => {
-    setFormulairesConsultation((precedents) => ({
-      ...precedents,
-      [rendezVousId]: {
-        ...precedents[rendezVousId],
-        medicaments_prescrits: [
-          ...precedents[rendezVousId].medicaments_prescrits,
-          {
-            nom: '',
-            indication: '',
-            forme: '',
-            matin: '',
-            midi: '',
-            soir: '',
-            posologie: '',
-            duree_jours: '',
-          },
-        ],
-      },
-    }));
-  };
-
-  const retirerMedicament = (rendezVousId, index) => {
-    setFormulairesConsultation((precedents) => ({
-      ...precedents,
-      [rendezVousId]: {
-        ...precedents[rendezVousId],
-        medicaments_prescrits: precedents[rendezVousId].medicaments_prescrits.filter((_, numero) => numero !== index),
-      },
-    }));
-  };
-
-  const imprimerOrdonnance = async (consultation, rdv) => {
-    setErreur('');
-    try {
-      await telechargerOrdonnancePdf(
-        consultation,
-        rdv,
-        profil,
-        dossiersMedicaux[rdv.patient_id]?.donnees,
-      );
-    } catch (err) {
-      setErreur(err.message || 'Impossible de générer l’ordonnance PDF.');
     }
   };
 
@@ -730,64 +679,6 @@ export default function GestionRendezVous({
         }
       }
       setErreur(messageErreur);
-    } finally {
-      setEnregistrement(false);
-    }
-  };
-
-  const ouvrirDossierMedical = (rdv) => {
-    setDossiersOuverts({ ...dossiersOuverts, [rdv.patient_id]: false });
-    setSeanceOuverte(rdv);
-  };
-
-  const enregistrerConsultation = async (rdv) => {
-    const formulaire = formulairesConsultation[rdv.id] || {};
-    const medicaments = formulaire.medicaments_prescrits || [];
-    const medicamentSansNom = medicaments.some((medicament) => (
-      Object.entries(medicament).some(([champ, valeur]) => (
-        champ !== 'nom' && String(valeur || '').trim()
-      )) && !medicament.nom.trim()
-    ));
-    if (medicamentSansNom) {
-      setErreur('Renseignez le nom de chaque médicament qui contient une prescription.');
-      return;
-    }
-    setErreur('');
-    setSucces('');
-    setEnregistrement(true);
-    try {
-      await creerConsultation(token, rdv.id, {
-        remarques: formulaire.remarques || '',
-        medicaments_prescrits: formulaire.medicaments_prescrits
-          .filter((medicament) => medicament.nom.trim())
-          .map((medicament) => ({
-            nom: medicament.nom.trim(),
-            indication: medicament.indication || null,
-            forme: medicament.forme || null,
-            matin: medicament.matin ? Number(medicament.matin) : null,
-            midi: medicament.midi ? Number(medicament.midi) : null,
-            soir: medicament.soir ? Number(medicament.soir) : null,
-            posologie: medicament.posologie.trim() || null,
-            duree_jours: medicament.duree_jours ? Number(medicament.duree_jours) : null,
-          })),
-        controle_supplementaire: formulaire.controle_supplementaire.trim() || null,
-        ...(formulaire.prochain_rendez_vous && {
-          prochain_rendez_vous: new Date(formulaire.prochain_rendez_vous).toISOString(),
-        }),
-      });
-      await actualiserRendezVous();
-      setFormulairesConsultation((precedents) => ({
-        ...precedents,
-        [rdv.id]: undefined,
-      }));
-      setSucces('La consultation a été enregistrée dans le dossier médical.');
-      const dossier = await obtenirDossierMedical(token, rdv.patient_id);
-      setDossiersMedicaux((precedents) => ({
-        ...precedents,
-        [rdv.patient_id]: { chargement: false, erreur: '', donnees: dossier },
-      }));
-    } catch (err) {
-      setErreur(err.message || 'Impossible d’enregistrer la consultation.');
     } finally {
       setEnregistrement(false);
     }
@@ -927,28 +818,6 @@ export default function GestionRendezVous({
     }
   };
 
-  if (dossierPatientOuvert && (estMedecin || profil?.role === 'patient')) {
-    return (
-      <DossierPatient
-        patient={dossierPatientOuvert}
-        token={token}
-        role={profil?.role}
-        onRetour={() => setDossierPatientOuvert(null)}
-      />
-    );
-  }
-
-  if (estMedecin && seanceOuverte) {
-    return (
-      <SeanceRendezVous
-        rendezVous={seanceOuverte}
-        token={token}
-        onRetour={() => setSeanceOuverte(null)}
-        onConsultationEnregistree={actualiserRendezVous}
-      />
-    );
-  }
-
   const dateDuRdv = (rdv) => new Date(rdv.date_confirmee || rdv.date_souhaitee);
   const rdvActif = (rdv) => ['en_attente', 'confirme'].includes(rdv.statutApi);
   const prenomPatient = (profil?.patient?.prenoms || '').split(' ')[0] || nomUtilisateur;
@@ -959,8 +828,10 @@ export default function GestionRendezVous({
     filtreMesRdv === 'tous' ? true : filtreMesRdv === 'a_venir' ? rdvActif(rdv) : !rdvActif(rdv)
   ));
   const etapeReservation = creneauSelectionne ? 3 : serviceCalendrier?.id ? 2 : 1;
-  const consultationsDossier = dossiersMedicaux[profil?.patient?.id]?.donnees?.consultations || [];
-  const formatHeure = (valeur) => new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(valeur));
+  const formatHeure = (valeur) => new Intl.DateTimeFormat('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(valeur));
 
   return (
     <div className="espace min-h-screen bg-[#F4F2EE] font-body text-[#1E2333]">
@@ -1476,13 +1347,14 @@ export default function GestionRendezVous({
                     setCreneauSelectionneId((idActuel) => (
                       idActuel === creneau.id ? '' : creneau.id
                     ));
+                    setQuotaJournalierModif(String(creneau.quota_journalier || 20));
                     if (estGestionnaireRdv) void chargerPatientsDisponibles();
                   }}
                   onDateSelectionnee={estSecretaire || estMedecin ? (date) => {
                     setErreur('');
                     void chargerPatientsDisponibles();
                     setDateFormulaireCreneau(date);
-                    setNouveauCreneau({ heureDebut: '09:00', heureFin: '10:00', patient_id: '', motif: '' });
+                    setNouveauCreneau({ heureDebut: '09:00', heureFin: '10:00', quota_journalier: '20', patient_id: '', motif: '' });
                     setFormulaireCreneauOuvert(true);
                     setModificationHorairesCreneau(null);
                   } : undefined}
@@ -1499,58 +1371,17 @@ export default function GestionRendezVous({
                       {'–'}
                       {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(creneauSelectionne.date_fin))}
                     </p>
-                    <p className="mt-1 text-sm text-slate-500">{creneauSelectionne.nombre_patients} patient(s) dans la file · {creneauSelectionne.est_ouvert ? 'Ouvert aux réservations' : 'Fermé'}</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {creneauSelectionne.nombre_patients} patient(s) dans ce créneau · {creneauSelectionne.nombre_patients_jour}/{creneauSelectionne.quota_journalier || 'sans limite'} rendez-vous ce jour · {creneauSelectionne.est_ouvert ? 'Ouvert' : 'Fermé'}
+                    </p>
                     <p className="mt-1 text-xs font-semibold text-[#1F7A8C]">
                       Les rendez-vous de ce créneau sont affichés dans la liste ci-dessous.
                     </p>
                   </div>
                   {estGestionnaireRdv && (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <form onSubmit={ajouterPatientAuCreneau} className="flex flex-wrap items-center gap-2">
-                        <select
-                          value={patientAffecteId}
-                          onChange={(event) => setPatientAffecteId(event.target.value)}
-                          disabled={!creneauSelectionne.est_ouvert || chargementPatients || patients.length === 0}
-                          aria-label="Patient à ajouter au créneau sélectionné"
-                          className="h-10 min-w-48 rounded-xl border border-slate-200 bg-white px-2 text-sm disabled:bg-slate-100"
-                        >
-                          <option value="">
-                            {chargementPatients
-                              ? 'Chargement des patients…'
-                              : patients.length
-                                ? 'Ajouter un patient…'
-                                : erreurPatients
-                                  ? 'Liste des patients indisponible'
-                                  : 'Aucun patient disponible'}
-                          </option>
-                          {patients.map((patient) => (
-                            <option key={patient.id} value={patient.id}>{patient.prenoms} {patient.nom}</option>
-                          ))}
-                        </select>
-                        <input
-                          required
-                          value={motifFile}
-                          onChange={(event) => setMotifFile(event.target.value)}
-                          maxLength={2000}
-                          placeholder="Motif"
-                          aria-label="Motif du rendez-vous"
-                          disabled={!creneauSelectionne.est_ouvert}
-                          className="h-10 w-36 rounded-xl border border-slate-200 px-2 text-sm disabled:bg-slate-100"
-                        />
-                        <button type="submit" disabled={enregistrement || chargementPatients || !creneauSelectionne.est_ouvert || !patientAffecteId} className="inline-flex h-10 items-center gap-1 rounded-full bg-emerald-600 px-3 text-sm font-bold text-white disabled:opacity-50">
-                          <UserPlus size={15} /> Ajouter
-                        </button>
-                        {erreurPatients && (
-                          <button
-                            type="button"
-                            onClick={() => void chargerPatientsDisponibles()}
-                            disabled={chargementPatients}
-                            className="h-10 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-600 disabled:opacity-50"
-                          >
-                            Réessayer
-                          </button>
-                        )}
-                      </form>
+                    <div className="flex flex-col gap-3">
+                      <button type="button" onClick={() => { setErreur(''); setAjoutPatientOuvert(true); }} disabled={!creneauSelectionne.est_ouvert} className="h-10 self-start rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white disabled:opacity-50"><UserPlus size={15} className="mr-1 inline" /> Ajouter un patient au créneau</button>
+                      <button type="button" onClick={() => { setErreur(''); setModificationQuotaOuverte(true); }} className="h-10 self-start rounded-xl border border-[#1F7A8C]/25 px-4 text-xs font-bold text-[#1F7A8C]">Modifier le quota journalier</button>
                       <button
                         type="button"
                         disabled={enregistrement}
@@ -1563,63 +1394,18 @@ export default function GestionRendezVous({
                   )}
                 </div>
               )}
-              {estGestionnaireRdv && modificationHorairesCreneau && creneauSelectionne && (
-                <form
-                  onSubmit={enregistrerModificationHorairesCreneau}
-                  className="grid min-w-0 gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:grid-cols-2 sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto]"
-                >
-                  <label className="text-xs font-semibold text-slate-600">
-                    Début du créneau
-                    <input
-                      required
-                      type="datetime-local"
-                      value={modificationHorairesCreneau.dateHeure}
-                      onChange={(event) => setModificationHorairesCreneau((precedent) => ({
-                        ...precedent,
-                        dateHeure: event.target.value,
-                      }))}
-                      className="mt-1 h-10 w-full rounded-xl border border-slate-200 px-2 text-sm outline-none focus:border-[#1F7A8C]"
-                    />
-                  </label>
-                  <label className="text-xs font-semibold text-slate-600">
-                    Fin du créneau
-                    <input
-                      required
-                      type="datetime-local"
-                      value={modificationHorairesCreneau.dateFin}
-                      onChange={(event) => setModificationHorairesCreneau((precedent) => ({
-                        ...precedent,
-                        dateFin: event.target.value,
-                      }))}
-                      className="mt-1 h-10 w-full rounded-xl border border-slate-200 px-2 text-sm outline-none focus:border-[#1F7A8C]"
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={enregistrement}
-                    className="h-10 rounded-full bg-[#1F7A8C] px-4 text-sm font-bold text-white hover:bg-[#186575] disabled:opacity-50"
-                  >
-                    Enregistrer
-                  </button>
-                  <button
-                    type="button"
-                    disabled={enregistrement}
-                    onClick={() => setModificationHorairesCreneau(null)}
-                    className="h-10 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    Annuler
-                  </button>
-                </form>
-              )}
               {estGestionnaireRdv && creneauSelectionne && !modificationHorairesCreneau
                 && new Date(creneauSelectionne.date_heure) > new Date() && (
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      onClick={() => setModificationHorairesCreneau({
-                        dateHeure: versDateLocaleInput(creneauSelectionne.date_heure),
-                        dateFin: versDateLocaleInput(creneauSelectionne.date_fin),
-                      })}
+                      onClick={() => {
+                        setErreur('');
+                        setModificationHorairesCreneau({
+                          dateHeure: versDateLocaleInput(creneauSelectionne.date_heure),
+                          dateFin: versDateLocaleInput(creneauSelectionne.date_fin),
+                        });
+                      }}
                       className="h-10 rounded-xl border border-[#1F7A8C]/25 px-4 text-sm font-bold text-[#1F7A8C] hover:bg-[#1F7A8C]/5"
                     >
                       Modifier les horaires du créneau
@@ -1628,37 +1414,81 @@ export default function GestionRendezVous({
                 )}
             </section>
 
-            {estGestionnaireRdv && formulaireCreneauOuvert && (
-              <div
-                className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/60 p-4 backdrop-blur-sm"
-                onMouseDown={(event) => {
-                  if (event.target === event.currentTarget && !enregistrement) setFormulaireCreneauOuvert(false);
-                }}
+            {estGestionnaireRdv && creneauSelectionne && ajoutPatientOuvert && (
+              <FenetreFormulaire
+                titre="Ajouter un patient au créneau"
+                description="Ajoutez un patient existant ou renseignez les coordonnées d’un nouveau patient sans compte."
+                erreur={erreur}
+                onFermer={() => setAjoutPatientOuvert(false)}
+                largeur="max-w-2xl"
               >
-                <section
-                  role="dialog"
-                  aria-modal="true"
-                  aria-labelledby="titre-formulaire-creneau"
-                  className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-4 shadow-2xl sm:p-7"
-                >
-                  <div className="mb-5 flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.13em] text-[#5B7480]">{serviceCalendrier?.nom}</p>
-                      <h2 id="titre-formulaire-creneau" className="mt-1 text-xl font-bold text-[#0A2233]">Nouveau créneau médical</h2>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full' }).format(new Date(`${dateFormulaireCreneau}T12:00:00`))}
-                      </p>
+                <form onSubmit={ajouterPatientAuCreneau} className="space-y-4">
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Type de patient
+                    <select value={modePatientAffecte} onChange={(event) => setModePatientAffecte(event.target.value)} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm">
+                      <option value="existant">Patient existant</option>
+                      <option value="nouveau">Nouveau patient sans compte</option>
+                    </select>
+                  </label>
+                  {modePatientAffecte === 'existant' ? (
+                    <label className="block text-sm font-semibold text-slate-700">
+                      Patient
+                      <select required value={patientAffecteId} onChange={(event) => setPatientAffecteId(event.target.value)} disabled={chargementPatients || patients.length === 0} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm disabled:bg-slate-100">
+                        <option value="">{chargementPatients ? 'Chargement des patients…' : patients.length ? 'Choisir un patient…' : erreurPatients ? 'Liste des patients indisponible' : 'Aucun patient disponible'}</option>
+                        {patients.map((patient) => <option key={patient.id} value={patient.id}>{patient.prenoms} {patient.nom} · {patient.telephone}</option>)}
+                      </select>
+                      {erreurPatients && <button type="button" onClick={() => void chargerPatientsDisponibles()} disabled={chargementPatients} className="mt-2 text-xs font-semibold text-[#1F7A8C] disabled:opacity-50">Réessayer de charger les patients</button>}
+                    </label>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="text-sm font-semibold text-slate-700">Nom<input required value={nouveauPatientAffecte.nom} onChange={(event) => setNouveauPatientAffecte({ ...nouveauPatientAffecte, nom: event.target.value })} maxLength={100} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal" /></label>
+                      <label className="text-sm font-semibold text-slate-700">Prénoms<input required value={nouveauPatientAffecte.prenoms} onChange={(event) => setNouveauPatientAffecte({ ...nouveauPatientAffecte, prenoms: event.target.value })} maxLength={150} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal" /></label>
+                      <label className="text-sm font-semibold text-slate-700 sm:col-span-2">Téléphone<input required value={nouveauPatientAffecte.telephone} onChange={(event) => setNouveauPatientAffecte({ ...nouveauPatientAffecte, telephone: event.target.value })} maxLength={20} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal" /></label>
                     </div>
-                    <button
-                      type="button"
-                      aria-label="Fermer le formulaire"
-                      disabled={enregistrement}
-                      onClick={() => setFormulaireCreneauOuvert(false)}
-                      className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
-                    >
-                      <XCircle size={20} />
+                  )}
+                  <label className="block text-sm font-semibold text-slate-700">Motif du rendez-vous<textarea required value={motifFile} onChange={(event) => setMotifFile(event.target.value)} maxLength={2000} rows={3} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-normal" /></label>
+                  <div className="flex justify-end border-t border-slate-200 pt-4">
+                    <button type="submit" disabled={enregistrement || !creneauSelectionne.est_ouvert || (modePatientAffecte === 'existant' && (chargementPatients || !patientAffecteId))} className="inline-flex h-11 items-center gap-2 rounded-full bg-emerald-600 px-5 text-sm font-bold text-white disabled:opacity-50">
+                      <UserPlus size={16} />{enregistrement ? 'Ajout…' : 'Ajouter au créneau'}
                     </button>
                   </div>
+                </form>
+              </FenetreFormulaire>
+            )}
+
+            {estGestionnaireRdv && creneauSelectionne && modificationQuotaOuverte && (
+              <FenetreFormulaire titre="Modifier le quota journalier" description="Cette limite est commune aux créneaux du service pour la journée." erreur={erreur} onFermer={() => setModificationQuotaOuverte(false)} largeur="max-w-xl">
+                <form onSubmit={modifierQuotaJournalier} className="space-y-4">
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Quota journalier du service
+                    <input type="number" min="1" max="10000" required value={quotaJournalierModif} onChange={(event) => setQuotaJournalierModif(event.target.value)} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal" />
+                  </label>
+                  <div className="flex justify-end border-t border-slate-200 pt-4"><button type="submit" disabled={enregistrement} className="h-11 rounded-full bg-[#1F7A8C] px-5 text-sm font-bold text-white disabled:opacity-50">{enregistrement ? 'Enregistrement…' : 'Enregistrer le quota'}</button></div>
+                </form>
+              </FenetreFormulaire>
+            )}
+
+            {estGestionnaireRdv && modificationHorairesCreneau && creneauSelectionne && (
+              <FenetreFormulaire titre="Modifier les horaires du créneau" description="Les horaires sont modifiables uniquement avant le début du créneau." erreur={erreur} onFermer={() => { if (!enregistrement) setModificationHorairesCreneau(null); }} largeur="max-w-2xl">
+                <form onSubmit={enregistrerModificationHorairesCreneau} className="space-y-4">
+                  <label className="block text-sm font-semibold text-slate-700">Début du créneau<input required type="datetime-local" value={modificationHorairesCreneau.dateHeure} onChange={(event) => setModificationHorairesCreneau((precedent) => ({ ...precedent, dateHeure: event.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal" /></label>
+                  <label className="block text-sm font-semibold text-slate-700">Fin du créneau<input required type="datetime-local" value={modificationHorairesCreneau.dateFin} onChange={(event) => setModificationHorairesCreneau((precedent) => ({ ...precedent, dateFin: event.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal" /></label>
+                  <div className="flex justify-end gap-2 border-t border-slate-200 pt-4">
+                    <button type="button" disabled={enregistrement} onClick={() => setModificationHorairesCreneau(null)} className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-600 disabled:opacity-50">Annuler</button>
+                    <button type="submit" disabled={enregistrement} className="h-11 rounded-full bg-[#1F7A8C] px-5 text-sm font-bold text-white disabled:opacity-50">{enregistrement ? 'Enregistrement…' : 'Enregistrer les horaires'}</button>
+                  </div>
+                </form>
+              </FenetreFormulaire>
+            )}
+
+            {estGestionnaireRdv && formulaireCreneauOuvert && (
+              <FenetreFormulaire
+                titre="Nouveau créneau médical"
+                description={`${serviceCalendrier?.nom || 'Service'} · ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full' }).format(new Date(`${dateFormulaireCreneau}T12:00:00`))}`}
+                erreur={erreur}
+                onFermer={() => { if (!enregistrement) setFormulaireCreneauOuvert(false); }}
+                largeur="max-w-2xl"
+              >
                   <form onSubmit={enregistrerCreneau} className="space-y-4">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <label className="block text-sm font-semibold text-slate-700">
@@ -1683,6 +1513,19 @@ export default function GestionRendezVous({
                         />
                       </label>
                     </div>
+                    <label className="block text-sm font-semibold text-slate-700">
+                      Quota journalier du service
+                      <input
+                        required
+                        type="number"
+                        min="1"
+                        max="10000"
+                        value={nouveauCreneau.quota_journalier}
+                        onChange={(event) => setNouveauCreneau({ ...nouveauCreneau, quota_journalier: event.target.value })}
+                        className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 px-3 font-normal outline-none focus:border-[#1F7A8C]"
+                      />
+                      <span className="mt-1 block text-xs font-normal text-slate-500">Limite commune aux créneaux de ce service pour cette journée.</span>
+                    </label>
                     <label className="block text-sm font-semibold text-slate-700">
                       Ajouter un patient (facultatif)
                       <select
@@ -1748,8 +1591,7 @@ export default function GestionRendezVous({
                       </button>
                     </div>
                   </form>
-                </section>
-              </div>
+              </FenetreFormulaire>
             )}
               </>
             )}
@@ -1790,19 +1632,6 @@ export default function GestionRendezVous({
                             {patient.telephone || 'Téléphone non renseigné'} · {patient.nombreRendezVous} rendez-vous
                           </p>
                         </div>
-                        {estMedecin && (
-                          <button
-                            type="button"
-                            onClick={() => setDossierPatientOuvert({
-                              patientId: patient.patientId,
-                              patient: patient.patient,
-                            })}
-                            className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#1F7A8C]/25 px-3 text-xs font-bold text-[#1F7A8C] hover:bg-[#1F7A8C]/5"
-                          >
-                            <BookOpenText size={15} />
-                            Consulter le dossier
-                          </button>
-                        )}
                       </article>
                     ))}
                   </div>
@@ -1898,7 +1727,7 @@ export default function GestionRendezVous({
                         </span>
                       </div>
                       <div className="space-y-3">
-                        {groupe.rendezVous.map((rdv, indexRendezVous) => (
+                        {groupe.rendezVous.map((rdv) => (
                     <article key={rdv.id} className="apparition transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#1F7A8C]/10 flex flex-wrap items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                       <div className="min-w-0 flex-1">
                         <p className="mt-1 text-sm text-slate-600">{rdv.specialite} · {rdv.date} à {rdv.heure}</p>
@@ -1977,291 +1806,9 @@ export default function GestionRendezVous({
                           </div>
                         )}
                         {rdv.statutApi === 'arrive' && estSecretaire && (
-                          <button type="button" disabled={enregistrement} onClick={() => changerStatut(rdv, 'termine')} className="h-9 rounded-full bg-emerald-600 px-3 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50">Terminer consultation</button>
+                          <button type="button" disabled={enregistrement} onClick={() => changerStatut(rdv, 'termine')} className="h-9 rounded-full bg-emerald-600 px-3 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50">Terminer le rendez-vous</button>
                         )}
                       </div>
-                      {estMedecin && (
-                        <div className="basis-full border-t border-slate-100 pt-3">
-                          <div className="flex flex-wrap gap-2">
-                            {rdv.statutApi === 'arrive' && (
-                              <button
-                                type="button"
-                                onClick={() => ouvrirDossierMedical(rdv)}
-                                className="inline-flex h-9 items-center gap-2 rounded-full bg-[#1F7A8C] px-3 text-xs font-bold text-white hover:bg-[#186575]"
-                              >
-                                <Stethoscope size={15} />
-                                Ouvrir la séance
-                              </button>
-                            )}
-                          </div>
-
-                          {formulairesConsultation[rdv.id] && (
-                            <form
-                              className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-4 md:grid-cols-2"
-                              onSubmit={(evenement) => {
-                                evenement.preventDefault();
-                                enregistrerConsultation(rdv);
-                              }}
-                            >
-                              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">
-                                Remarques médicales
-                                <textarea
-                                  required
-                                  maxLength={10000}
-                                  rows={4}
-                                  value={formulairesConsultation[rdv.id].remarques}
-                                  onChange={(evenement) => setFormulairesConsultation({
-                                    ...formulairesConsultation,
-                                    [rdv.id]: { ...formulairesConsultation[rdv.id], remarques: evenement.target.value },
-                                  })}
-                                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                  placeholder="Observations, diagnostic et conduite à tenir"
-                                />
-                              </label>
-                              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">
-                                Prescription médicamenteuse
-                              </label>
-                              <div className="space-y-3 md:col-span-2">
-                                {formulairesConsultation[rdv.id].medicaments_prescrits.map((medicament, index) => (
-                                  <fieldset key={`medicament-${index}`} className="rounded-xl border border-slate-200 bg-white p-3">
-                                    <legend className="px-1 text-xs font-bold text-slate-600">Médicament {index + 1}</legend>
-                                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                      <label className="block text-sm font-semibold text-slate-700">
-                                        Nom
-                                        <input
-                                          type="text"
-                                          maxLength={300}
-                                          value={medicament.nom}
-                                          onChange={(evenement) => modifierMedicament(rdv.id, index, 'nom', evenement.target.value)}
-                                          className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                          placeholder="Ex. Paracétamol"
-                                        />
-                                      </label>
-                                      <label className="block text-sm font-semibold text-slate-700">
-                                        Type de traitement
-                                        <select
-                                          value={medicament.indication}
-                                          onChange={(evenement) => modifierMedicament(rdv.id, index, 'indication', evenement.target.value)}
-                                          className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                        >
-                                          <option value="">Non précisé</option>
-                                          <option value="Traitement de fond de la migraine">Traitement de fond de la migraine</option>
-                                          <option value="Traitement de la crise migraineuse">Traitement de la crise migraineuse</option>
-                                          <option value="Traitement des douleurs neuropathiques">Traitement des douleurs neuropathiques</option>
-                                          <option value="Autre">Autre traitement</option>
-                                        </select>
-                                      </label>
-                                      <label className="block text-sm font-semibold text-slate-700">
-                                        Forme du médicament
-                                        <select
-                                          value={medicament.forme}
-                                          onChange={(evenement) => modifierMedicament(rdv.id, index, 'forme', evenement.target.value)}
-                                          className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                        >
-                                          <option value="">Non précisée</option>
-                                          <option value="comprime">Comprimé(s)</option>
-                                          <option value="solution_buvable">Solution buvable (flacon)</option>
-                                          <option value="gelule">Gélule(s)</option>
-                                          <option value="autre">Autre (unité)</option>
-                                        </select>
-                                      </label>
-                                      {[
-                                        ['matin', 'Matin'],
-                                        ['midi', 'Midi'],
-                                        ['soir', 'Soir'],
-                                      ].map(([champ, libelle]) => (
-                                        <label key={champ} className="block text-sm font-semibold text-slate-700">
-                                          Quantité · {libelle} ({medicament.forme === 'solution_buvable' ? 'mL' : 'unités'})
-                                          <input
-                                            type="number"
-                                            min="0"
-                                            step={medicament.forme === 'solution_buvable' ? '0.1' : '1'}
-                                            inputMode={medicament.forme === 'solution_buvable' ? 'decimal' : 'numeric'}
-                                            value={medicament[champ]}
-                                            onChange={(evenement) => modifierMedicament(rdv.id, index, champ, evenement.target.value)}
-                                            className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                            placeholder="Ex. 1"
-                                          />
-                                        </label>
-                                      ))}
-                                      <label className="block text-sm font-semibold text-slate-700 sm:col-span-2 lg:col-span-4">
-                                        Posologie
-                                        <textarea
-                                          maxLength={2000}
-                                          rows={2}
-                                          value={medicament.posologie}
-                                          onChange={(evenement) => modifierMedicament(rdv.id, index, 'posologie', evenement.target.value)}
-                                          className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                          placeholder="Expliquez le mode de prise, par exemple : à prendre avec un verre d’eau au cours du repas"
-                                        />
-                                      </label>
-                                      <label className="block text-sm font-semibold text-slate-700">
-                                        Durée de prise
-                                        <div className="mt-1.5 flex items-center gap-2">
-                                          <input
-                                            type="number"
-                                            min="1"
-                                            max="3650"
-                                            step="1"
-                                            value={medicament.duree_jours}
-                                            onChange={(evenement) => modifierMedicament(rdv.id, index, 'duree_jours', evenement.target.value)}
-                                            className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                            placeholder="Ex. 30"
-                                          />
-                                          <span className="text-xs font-normal text-slate-500">jours</span>
-                                        </div>
-                                      </label>
-                                      <button
-                                        type="button"
-                                        aria-label={`Supprimer le médicament ${index + 1}`}
-                                        onClick={() => retirerMedicament(rdv.id, index)}
-                                        className="flex h-10 w-10 self-end items-center justify-center rounded-xl border border-red-200 text-red-600 hover:bg-red-50"
-                                      >
-                                        <XCircle size={17} />
-                                      </button>
-                                    </div>
-                                  </fieldset>
-                                ))}
-                                <button
-                                  type="button"
-                                  onClick={() => ajouterMedicament(rdv.id)}
-                                  className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#1F7A8C]/25 px-3 text-xs font-bold text-[#1F7A8C] hover:bg-[#1F7A8C]/5"
-                                >
-                                  <Plus size={15} /> Ajouter un médicament
-                                </button>
-                              </div>
-                              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">
-                                Contrôle ou examen complémentaire (facultatif)
-                                <textarea
-                                  maxLength={10000}
-                                  rows={3}
-                                  value={formulairesConsultation[rdv.id].controle_supplementaire}
-                                  onChange={(evenement) => setFormulairesConsultation({
-                                    ...formulairesConsultation,
-                                    [rdv.id]: { ...formulairesConsultation[rdv.id], controle_supplementaire: evenement.target.value },
-                                  })}
-                                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                  placeholder="Ex. examen complémentaire ou contrôle à prévoir"
-                                />
-                              </label>
-                              <label className="block text-sm font-semibold text-slate-700">
-                                Prochain rendez-vous (facultatif)
-                                <input
-                                  type="datetime-local"
-                                  min={versDateLocaleInput(new Date())}
-                                  value={formulairesConsultation[rdv.id].prochain_rendez_vous}
-                                  onChange={(evenement) => setFormulairesConsultation({
-                                    ...formulairesConsultation,
-                                    [rdv.id]: { ...formulairesConsultation[rdv.id], prochain_rendez_vous: evenement.target.value },
-                                  })}
-                                  className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-normal outline-none focus:border-[#1F7A8C]"
-                                />
-                                <span className="mt-1 block text-xs font-normal text-slate-500">
-                                  Le suivi sera ajouté au planning du patient comme rendez-vous confirmé.
-                                </span>
-                              </label>
-                              <button
-                                type="submit"
-                                disabled={enregistrement}
-                                className="h-10 self-end rounded-full bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
-                              >
-                                {enregistrement ? 'Enregistrement…' : 'Enregistrer et terminer'}
-                              </button>
-                            </form>
-                          )}
-
-                          {indexRendezVous === 0 && dossiersOuverts[groupe.patientId] && (
-                            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-                              {dossiersMedicaux[rdv.patient_id]?.chargement ? (
-                                <p className="text-sm text-slate-500">Chargement du dossier médical…</p>
-                              ) : dossiersMedicaux[rdv.patient_id]?.erreur ? (
-                                <p className="text-sm text-red-700">{dossiersMedicaux[rdv.patient_id].erreur}</p>
-                              ) : (
-                                <>
-                                  <h4 className="font-bold text-slate-800">
-                                    Dossier de {rdv.patient}
-                                    {dossiersMedicaux[rdv.patient_id]?.donnees?.patient_date_naissance
-                                      ? ` · Né(e) le ${new Intl.DateTimeFormat('fr-FR').format(new Date(`${dossiersMedicaux[rdv.patient_id].donnees.patient_date_naissance}T00:00:00`))}`
-                                      : ''}
-                                  </h4>
-                                  {dossiersMedicaux[rdv.patient_id]?.donnees?.consultations.length ? (
-                                    <div className="mt-3 space-y-3">
-                                      {dossiersMedicaux[rdv.patient_id].donnees.consultations.map((consultation) => (
-                                        <div key={consultation.id} className="rounded-xl bg-slate-50 p-3 text-sm">
-                                          <p className="text-xs font-semibold text-slate-500">
-                                            {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(consultation.date_creation))}
-                                          </p>
-                                          <p className="mt-2 whitespace-pre-wrap text-slate-700">{consultation.remarques}</p>
-                                          {(consultation.medicaments_prescrits?.length > 0
-                                            || consultation.medicaments
-                                            || consultation.controle_supplementaire) && (
-                                            <div className="mt-2 border-t border-slate-200 pt-2 text-slate-700">
-                                              <p className="font-bold">Ordonnance</p>
-                                              <div className="mt-2 space-y-2">
-                                                {(consultation.medicaments_prescrits?.length
-                                                  ? consultation.medicaments_prescrits
-                                                  : [{
-                                                    nom: consultation.medicaments,
-                                                    matin: consultation.quantite_matin,
-                                                    midi: consultation.quantite_midi,
-                                                    soir: consultation.quantite_soir,
-                                                  }]).map((medicament, index) => (
-                                                  <div key={`${medicament.nom}-${index}`} className="rounded-lg border border-slate-200 bg-white p-2 text-xs">
-                                                    <p className="font-semibold">
-                                                      {medicament.indication ? `${medicament.indication} · ` : ''}
-                                                      {medicament.nom}
-                                                      {medicament.forme ? ` (${{
-                                                        comprime: 'comprimé',
-                                                        solution_buvable: 'solution buvable',
-                                                        gelule: 'gélule',
-                                                        autre: 'autre forme',
-                                                      }[medicament.forme] || medicament.forme})` : ''}
-                                                    </p>
-                                                    <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                                      <p><strong>Matin :</strong> {formaterQuantiteMedicament(medicament, medicament.matin)}</p>
-                                                      <p><strong>Midi :</strong> {formaterQuantiteMedicament(medicament, medicament.midi)}</p>
-                                                      <p><strong>Soir :</strong> {formaterQuantiteMedicament(medicament, medicament.soir)}</p>
-                                                    </div>
-                                                    {medicament.posologie && (
-                                                      <p className="mt-1 whitespace-pre-wrap"><strong>Posologie :</strong> {medicament.posologie}</p>
-                                                    )}
-                                                    {medicament.duree_jours && (
-                                                      <p className="mt-1"><strong>Durée :</strong> {medicament.duree_jours} jour(s)</p>
-                                                    )}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                              {consultation.controle_supplementaire && (
-                                                <p className="mt-3 whitespace-pre-wrap text-xs">
-                                                  <strong>Contrôle / examen complémentaire :</strong> {consultation.controle_supplementaire}
-                                                </p>
-                                              )}
-                                              <button
-                                                type="button"
-                                                onClick={() => imprimerOrdonnance(consultation, rdv)}
-                                                className="mt-3 inline-flex h-9 items-center gap-2 rounded-full bg-[#1F7A8C] px-3 text-xs font-bold text-white hover:bg-[#186575]"
-                                              >
-                                                <FileDown size={15} /> Télécharger l’ordonnance PDF
-                                              </button>
-                                            </div>
-                                          )}
-                                          {consultation.ordonnance && (
-                                            <p className="mt-2 whitespace-pre-wrap border-t border-slate-200 pt-2 text-slate-700">
-                                              <strong>Ancienne ordonnance :</strong> {consultation.ordonnance}
-                                            </p>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <p className="mt-2 text-sm text-slate-500">Aucune consultation enregistrée pour ce service.</p>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </article>
                         ))}
                       </div>
@@ -2304,20 +1851,13 @@ export default function GestionRendezVous({
                     Bonjour, {prenomPatient}.<br /><span className="text-white/40">Prenons soin de vous.</span>
                   </h2>
                   <p className="mt-5 max-w-md text-sm font-light leading-relaxed text-white/70 sm:text-base">
-                    Réservez une consultation, suivez vos rendez-vous et retrouvez votre dossier médical, au même endroit.
+                    Réservez un rendez-vous et suivez facilement vos demandes.
                   </p>
                   <div className="mt-8 flex flex-wrap gap-3">
                     <a href="#reservation" className="group inline-flex items-center gap-2.5 rounded-full bg-white px-6 py-3.5 text-sm font-medium text-[#0A2233] transition hover:bg-[#7FD1CB]">
                       <Calendar size={17} /> Réserver une consultation
                       <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />
                     </a>
-                    <button
-                      type="button"
-                      onClick={() => setDossierPatientOuvert({ patientId: profil?.patient?.id, patient: nomUtilisateur })}
-                      className="inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-sm text-white backdrop-blur-md transition hover:bg-white/20"
-                    >
-                      <BookOpenText size={17} /> Mon dossier médical
-                    </button>
                   </div>
                 </div>
 
@@ -2335,7 +1875,7 @@ export default function GestionRendezVous({
                     <p className="mt-4 text-sm font-light leading-relaxed text-white/70">Aucun rendez-vous confirmé pour le moment. Choisissez un créneau ci-dessous pour commencer.</p>
                   )}
                   <dl className="mt-6 grid grid-cols-3 gap-3 border-t border-white/15 pt-5 text-center">
-                    {[['En cours', rendezVous.filter(rdvActif).length], ['Au dossier', consultationsDossier.length], ['Total', rendezVous.length]].map(([libelle, valeur]) => (
+                    {[['En cours', rendezVous.filter(rdvActif).length], ['Total', rendezVous.length]].map(([libelle, valeur]) => (
                       <div key={libelle}>
                         <dd className="text-3xl font-light tabular-nums"><Compteur valeur={valeur} /></dd>
                         <dt className="mt-1 text-[10px] uppercase tracking-widest text-white/50">{libelle}</dt>
@@ -2519,111 +2059,7 @@ export default function GestionRendezVous({
                 )}
               </section>
             </div>
-
             {/* ───────── DOSSIER MÉDICAL ───────── */}
-            <section aria-labelledby="titre-dossier-patient" className="apparition overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:px-6">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-[#5B7480]">Informations personnelles</p>
-                  <h2 id="titre-dossier-patient" className="mt-1 text-2xl">Mon dossier médical</h2>
-                  <p className="mt-1 text-sm font-light text-slate-500">Notes, prescriptions et examens enregistrés par vos médecins.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setDossierPatientOuvert({ patientId: profil?.patient?.id, patient: nomUtilisateur })}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#0A2233] px-5 py-2.5 text-sm text-white transition hover:bg-[#0F3D52]"
-                >
-                  <BookOpenText size={16} /> Dossier complet
-                </button>
-              </div>
-              {dossiersMedicaux[profil?.patient?.id]?.chargement ? (
-                <div className="space-y-3 p-6" aria-busy="true">{[...Array(2)].map((_, index) => <div key={index} className="h-16 animate-pulse rounded-2xl bg-[#F4F2EE]" />)}</div>
-              ) : dossiersMedicaux[profil?.patient?.id]?.erreur ? (
-                <p role="alert" className="px-5 py-6 text-sm text-red-700">{dossiersMedicaux[profil?.patient?.id].erreur}</p>
-              ) : consultationsDossier.length ? (
-                <div className="divide-y divide-slate-100">
-                  {consultationsDossier.map((consultation, indexConsultation) => {
-                    const rendezVousConsultation = rendezVous.find((element) => element.id === consultation.rendez_vous_id);
-                    const dateRendezVous = rendezVousConsultation?.date_confirmee
-                      || rendezVousConsultation?.date_souhaitee
-                      || consultation.date_creation;
-                    const medicaments = consultation.medicaments_prescrits?.length
-                      ? consultation.medicaments_prescrits
-                      : consultation.medicaments
-                        ? [{
-                          nom: consultation.medicaments,
-                          matin: consultation.quantite_matin,
-                          midi: consultation.quantite_midi,
-                          soir: consultation.quantite_soir,
-                        }]
-                        : [];
-                    return (
-                      <details key={consultation.id} open={indexConsultation === 0} className="group">
-                        <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-4 transition-colors hover:bg-[#F4F2EE]/60 sm:px-6 [&::-webkit-details-marker]:hidden">
-                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1F7A8C]/10 text-[#1F7A8C]"><FileText size={19} strokeWidth={1.6} /></span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm text-[#0A2233]">Rendez-vous du {formaterDateNotification(dateRendezVous)}</span>
-                            <span className="block truncate text-xs font-light text-slate-500">
-                              {rendezVousConsultation?.specialite || 'Consultation'} · Compte rendu du {formaterDateNotification(consultation.date_creation)}
-                            </span>
-                          </span>
-                          {medicaments.length > 0 && <span className="hidden shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] text-amber-700 sm:inline">{medicaments.length} médicament{medicaments.length > 1 ? 's' : ''}</span>}
-                          <ChevronRight className="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-300 group-open:rotate-90" />
-                        </summary>
-                        <div className="space-y-5 border-t border-slate-100 bg-[#F7F6F3]/70 px-5 py-6 sm:px-6">
-                          {rendezVousConsultation?.motif && <p className="text-xs font-light text-slate-500">Motif : {rendezVousConsultation.motif}</p>}
-                          <div>
-                            <h4 className="text-[11px] uppercase tracking-[0.2em] text-[#5B7480]">Compte rendu</h4>
-                            <p className="mt-2 whitespace-pre-wrap border-l-2 border-[#1F7A8C]/40 pl-4 text-sm font-light leading-relaxed text-slate-700">{consultation.remarques}</p>
-                          </div>
-                          {consultation.ordonnance && (
-                            <div>
-                              <h4 className="text-[11px] uppercase tracking-[0.2em] text-[#5B7480]">Ordonnance</h4>
-                              <p className="mt-2 whitespace-pre-wrap text-sm font-light text-slate-700">{consultation.ordonnance}</p>
-                            </div>
-                          )}
-                          {medicaments.length > 0 && (
-                            <div>
-                              <h4 className="text-[11px] uppercase tracking-[0.2em] text-[#5B7480]">Médicaments prescrits</h4>
-                              <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-                                {medicaments.map((medicament, index) => (
-                                  <li key={`${medicament.nom}-${index}`} className="rounded-2xl border border-slate-100 bg-white p-4 text-sm shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-                                    <p className="text-[#0A2233]">{medicament.nom}</p>
-                                    {medicament.indication && <p className="mt-0.5 text-xs font-light text-slate-500">{medicament.indication}</p>}
-                                    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                                      {[['Matin', medicament.matin], ['Midi', medicament.midi], ['Soir', medicament.soir]].map(([moment, quantite]) => (
-                                        <div key={moment} className="rounded-xl bg-[#F4F2EE] px-1 py-2">
-                                          <p className="text-[10px] uppercase tracking-wider text-slate-500">{moment}</p>
-                                          <p className="mt-0.5 text-xs text-[#0A2233]">{formaterQuantiteMedicament(medicament, quantite)}</p>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    {medicament.posologie && <p className="mt-3 whitespace-pre-wrap text-xs font-light text-slate-600">Posologie : {medicament.posologie}</p>}
-                                    {medicament.duree_jours && <p className="mt-1 text-xs font-light text-slate-600">Durée : {medicament.duree_jours} jour(s)</p>}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {consultation.controle_supplementaire && (
-                            <div>
-                              <h4 className="text-[11px] uppercase tracking-[0.2em] text-[#5B7480]">Contrôle ou examen complémentaire</h4>
-                              <p className="mt-2 whitespace-pre-wrap text-sm font-light text-slate-700">{consultation.controle_supplementaire}</p>
-                            </div>
-                          )}
-                        </div>
-                      </details>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="px-5 py-14 text-center sm:px-6">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#1F7A8C]/10 text-[#1F7A8C]"><FileText size={24} strokeWidth={1.5} /></div>
-                  <p className="mt-4 text-lg font-light text-[#0A2233]">Votre dossier est vide pour l’instant</p>
-                  <p className="mt-1 text-sm font-light text-slate-500">Aucune consultation n’a encore été ajoutée à votre dossier.</p>
-                </div>
-              )}
-            </section>
           </>
         )}
         {erreur && (

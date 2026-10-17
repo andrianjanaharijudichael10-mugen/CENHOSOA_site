@@ -1,191 +1,310 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Linking,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import AuthScreen from './screens/AuthScreen';
-import ServicesScreen from './screens/ServicesScreen';
-import AppointmentsScreen from './screens/AppointmentsScreen';
-import AmbulanceScreen from './screens/AmbulanceScreen';
-import PublicHomeScreen from './screens/PublicHomeScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import StaffScreen, { RecordsScreen } from './screens/StaffScreen';
-import { AdminScreen, BedsScreen, RegulatorScreen } from './screens/OperationsScreen';
-import { demarrerTempsReel } from './hooks/useRealtimeRefresh';
-import { profilCourant, lireAccessToken, supprimerTokens } from './services/api';
-import { colors } from './theme';
+import { WebView } from 'react-native-webview';
 
-const Stack = createNativeStackNavigator();
-const Tabs = createBottomTabNavigator();
+const URL_SITE = process.env.EXPO_PUBLIC_WEB_URL?.trim() || '';
+const AUTORISER_HTTP_LOCAL = process.env.EXPO_PUBLIC_ALLOW_INSECURE_WEBVIEW === 'true';
 
-const TITLES = {
-  Accueil: 'Accueil',
-  Ambulance: 'Ambulance',
-  Dossiers: 'Dossiers',
-  Lits: 'Lits',
-  Missions: 'Missions',
-  'Mes rendez-vous': 'Rendez-vous',
-  'Mon espace': 'Profil',
-  Planning: 'Planning',
-  'Spécialités': 'Services',
-  Administration: 'Admin',
-};
+function validerUrlSite(valeur) {
+  if (!valeur) return null;
 
-function TabsConnectes({ profile, onLogout, onProfileUpdated }) {
-  const role = profile?.role;
-  let screens = [];
-
-  if (role === 'patient') {
-    screens = [
-      ['Accueil', ServicesScreen, { authenticated: true, canBookAppointments: true }],
-      ['Mes rendez-vous', AppointmentsScreen, {}],
-      ['Ambulance', AmbulanceScreen, { profile }],
-      ['Mon espace', ProfileScreen, { profile, onLogout, onProfileUpdated }],
-    ];
-  } else if (['secretaire', 'medecin'].includes(role)) {
-    screens = [
-      ['Planning', StaffScreen, { profile }],
-      ['Spécialités', ServicesScreen, { authenticated: true }],
-      ...(role === 'medecin' ? [['Dossiers', RecordsScreen, {}]] : []),
-      ['Mon espace', ProfileScreen, { profile, onLogout, onProfileUpdated }],
-    ];
-  } else if (role === 'major_de_garde') {
-    screens = [
-      ['Lits', BedsScreen, {}],
-      ['Spécialités', ServicesScreen, { authenticated: true }],
-      ['Mon espace', ProfileScreen, { profile, onLogout, onProfileUpdated }],
-    ];
-  } else if (role === 'superadmin') {
-    screens = [
-      ['Administration', AdminScreen, {}],
-      ['Lits', BedsScreen, {}],
-      ['Spécialités', ServicesScreen, { authenticated: true }],
-      ['Mon espace', ProfileScreen, { profile, onLogout, onProfileUpdated }],
-    ];
-  } else if (['major', 'regulateur_ambulance', 'chef_division_auto', 'chef_sim'].includes(role)) {
-    screens = [
-      ['Missions', RegulatorScreen, {}],
-      ['Mon espace', ProfileScreen, { profile, onLogout, onProfileUpdated }],
-    ];
+  try {
+    const url = new URL(valeur);
+    const estHttpAutorise = AUTORISER_HTTP_LOCAL
+      && url.protocol === 'http:'
+      && ['localhost', '127.0.0.1', '10.0.2.2'].includes(url.hostname);
+    if (url.protocol !== 'https:' && !estHttpAutorise) return null;
+    if (url.username || url.password) return null;
+    return url;
+  } catch {
+    return null;
   }
+}
 
-  if (!screens.length) {
-    screens = [['Mon espace', ProfileScreen, { profile, onLogout, onProfileUpdated }]];
-  }
+function ouvrirLienExterne(url) {
+  Linking.openURL(url).catch((erreur) => {
+    console.warn('Impossible d’ouvrir le lien externe.', erreur);
+  });
+}
 
+function BoutonBarre({ label, onPress, disabled, children }) {
   return (
-    <Tabs.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: colors.teal,
-        tabBarInactiveTintColor: colors.muted,
-        tabBarLabel: TITLES[route.name] || route.name,
-        tabBarStyle: {
-          backgroundColor: colors.white,
-          borderTopColor: colors.border,
-          height: Platform.OS === 'ios' ? 88 : 66,
-          paddingTop: 8,
-          paddingBottom: Platform.OS === 'ios' ? 26 : 8,
-        },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '700' },
-      })}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.action,
+        (pressed || disabled) && styles.actionInactive,
+      ]}
     >
-      {screens.map(([name, ScreenComponent, props]) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{ title: TITLES[name] || name }}
-        >
-          {(screenProps) => <ScreenComponent {...screenProps} {...props} />}
-        </Tabs.Screen>
-      ))}
-    </Tabs.Navigator>
+      <Text style={styles.actionText}>{children}</Text>
+    </Pressable>
   );
 }
 
 export default function App() {
-  const [profile, setProfile] = useState(null);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [loadError, setLoadError] = useState('');
+  const webView = useRef(null);
+  const navigation = useRef({ canGoBack: false });
+  const siteUrl = useMemo(() => validerUrlSite(URL_SITE), []);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState('');
+  const [progression, setProgression] = useState(0);
 
-  const chargerProfil = useCallback(async () => {
-    try {
-      setLoadError('');
-      setProfile(await profilCourant());
-    } catch (error) {
-      await supprimerTokens();
-      setProfile(null);
-      if (error.status !== 401) setLoadError(error.message || 'Impossible de vérifier la session.');
-    } finally {
-      setCheckingSession(false);
+  const revenir = useCallback(() => {
+    if (navigation.current.canGoBack) {
+      webView.current?.goBack();
+      return true;
     }
+    return false;
   }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (await lireAccessToken()) await chargerProfil();
-        else setCheckingSession(false);
-      } catch (error) {
-        setLoadError(error.message || 'Impossible de lire la session sécurisée.');
-        setCheckingSession(false);
+    if (Platform.OS !== 'android') return undefined;
+    const abonnement = BackHandler.addEventListener('hardwareBackPress', revenir);
+    return () => abonnement.remove();
+  }, [revenir]);
+
+  const recharger = () => {
+    setErreur('');
+    setChargement(true);
+    webView.current?.reload();
+  };
+
+  const verifierNavigation = (requete) => {
+    const { url } = requete;
+    if (!url) return false;
+    if (url === 'about:blank') return true;
+
+    try {
+      const cible = new URL(url);
+      if (siteUrl && cible.origin === siteUrl.origin) return true;
+      if (cible.protocol === 'tel:' || cible.protocol === 'mailto:' || cible.protocol === 'sms:') {
+        ouvrirLienExterne(url);
+        return false;
       }
-    })();
-  }, [chargerProfil]);
+      if (cible.protocol === 'https:') {
+        ouvrirLienExterne(url);
+        return false;
+      }
+    } catch {
+      return false;
+    }
+    return false;
+  };
 
-  useEffect(() => demarrerTempsReel(), []);
-
-  const logout = () => setProfile(null);
-
-  if (checkingSession) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.teal} />
-        <Text style={styles.loadingText}>Connexion aux services CENHOSOA…</Text>
-      </View>
-    );
-  }
+  const afficherErreur = (message) => {
+    setChargement(false);
+    setErreur(message || 'Le site est momentanément inaccessible. Vérifiez votre connexion puis réessayez.');
+  };
 
   return (
-    <NavigationContainer>
-      <StatusBar style={profile ? 'dark' : 'dark'} />
-      {profile ? (
-        <TabsConnectes
-          profile={profile}
-          onLogout={logout}
-          onProfileUpdated={setProfile}
-        />
-      ) : (
-        <Stack.Navigator
-          initialRouteName="Accueil"
-          screenOptions={{
-            headerStyle: { backgroundColor: colors.ink },
-            headerTintColor: colors.white,
-            headerTitleStyle: { fontWeight: '800' },
-            contentStyle: { backgroundColor: colors.canvas },
-          }}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar style="light" backgroundColor="#0A2233" />
+      <View style={styles.header}>
+        <BoutonBarre
+          label="Revenir à la page précédente"
+          onPress={revenir}
+          disabled={!navigation.current.canGoBack}
         >
-          <Stack.Screen name="Accueil" component={PublicHomeScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="Connexion" options={{ title: 'Compte CENHOSOA' }}>
-            {() => <AuthScreen onConnect={chargerProfil} />}
-          </Stack.Screen>
-          <Stack.Screen name="Spécialités" options={{ title: 'Nos spécialités' }}>
-            {(props) => <ServicesScreen {...props} />}
-          </Stack.Screen>
-          <Stack.Screen name="Ambulance" options={{ title: 'Demande d’ambulance' }}>
-            {() => <AmbulanceScreen profile={null} />}
-          </Stack.Screen>
-        </Stack.Navigator>
+          ‹
+        </BoutonBarre>
+        <Text accessibilityRole="header" style={styles.title}>CENHOSOA</Text>
+        <BoutonBarre label="Actualiser la page" onPress={recharger}>↻</BoutonBarre>
+      </View>
+
+      {siteUrl ? (
+        <View style={styles.content}>
+          <WebView
+            ref={webView}
+            source={{ uri: siteUrl.href }}
+            style={styles.webView}
+            javaScriptEnabled
+            domStorageEnabled
+            sharedCookiesEnabled
+            thirdPartyCookiesEnabled
+            allowsBackForwardNavigationGestures
+            setSupportMultipleWindows={false}
+            onShouldStartLoadWithRequest={verifierNavigation}
+            onNavigationStateChange={(etat) => {
+              navigation.current.canGoBack = etat.canGoBack;
+            }}
+            onLoadStart={() => {
+              setChargement(true);
+              setErreur('');
+              setProgression(0);
+            }}
+            onLoadProgress={({ nativeEvent }) => setProgression(nativeEvent.progress)}
+            onLoadEnd={() => setChargement(false)}
+            onError={({ nativeEvent }) => afficherErreur(nativeEvent.description)}
+            onHttpError={({ nativeEvent }) => {
+              if (nativeEvent.statusCode >= 500) {
+                afficherErreur(`Le site a répondu avec une erreur (${nativeEvent.statusCode}).`);
+              }
+            }}
+            onOpenWindow={({ nativeEvent }) => {
+              if (nativeEvent.targetUrl) verifierNavigation({ url: nativeEvent.targetUrl });
+            }}
+            renderLoading={() => null}
+            startInLoadingState
+            applicationNameForUserAgent="CENHOSOA-Mobile"
+            accessible
+          />
+          {chargement && !erreur && (
+            <View style={styles.loading} pointerEvents="none">
+              <ActivityIndicator size="large" color="#1F7A8C" />
+              <Text style={styles.loadingText}>
+                {progression > 0 ? `Chargement du site… ${Math.round(progression * 100)} %` : 'Connexion au site…'}
+              </Text>
+            </View>
+          )}
+          {erreur ? (
+            <View style={styles.errorPanel}>
+              <Text style={styles.errorTitle}>Connexion impossible</Text>
+              <Text style={styles.errorText}>{erreur}</Text>
+              <Pressable accessibilityRole="button" onPress={recharger} style={styles.retryButton}>
+                <Text style={styles.retryText}>Réessayer</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      ) : (
+        <View style={styles.setupPanel}>
+          <Text style={styles.setupTitle}>Adresse du site à configurer</Text>
+          <Text style={styles.setupText}>
+            Définissez EXPO_PUBLIC_WEB_URL avec l’adresse HTTPS du site CENHOSOA, puis redémarrez Expo.
+          </Text>
+          <Text style={styles.setupHint}>Exemple : EXPO_PUBLIC_WEB_URL=https://votre-site.example</Text>
+        </View>
       )}
-      {loadError ? <View style={styles.error}><Text style={styles.errorText}>{loadError}</Text></View> : null}
-    </NavigationContainer>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas, gap: 14 },
-  loadingText: { color: colors.ink, fontWeight: '700' },
-  error: { position: 'absolute', top: 50, left: 16, right: 16, backgroundColor: colors.dangerPale, padding: 12, borderRadius: 12 },
-  errorText: { color: colors.danger, fontSize: 13 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#0A2233',
+  },
+  header: {
+    minHeight: 52,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#0A2233',
+  },
+  title: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 1.4,
+  },
+  action: {
+    width: 42,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 21,
+  },
+  actionInactive: {
+    opacity: 0.4,
+  },
+  actionText: {
+    color: '#7FD1CB',
+    fontSize: 29,
+    lineHeight: 34,
+    fontWeight: '500',
+  },
+  content: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  webView: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  loading: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: '#FFFFFF',
+  },
+  loadingText: {
+    color: '#0F3D52',
+    fontSize: 14,
+    textAlign: 'center',
+    paddingHorizontal: 24,
+  },
+  errorPanel: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#FFFFFF',
+  },
+  errorTitle: {
+    color: '#0A2233',
+    fontSize: 21,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  errorText: {
+    marginTop: 10,
+    color: '#475569',
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 22,
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#1F7A8C',
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  setupPanel: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 28,
+    backgroundColor: '#F4F2EE',
+  },
+  setupTitle: {
+    color: '#0A2233',
+    fontSize: 22,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  setupText: {
+    marginTop: 12,
+    color: '#334155',
+    fontSize: 15,
+    lineHeight: 23,
+    textAlign: 'center',
+  },
+  setupHint: {
+    marginTop: 16,
+    color: '#1F7A8C',
+    fontSize: 13,
+    textAlign: 'center',
+  },
 });

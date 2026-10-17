@@ -6,11 +6,12 @@ import {
 import {
   admettreUrgenceVitale, annulerReservationTransfertLit, completerIdentiteLit,
   confirmerTransfertLit, creerCategorieLit, creerLit, libererLit, listerLits, obtenirResumeLits,
-  obtenirTokenStocke, occuperLit, reserverTransfertLit,
+  obtenirTokenStocke, occuperLit, reserverTransfertLit, listerServices,
 } from '../services/api';
 import logoCenhosoa from '../assets/logo/logo.jpeg';
 import { StylesEspace, Compteur } from './StylesEspace';
 import { ecouterDonneesModifiees } from '../services/tempsReel';
+import HistoriqueLits from './HistoriqueLits';
 
 const LIBELLES_CATEGORIES = {
   vip: 'VIP',
@@ -114,12 +115,18 @@ export default function TableauDeBordLits({
   const [maintenant, fixerMaintenant] = useState(0);
   const [litDestination, fixerLitDestination] = useState('');
   const [motifTransfert, fixerMotifTransfert] = useState('');
+  const [motifTransfertRaison, fixerMotifTransfertRaison] = useState('');
   const [facturationTransfert, fixerFacturationTransfert] = useState(false);
   const [identite, fixerIdentite] = useState({ nom_patient: '', prenoms_patient: '' });
   const [actionDetails, fixerActionDetails] = useState(false);
+  const [clotureLit, fixerClotureLit] = useState(null);
+  const [typeFin, fixerTypeFin] = useState('sortie');
+  const [motifCloture, fixerMotifCloture] = useState('');
+  const [serviceDestination, fixerServiceDestination] = useState('');
+  const [services, fixerServices] = useState([]);
 
   const token = obtenirTokenStocke();
-  const peutGererLits = profil?.role === 'major_de_garde';
+  const peutGererLits = ['major_de_garde', 'superadmin'].includes(profil?.role);
 
   useEffect(() => {
     const amorcage = window.setTimeout(() => fixerMaintenant(Date.now()), 0);
@@ -189,6 +196,12 @@ export default function TableauDeBordLits({
     });
   }, [lits, recherche, filtreStatut, filtreCategorie]);
   const litDetails = lits.find((lit) => lit.id === litDetailsId);
+  const identiteLitACompleter = litDetails?.statut === 'occupe'
+    && !litDetails.patient_id
+    && (litDetails.prenoms_patient_actuel || '').trim().toLocaleLowerCase('fr') === 'patient'
+    && ['non renseigné', 'non identifié'].includes(
+      (litDetails.nom_patient_actuel || '').trim().toLocaleLowerCase('fr'),
+    );
   const nomCategorie = (cle) => resume.find((ligne) => ligne.categorie === cle)?.nom
     || LIBELLES_CATEGORIES[cle]
     || cle;
@@ -253,6 +266,7 @@ export default function TableauDeBordLits({
     fixerLitDetailsId(lit.id);
     fixerLitDestination('');
     fixerMotifTransfert('');
+    fixerMotifTransfertRaison('');
     fixerFacturationTransfert(false);
     fixerErreurAction('');
   };
@@ -266,7 +280,7 @@ export default function TableauDeBordLits({
       await occuperLit(token, litSelectionne.id, {
         nom_patient: formulaire.nom_patient.trim(),
         prenoms_patient: formulaire.prenoms_patient.trim(),
-        motif_admission: formulaire.motif_admission.trim() || null,
+        motif_admission: formulaire.motif_admission.trim(),
         motif_infectieux: formulaire.motif_infectieux.trim() || null,
         facturation_vip_validee: formulaire.facturation_vip_validee,
       });
@@ -307,6 +321,7 @@ export default function TableauDeBordLits({
     try {
       await reserverTransfertLit(token, litDetails.id, {
         lit_destination_id: destination.id,
+        motif_transfert: motifTransfertRaison.trim(),
         motif_infectieux: motifTransfert.trim() || null,
         facturation_vip_validee: facturationTransfert,
       });
@@ -324,6 +339,7 @@ export default function TableauDeBordLits({
       fixerMessageSucces(`Transfert vers ${destination.numero} confirmé.`);
       fixerLitDestination('');
       fixerMotifTransfert('');
+      fixerMotifTransfertRaison('');
       fixerFacturationTransfert(false);
       recharger();
     } catch (err) {
@@ -352,18 +368,42 @@ export default function TableauDeBordLits({
 
   const liberer = async (lit) => {
     if (!peutGererLits) return;
-    const nomPatient = [lit.prenoms_patient_actuel, lit.nom_patient_actuel].filter(Boolean).join(' ');
-    if (!window.confirm(`Confirmer la libération du lit ${lit.numero}${nomPatient ? ` pour ${nomPatient}` : ''} ?`)) return;
-    fixerErreur('');
+    fixerClotureLit(lit);
+    fixerTypeFin('sortie');
+    fixerMotifCloture('');
+    fixerServiceDestination('');
+    fixerErreurAction('');
     try {
-      await libererLit(token, lit.id);
+      fixerServices(await listerServices());
+    } catch (err) {
+      fixerErreurAction(err.message || 'Impossible de charger les services de destination.');
+    }
+  };
+
+  const confirmerCloture = async (evenement) => {
+    evenement.preventDefault();
+    if (!peutGererLits || !clotureLit) return;
+    fixerActionDetails(true);
+    fixerErreurAction('');
+    try {
+      await libererLit(token, clotureLit.id, {
+        type_fin: typeFin,
+        motif: motifCloture.trim() || null,
+        service_destination_id: typeFin === 'transfert_service' ? serviceDestination : null,
+      });
+      const libelle = typeFin === 'transfert_service'
+        ? `Transfert vers ${services.find((service) => service.id === serviceDestination)?.nom || 'le service sélectionné'} enregistré.`
+        : clotureLit.categorie === 'salle_septique'
+          ? `Sortie enregistrée. Le lit ${clotureLit.numero} est bloqué pour bionettoyage terminal (2 heures).`
+          : `Sortie enregistrée. Le lit ${clotureLit.numero} est maintenant disponible.`;
+      fixerClotureLit(null);
       fixerLitDetailsId(null);
-      fixerMessageSucces(lit.categorie === 'salle_septique'
-        ? `Le lit ${lit.numero} est bloqué pour bionettoyage terminal (2 heures).`
-        : `Le lit ${lit.numero} est maintenant disponible.`);
+      fixerMessageSucces(libelle);
       recharger();
     } catch (err) {
-      fixerErreur(err.message || 'La libération du lit a échoué.');
+      fixerErreurAction(err.message || 'La clôture du passage aux urgences a échoué.');
+    } finally {
+      fixerActionDetails(false);
     }
   };
 
@@ -431,15 +471,18 @@ export default function TableauDeBordLits({
       </header>}
 
       <main className={embedded ? 'space-y-5' : 'mx-auto max-w-[1440px] space-y-7 px-4 py-7 sm:px-7 lg:px-10 lg:py-9'}>
-        <div className="mb-6 flex flex-col gap-5 rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm sm:p-6 xl:flex-row xl:items-end xl:justify-between">
+        <section className="apparition relative mb-6 overflow-hidden rounded-[2rem] bg-[#0A2233] p-5 text-white shadow-lg shadow-[#0A2233]/10 sm:p-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0A2233] via-[#0F3D52]/90 to-[#1F7A8C]" />
+          <div className="absolute -bottom-24 right-0 h-64 w-64 rounded-full bg-[#7FD1CB]/20 blur-[90px]" />
+          <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#1F7A8C]">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#7FD1CB]">
               {profil?.role === 'superadmin' ? 'Administration du centre' : 'Tableau de service'}
             </span>
-            <h2 className="text-2xl font-semibold tracking-tight text-[#0A2233] sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               État des lits en temps réel
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
               Suivi de la capacité d’accueil, des admissions et des transferts immédiats. Actualisation automatique toutes les 30 secondes.
             </p>
           </div>
@@ -479,7 +522,8 @@ export default function TableauDeBordLits({
               Actualiser
             </button>
           </div>
-        </div>
+          </div>
+        </section>
 
         {alerteRougeGenerale && (
           <section role="alert" className="apparition flex items-start gap-3 rounded-2xl border border-red-300 bg-red-50 p-4 text-red-900 shadow-sm">
@@ -531,6 +575,8 @@ export default function TableauDeBordLits({
           </div>
         )}
 
+        {!embedded && (
+        <>
         <section aria-label="Synthèse des lits" className="apparition relative mb-8 overflow-hidden rounded-[2rem] bg-[#0A2233] p-6 text-white sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-br from-[#0A2233] via-[#0F3D52]/80 to-[#0A2233]" />
           <div className="absolute -left-20 -top-24 h-72 w-72 animate-pulse rounded-full bg-[#1F7A8C]/50 blur-[90px]" />
@@ -685,6 +731,8 @@ export default function TableauDeBordLits({
             </article>
           </div>
         </section>
+        </>
+        )}
 
         <div role="tablist" aria-label="Vue des lits" className="mb-6 inline-flex rounded-3xl border border-[#1F7A8C]/10 bg-white p-1.5 shadow-sm">
           <button
@@ -705,7 +753,22 @@ export default function TableauDeBordLits({
           >
             Liste détaillée
           </button>
+          {profil?.role === 'superadmin' && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={vue === 'historique'}
+              onClick={() => fixerVue('historique')}
+              className={`rounded-full px-4 py-2.5 text-sm font-bold transition-all ${vue === 'historique' ? 'bg-[#1F7A8C] text-white shadow-md shadow-[#1F7A8C]/20' : 'text-slate-600 hover:bg-[#F4F2EE]'}`}
+            >
+              Historique des lits
+            </button>
+          )}
         </div>
+
+        {vue === 'historique' && profil?.role === 'superadmin' && (
+          <HistoriqueLits token={token} rechargement={rechargement} />
+        )}
 
         {vue === 'plan' && (
           <section aria-label="Plan de salle des lits" className="apparition mb-8">
@@ -1016,7 +1079,7 @@ export default function TableauDeBordLits({
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
           onMouseDown={(event) => { if (event.target === event.currentTarget) fixerFormulaireCategorie(false); }}
         >
-          <section role="dialog" aria-modal="true" aria-labelledby="titre-nouvelle-categorie" className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+          <section role="dialog" aria-modal="true" aria-labelledby="titre-nouvelle-categorie" className="max-h-[92dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-[#1F7A8C]">Inventaire des lits</p>
@@ -1057,7 +1120,7 @@ export default function TableauDeBordLits({
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
           onMouseDown={(event) => { if (event.target === event.currentTarget) fixerCategorieALitAjouter(null); }}
         >
-          <section role="dialog" aria-modal="true" aria-labelledby="titre-nouveau-lit" className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+          <section role="dialog" aria-modal="true" aria-labelledby="titre-nouveau-lit" className="max-h-[92dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-[#1F7A8C]">Inventaire des lits</p>
@@ -1142,9 +1205,9 @@ export default function TableauDeBordLits({
               </div>
             </dl>
             <div className="space-y-5 border-t border-slate-100 p-6">
-              {peutGererLits && litDetails.urgence_vitale && (
+              {peutGererLits && (litDetails.urgence_vitale || identiteLitACompleter) && (
                 <form onSubmit={enregistrerIdentite} className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                  <div><p className="text-sm font-bold text-amber-950">Identité provisoire</p><p className="mt-1 text-xs text-amber-800">Complétez le dossier dès que l’état du patient le permet.</p></div>
+                  <div><p className="text-sm font-bold text-amber-950">Identité provisoire</p><p className="mt-1 text-xs text-amber-800">Complétez le dossier dès que l’état du patient le permet. Si le lit est lié à une mission d’ambulance, son identité sera mise à jour également.</p></div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <input aria-label="Nom du patient" required maxLength={100} value={identite.nom_patient} onChange={(event) => fixerIdentite({ ...identite, nom_patient: event.target.value })} placeholder="Nom" className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-300" />
                     <input aria-label="Prénoms du patient" required maxLength={150} value={identite.prenoms_patient} onChange={(event) => fixerIdentite({ ...identite, prenoms_patient: event.target.value })} placeholder="Prénoms" className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-300" />
@@ -1158,6 +1221,10 @@ export default function TableauDeBordLits({
                   <option value="">Choisir un lit libre…</option>
                   {lits.filter((lit) => lit.statut === 'libre' && lit.categorie !== litDetails.categorie).map((lit) => <option key={lit.id} value={lit.id}>{lit.numero} · {nomCategorie(lit.categorie)}</option>)}
                 </select>
+                <div>
+                  <label htmlFor="transfert-motif" className="mb-1 block text-xs font-semibold text-slate-700">Motif du transfert interne <span className="text-red-600">Obligatoire</span></label>
+                  <textarea id="transfert-motif" required maxLength={2000} rows="2" value={motifTransfertRaison} onChange={(event) => fixerMotifTransfertRaison(event.target.value)} placeholder="Ex. surveillance renforcée, besoin d’un lit de déchoquage…" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1F7A8C]" />
+                </div>
                 {lits.find((lit) => lit.id === litDestination)?.categorie === 'salle_septique' && (
                   <div>
                     <label htmlFor="transfert-motif-infectieux" className="mb-1 block text-xs font-semibold text-slate-700">Motif infectieux obligatoire</label>
@@ -1177,6 +1244,47 @@ export default function TableauDeBordLits({
                 </div>
               </form>}
             </div>
+          </section>
+        </div>
+      )}
+
+      {clotureLit && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#0A2233]/75 p-4 backdrop-blur-sm">
+          <section role="dialog" aria-modal="true" aria-labelledby="titre-cloture-lit" className="max-h-[92dvh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-3xl bg-white shadow-2xl">
+            <div className="bg-gradient-to-r from-[#0A2233] to-[#1F7A8C] px-6 py-5 text-white">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#B5E8E3]">Fin du passage aux urgences</p>
+              <h2 id="titre-cloture-lit" className="mt-1 text-xl font-semibold">Clôturer {clotureLit.numero}</h2>
+              <p className="mt-1 text-sm text-white/80">{[clotureLit.prenoms_patient_actuel, clotureLit.nom_patient_actuel].filter(Boolean).join(' ')}</p>
+            </div>
+            <form onSubmit={confirmerCloture} className="space-y-4 p-6">
+              <label className="block text-xs font-semibold text-slate-700">
+                Destination du patient
+                <select value={typeFin} onChange={(event) => fixerTypeFin(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1F7A8C]">
+                  <option value="sortie">Sortie de l’hôpital</option>
+                  <option value="transfert_service">Transfert vers un service</option>
+                </select>
+              </label>
+              {typeFin === 'transfert_service' && (
+                <>
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Service destinataire
+                    <select required value={serviceDestination} onChange={(event) => fixerServiceDestination(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1F7A8C]">
+                      <option value="">Choisir un service…</option>
+                      {services.map((service) => <option key={service.id} value={service.id}>{service.nom}</option>)}
+                    </select>
+                  </label>
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Motif du transfert <span className="text-red-600">Obligatoire</span>
+                    <textarea required maxLength={2000} rows="3" value={motifCloture} onChange={(event) => fixerMotifCloture(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1F7A8C]" placeholder="Précisez la raison et le contexte du transfert…" />
+                  </label>
+                </>
+              )}
+              {erreurAction && <p role="alert" className="text-xs font-semibold text-red-700">{erreurAction}</p>}
+              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+                <button type="button" onClick={() => fixerClotureLit(null)} disabled={actionDetails} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 disabled:opacity-50">Annuler</button>
+                <button type="submit" disabled={actionDetails || !peutGererLits || (typeFin === 'transfert_service' && !services.length)} className="rounded-xl bg-[#0F3D52] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50">{actionDetails ? 'Enregistrement…' : 'Confirmer la clôture'}</button>
+              </div>
+            </form>
           </section>
         </div>
       )}
@@ -1274,10 +1382,12 @@ export default function TableauDeBordLits({
 
               <div>
                 <label htmlFor="admission-motif" className="mb-2 block text-sm font-semibold text-slate-700">
-                  Motif d’admission <span className="ml-1 text-xs font-medium text-slate-500">Facultatif</span>
+                  Motif d’attribution du lit <span className="ml-1 text-xs font-medium text-red-600">Obligatoire</span>
                 </label>
                 <textarea
                   id="admission-motif"
+                  required
+                  maxLength={2000}
                   rows="3"
                   value={formulaire.motif_admission}
                   onChange={(event) => fixerFormulaire({ ...formulaire, motif_admission: event.target.value })}

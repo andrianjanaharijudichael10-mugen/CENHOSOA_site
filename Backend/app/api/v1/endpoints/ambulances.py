@@ -71,6 +71,11 @@ def calculer_frais_retard(minutes_sur_place: int) -> tuple[int, int]:
     return minutes_retard, paliers * FRAIS_PAR_PALIER_RETARD
 
 
+def calculer_frais_retard_declare(minutes_retard: int) -> int:
+    paliers = (minutes_retard + 59) // 60
+    return paliers * FRAIS_PAR_PALIER_RETARD
+
+
 def _calculer_itineraires_destination(donnees):
     if donnees.latitude_destination is not None:
         return calculer_itineraires_mission_coordonnees(
@@ -396,7 +401,7 @@ def creer_mission_urgente_invite(
         db,
         donnees_mission,
         patient_id=None,
-        telephone_contact=None,
+        telephone_contact=donnees.telephone_contact,
         jeton_suivi_hash=hashlib.sha256(jeton_suivi.encode("utf-8")).hexdigest(),
     )
     return DemandeAmbulanceInviteOut(mission=_sortie_mission(mission), jeton_suivi=jeton_suivi)
@@ -427,7 +432,7 @@ def creer_mission_urgente_patient(
         db,
         donnees_mission,
         patient_id=patient.id,
-        telephone_contact=patient.telephone,
+        telephone_contact=donnees.telephone_contact,
     )
 
 
@@ -1000,7 +1005,7 @@ def transitionner_mission(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mission introuvable.")
 
     transitions = {
-        StatutMissionAmbulance.ASSIGNE: StatutMissionAmbulance.SUR_LES_LIEUX,
+        StatutMissionAmbulance.ASSIGNE: StatutMissionAmbulance.ARRIVE_URGENCES,
         StatutMissionAmbulance.SUR_LES_LIEUX: StatutMissionAmbulance.EN_TRANSPORT,
         StatutMissionAmbulance.EN_TRANSPORT: StatutMissionAmbulance.ARRIVE_URGENCES,
         StatutMissionAmbulance.ARRIVE_URGENCES: StatutMissionAmbulance.EN_BIONETTOYAGE,
@@ -1030,6 +1035,15 @@ def transitionner_mission(
         mission.heure_transport = maintenant
         mission.heure_prise_en_charge = maintenant
     elif donnees.statut == StatutMissionAmbulance.ARRIVE_URGENCES:
+        if statut_actuel == StatutMissionAmbulance.ASSIGNE:
+            if donnees.minutes_retard is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Saisissez le retard déclaré par le chauffeur à son arrivée au centre.",
+                )
+            mission.minutes_retard = donnees.minutes_retard
+            mission.frais_retard = calculer_frais_retard_declare(donnees.minutes_retard)
+            mission.cout_total = mission.cout_base + mission.frais_retard
         lits_reserves_ids = [identifiant for identifiant in (mission.lit_id, mission.lit_secondaire_id) if identifiant]
         lits_reserves = (
             db.query(Lit)
@@ -1093,7 +1107,8 @@ def transitionner_mission(
             if mission.heure_arrivee_urgences
             else None
         )
-        mission.minutes_retard, mission.frais_retard = calculer_frais_retard(mission.minutes_sur_place or 0)
+        if mission.minutes_retard is None:
+            mission.minutes_retard, mission.frais_retard = calculer_frais_retard(mission.minutes_sur_place or 0)
         mission.cout_total = mission.cout_base + mission.frais_retard
         ambulance.statut = StatutAmbulance.DISPONIBLE
 

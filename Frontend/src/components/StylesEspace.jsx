@@ -136,8 +136,15 @@ export const StylesEspace = () => {
     <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600&display=swap');
     html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
-    .espace { position: relative; isolation: isolate; }
+    .espace { position: relative; isolation: isolate; min-width: 0; max-width: 100%; overflow-x: clip; }
+    .espace.min-h-screen { min-height: 100vh; min-height: 100svh; }
+    @supports (min-height: 100dvh) {
+      .espace.min-h-screen { min-height: 100dvh; }
+    }
     .espace, .espace * { font-family: 'Inter Tight', system-ui, sans-serif; }
+    .espace :where(main, section, article, form, dl) { min-width: 0; }
+    .espace :where(h1, h2, h3, h4, p, td, th) { overflow-wrap: anywhere; }
+    .espace :where(img, video, canvas) { max-width: 100%; }
     .espace h1, .espace h2, .espace h3 { font-weight: 300; letter-spacing: -0.025em; }
     .espace h4 { font-weight: 500; }
     .espace ::selection { background: #1F7A8C; color: #fff; }
@@ -186,7 +193,7 @@ export const StylesEspace = () => {
 
     /* Bouton retour en haut */
     .fx-top {
-      position: fixed; right: 20px; bottom: 20px; z-index: 90; width: 46px; height: 46px;
+      position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 90; width: 46px; height: 46px;
       display: flex; align-items: center; justify-content: center; border-radius: 9999px;
       border: 1px solid rgba(255,255,255,.18); background: #0A2233; color: #7FD1CB;
       box-shadow: 0 12px 28px -8px rgba(10,34,51,.55);
@@ -198,8 +205,12 @@ export const StylesEspace = () => {
     .fx-top:active { transform: scale(.94); }
 
     /* En-tête dynamique */
-    .espace > header { transition: box-shadow .35s ease, background-color .35s ease; }
+    .espace > header { padding-top: env(safe-area-inset-top); transition: box-shadow .35s ease, background-color .35s ease; }
     .espace > header.fx-header-scrolled { box-shadow: 0 14px 34px -14px rgba(10,34,51,.6); }
+    @media (max-width: 639px) {
+      .espace :where(table) { font-size: .8125rem; }
+      .espace :where(button, a[href]) { touch-action: manipulation; }
+    }
 
     /* Cartes : survol + halo qui suit le curseur */
     .espace main article, main.anim article { position: relative; transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease, border-color .35s ease; }

@@ -1,6 +1,6 @@
 """Schémas d'entrée et de sortie des rendez-vous."""
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -34,20 +34,35 @@ class CreationRendezVousSchema(BaseModel):
         return valeur
 
 
+class PatientSansCompteSchema(BaseModel):
+    nom: str = Field(min_length=1, max_length=100)
+    prenoms: str = Field(min_length=1, max_length=150)
+    telephone: str = Field(min_length=1, max_length=20)
+
+    @field_validator("nom", "prenoms", "telephone")
+    @classmethod
+    def valeur_patient_non_vide(cls, valeur: str) -> str:
+        valeur = valeur.strip()
+        if not valeur:
+            raise ValueError("Cette information patient ne peut pas être vide.")
+        return valeur
+
+
 class CreationCreneauSchema(BaseModel):
     service_id: uuid.UUID
     date_heure: datetime
     date_fin: datetime
+    date_jour: date | None = None
+    quota_journalier: int = Field(ge=1, le=10000)
     patient_id: uuid.UUID | None = None
+    nouveau_patient: "PatientSansCompteSchema | None" = None
     motif: str | None = Field(default=None, max_length=2000)
 
     @field_validator("date_heure")
     @classmethod
-    def date_heure_futur_avec_fuseau(cls, valeur: datetime) -> datetime:
+    def date_heure_avec_fuseau(cls, valeur: datetime) -> datetime:
         if valeur.tzinfo is None or valeur.utcoffset() is None:
             raise ValueError("La date du créneau doit inclure un fuseau horaire.")
-        if valeur <= datetime.now(timezone.utc):
-            raise ValueError("La date du créneau doit être dans le futur.")
         return valeur
 
     @field_validator("date_fin")
@@ -68,8 +83,10 @@ class CreationCreneauSchema(BaseModel):
         return valeur
 
     @model_validator(mode="after")
-    def motif_requis_si_patient(self):
-        if self.patient_id is not None and self.motif is None:
+    def valider_patient_initial(self):
+        if self.patient_id is not None and self.nouveau_patient is not None:
+            raise ValueError("Choisissez un patient existant ou renseignez un nouveau patient, pas les deux.")
+        if (self.patient_id is not None or self.nouveau_patient is not None) and self.motif is None:
             raise ValueError("Le motif est obligatoire pour ajouter un patient au créneau.")
         if self.date_fin <= self.date_heure:
             raise ValueError("L'heure de fermeture doit être après l'heure de début.")
@@ -80,6 +97,8 @@ class ModificationCreneauSchema(BaseModel):
     est_ouvert: bool | None = None
     date_heure: datetime | None = None
     date_fin: datetime | None = None
+    date_jour: date | None = None
+    quota_journalier: int | None = Field(default=None, ge=1, le=10000)
 
     @field_validator("date_heure")
     @classmethod
@@ -104,7 +123,11 @@ class ModificationCreneauSchema(BaseModel):
             raise ValueError("Les heures de début et de fin doivent être modifiées ensemble.")
         if self.date_heure is not None and self.date_fin <= self.date_heure:
             raise ValueError("L'heure de fermeture doit être après l'heure de début.")
-        if self.est_ouvert is None and self.date_heure is None:
+        if (
+            self.est_ouvert is None
+            and self.date_heure is None
+            and self.quota_journalier is None
+        ):
             raise ValueError("Aucune modification de créneau n'a été fournie.")
         return self
 
@@ -122,7 +145,14 @@ class ReservationCreneauSchema(BaseModel):
 
 
 class AffectationPatientCreneauSchema(ReservationCreneauSchema):
-    patient_id: uuid.UUID
+    patient_id: uuid.UUID | None = None
+    nouveau_patient: PatientSansCompteSchema | None = None
+
+    @model_validator(mode="after")
+    def choisir_un_patient(self):
+        if (self.patient_id is None) == (self.nouveau_patient is None):
+            raise ValueError("Choisissez un patient existant ou renseignez un nouveau patient.")
+        return self
 
 
 class CreneauOut(BaseModel):
@@ -131,8 +161,11 @@ class CreneauOut(BaseModel):
     service_nom: str
     date_heure: datetime
     date_fin: datetime
+    date_jour: date
     est_ouvert: bool
     nombre_patients: int
+    nombre_patients_jour: int
+    quota_journalier: int | None
 
 
 class PatientCreneauOut(BaseModel):

@@ -1,8 +1,8 @@
-"""Demandes de rendez-vous et consultations des patients."""
+"""Demandes de rendez-vous et créneaux des services."""
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func, text
+from sqlalchemy import Date, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -23,6 +23,7 @@ class CreneauMedecin(Base):
     )
     date_heure: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     date_fin: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    date_jour: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     est_ouvert: Mapped[bool] = mapped_column(default=True, nullable=False, index=True)
     dernier_numero_file: Mapped[int] = mapped_column(default=0, server_default="0", nullable=False)
     date_creation: Mapped[datetime] = mapped_column(
@@ -31,6 +32,22 @@ class CreneauMedecin(Base):
 
     service = relationship("Service")
     rendez_vous = relationship("RendezVous", back_populates="creneau")
+
+
+class QuotaRendezVousJournalier(Base):
+    __tablename__ = "quotas_rendez_vous_journaliers"
+    __table_args__ = (
+        UniqueConstraint("service_id", "date_jour", name="uq_quota_rendez_vous_service_jour"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    service_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("services.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    date_jour: Mapped[date] = mapped_column(Date, nullable=False)
+    limite: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class RendezVous(Base):
@@ -67,6 +84,7 @@ class RendezVous(Base):
     numero_file: Mapped[int | None] = mapped_column(nullable=True)
     service_nom: Mapped[str] = mapped_column(String(100), nullable=False)
     date_souhaitee: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    date_jour: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     date_confirmee: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     date_confirmee_vue: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     motif: Mapped[str] = mapped_column(Text, nullable=False)
@@ -82,4 +100,3 @@ class RendezVous(Base):
     patient = relationship("Patient")
     service = relationship("Service")
     creneau = relationship("CreneauMedecin", back_populates="rendez_vous")
-    consultation = relationship("Consultation", back_populates="rendez_vous", uselist=False)

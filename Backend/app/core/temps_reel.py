@@ -40,8 +40,8 @@ def domaine_modifie(chemin: str) -> str | None:
         return None
 
     return {
+        "actualites": "actualites",
         "ambulances": "ambulances",
-        "dossiers-medicaux": "dossiers",
         "informations-centre": "informations",
         "lits": "lits",
         "rendez-vous": "rendez-vous",

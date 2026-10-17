@@ -15,22 +15,27 @@ from app.api.v1.endpoints.ambulances import (
     creer_mission_invite,
     creer_mission_patient,
     creer_mission_urgente_invite,
+    creer_mission_urgente_patient,
     rattacher_mission_au_patient,
     simuler_trajet,
     terminer_mission,
+    transitionner_mission,
 )
 from app.models.ambulance import Ambulance, MissionAmbulance
 from app.models.enums import (
     CategorieLit,
+    ROLES_ACCES_AMBULANCES,
+    ROLES_GESTION_URGENCES,
     ROLES_REGULATION_AMBULANCE,
     StatutAmbulance,
     StatutLit,
+    StatutMissionAmbulance,
     TypeAmbulance,
     RoleUtilisateur,
 )
 from app.models.lit import Lit
 from app.models.patient import Patient
-from app.api.v1.endpoints.lits import ROLES_CONSULTATION
+from app.api.v1.endpoints.lits import ROLES_ACTIONS_LITS, ROLES_CONSULTATION
 from app.schemas.ambulance import (
     PriseEnChargeAmbulanceSchema,
     RetourCentreAmbulanceSchema,
@@ -41,6 +46,7 @@ from app.schemas.ambulance import (
     DonneesMissionAmbulanceSchema,
     MissionAmbulanceOut,
     RattacherDemandeAmbulanceSchema,
+    TransitionMissionSchema,
 )
 from app.core import osrm
 
@@ -62,11 +68,12 @@ def test_ambulance_keeps_legacy_compatibility_fields():
     assert ambulance.type == TypeAmbulance.SECONDAIRE
 
 
-def test_major_roles_are_separated_between_beds_and_ambulances():
+def test_roles_operationnels_partagent_l_acces_aux_lits_et_aux_ambulances():
     assert RoleUtilisateur.MAJOR in ROLES_REGULATION_AMBULANCE
     assert RoleUtilisateur.MAJOR_DE_GARDE not in ROLES_REGULATION_AMBULANCE
-    assert RoleUtilisateur.MAJOR_DE_GARDE in ROLES_CONSULTATION
-    assert RoleUtilisateur.MAJOR not in ROLES_CONSULTATION
+    assert ROLES_GESTION_URGENCES <= set(ROLES_CONSULTATION)
+    assert ROLES_GESTION_URGENCES <= set(ROLES_ACTIONS_LITS)
+    assert ROLES_GESTION_URGENCES <= ROLES_ACCES_AMBULANCES
     assert RoleUtilisateur.SUPERADMIN in ROLES_CONSULTATION
 
 
@@ -83,6 +90,113 @@ def test_mission_persists_patient_pickup_time_and_delay():
     assert "minutes_retard" in MissionAmbulance.__table__.columns
 
 
+def test_transition_directe_a_l_arrivee_enregistre_le_retard_et_admet_le_patient():
+    mission_id = uuid.uuid4()
+    ambulance = Ambulance(
+        id=uuid.uuid4(),
+        numero="AMB-ARRIVEE",
+        est_principale=True,
+        statut=StatutAmbulance.NON_DISPONIBLE,
+    )
+    lit = Lit(
+        id=uuid.uuid4(),
+        numero="URG-ARRIVEE",
+        categorie=CategorieLit.URGENCE,
+        statut=StatutLit.RESERVE,
+        mission_reservation_id=mission_id,
+    )
+    mission = MissionAmbulance(
+        id=mission_id,
+        ambulance_id=ambulance.id,
+        ambulance=ambulance,
+        lit_id=lit.id,
+        lit=lit,
+        nom_patient="Rabe",
+        prenoms_patient="Jean",
+        adresse_destination="Anosy",
+        distance_km=8,
+        tarif_base=70000,
+        montant_total=70000,
+        frais_retard=0,
+        statut=StatutMissionAmbulance.ASSIGNE.value,
+        heure_depart=datetime.now(timezone.utc),
+    )
+
+    class Requete:
+        def __init__(self, modele):
+            self.modele = modele
+
+        def filter(self, *args):
+            return self
+
+        def with_for_update(self):
+            return self
+
+        def order_by(self, *args):
+            return self
+
+        def one_or_none(self):
+            return {
+                MissionAmbulance: mission,
+                Ambulance: ambulance,
+            }.get(self.modele)
+
+        def one(self):
+            return ambulance
+
+        def all(self):
+            return [lit]
+
+    class SessionFictive:
+        def query(self, modele):
+            return Requete(modele)
+
+        def commit(self):
+            pass
+
+        def refresh(self, objet):
+            pass
+
+    with pytest.raises(HTTPException) as erreur:
+        transitionner_mission(
+            mission_id,
+            TransitionMissionSchema(
+                statut=StatutMissionAmbulance.ARRIVE_URGENCES,
+                lit_id=lit.id,
+            ),
+            SessionFictive(),
+        )
+    assert erreur.value.status_code == 422
+
+    donnees = TransitionMissionSchema(
+        statut=StatutMissionAmbulance.ARRIVE_URGENCES,
+        lit_id=lit.id,
+        minutes_retard=75,
+    )
+    resultat = transitionner_mission(mission_id, donnees, SessionFictive())
+
+    assert resultat.statut == StatutMissionAmbulance.ARRIVE_URGENCES
+    assert resultat.minutes_retard == 75
+    assert resultat.frais_retard == 70000
+    assert resultat.cout_total == 140000
+    assert mission.heure_arrivee_urgences is not None
+    assert lit.statut == StatutLit.OCCUPE
+
+
+def test_transition_mission_valide_minutes_retard_declarees():
+    donnees = TransitionMissionSchema(
+        statut=StatutMissionAmbulance.ARRIVE_URGENCES,
+        minutes_retard=0,
+    )
+    assert donnees.minutes_retard == 0
+
+    with pytest.raises(ValidationError):
+        TransitionMissionSchema(
+            statut=StatutMissionAmbulance.ARRIVE_URGENCES,
+            minutes_retard=1441,
+        )
+
+
 def test_public_ambulance_request_requires_valid_contact_phone():
     demande = {
         "patient": "Jean Rabe",
@@ -97,21 +211,33 @@ def test_public_ambulance_request_requires_valid_contact_phone():
     assert CreationDemandeAmbulanceInviteSchema.model_validate(demande).telephone_contact == "+261 34 12 345 67"
 
 
-def test_urgent_ambulance_request_only_requires_address():
-    demande = DemandeAmbulanceUrgenteSchema.model_validate({"destination": "  Anosy  "})
+def test_urgent_ambulance_request_requires_address_and_valid_contact_phone():
+    with pytest.raises(ValidationError):
+        DemandeAmbulanceUrgenteSchema.model_validate({"destination": "Anosy"})
+    with pytest.raises(ValidationError):
+        DemandeAmbulanceUrgenteSchema.model_validate({
+            "destination": "Anosy",
+            "telephone_contact": "123",
+        })
+    demande = DemandeAmbulanceUrgenteSchema.model_validate({
+        "destination": "  Anosy  ",
+        "telephone_contact": " +261 34 12 345 67 ",
+    })
     infos_medicales_facultatives = DemandeAmbulanceUrgenteSchema.model_validate({
         "destination": "Anosy",
+        "telephone_contact": "0341234567",
         "patient_infectieux": True,
     })
 
     assert demande.destination == "Anosy"
+    assert demande.telephone_contact == "+261 34 12 345 67"
     assert demande.urgence_vitale is False
     assert demande.patient_infectieux is False
     assert demande.motif_infectieux is None
     assert infos_medicales_facultatives.motif_infectieux is None
 
 
-def test_urgent_guest_request_passes_optional_contact_as_none(monkeypatch):
+def test_urgent_guest_request_transmits_requester_contact(monkeypatch):
     appel = {}
     mission = object()
     mission_out = MissionAmbulanceOut.model_construct()
@@ -131,14 +257,46 @@ def test_urgent_guest_request_passes_optional_contact_as_none(monkeypatch):
     )
 
     resultat = creer_mission_urgente_invite(
-        DemandeAmbulanceUrgenteSchema(destination="Anosy"),
+        DemandeAmbulanceUrgenteSchema(
+            destination="Anosy",
+            telephone_contact="+261 34 12 345 67",
+        ),
         db=object(),
     )
 
-    assert appel["telephone_contact"] is None
+    assert appel["telephone_contact"] == "+261 34 12 345 67"
     assert appel["patient_id"] is None
     assert len(appel["jeton_suivi_hash"]) == 64
     assert resultat.mission is mission_out
+
+
+def test_urgent_patient_request_uses_provided_requester_contact(monkeypatch):
+    appel = {}
+    mission = object()
+    patient = SimpleNamespace(id=uuid.uuid4(), prenoms="Jean", nom="Rabe", telephone="0340000000")
+    utilisateur = SimpleNamespace(patient=patient)
+
+    def creer_demande(db, donnees, **kwargs):
+        appel.update(kwargs)
+        return mission
+
+    monkeypatch.setattr(
+        "app.api.v1.endpoints.ambulances._creer_demande_en_attente",
+        creer_demande,
+    )
+
+    resultat = creer_mission_urgente_patient(
+        DemandeAmbulanceUrgenteSchema(
+            destination="Anosy",
+            telephone_contact="+261 34 12 345 67",
+        ),
+        utilisateur=utilisateur,
+        db=object(),
+    )
+
+    assert appel["telephone_contact"] == "+261 34 12 345 67"
+    assert appel["patient_id"] == patient.id
+    assert resultat is mission
 
 
 def test_standard_guest_request_converts_mission_before_building_response(monkeypatch):

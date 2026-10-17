@@ -7,7 +7,6 @@ from app.core.temps_reel import GestionnaireTempsReel, domaine_modifie
 
 def test_domaines_modifies_identifient_les_ecrans_concernes():
     assert domaine_modifie("/api/v1/ambulances/missions") == "ambulances"
-    assert domaine_modifie("/api/v1/dossiers-medicaux/patients/1") == "dossiers"
     assert domaine_modifie("/api/v1/auth/profil-patient") == "patients"
     assert domaine_modifie("/api/v1/auth/connexion") is None
     assert domaine_modifie("/api/v1/ambulances/missions/moi") == "ambulances"

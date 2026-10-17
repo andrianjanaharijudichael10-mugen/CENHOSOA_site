@@ -49,7 +49,13 @@ function construireRepartition(elements, cle, libelles = {}) {
   }));
 }
 
-function CarteGraphique({ titre, description, items }) {
+function CarteGraphique({
+  titre,
+  description,
+  items,
+  valeurCentre,
+  libelleCentre = 'au total',
+}) {
   const total = items.reduce((somme, item) => somme + item.valeur, 0);
   const gradient = items.map((item, index) => {
     const debut = items
@@ -72,8 +78,8 @@ function CarteGraphique({ titre, description, items }) {
             aria-label={`${titre} : ${total} au total`}
           >
             <div className="flex h-20 w-20 flex-col items-center justify-center rounded-full bg-white shadow-inner">
-              <span className="text-2xl font-light tabular-nums text-[#0A2233]">{total}</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">au total</span>
+              <span className="text-2xl font-light tabular-nums text-[#0A2233]">{valeurCentre ?? total}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{libelleCentre}</span>
             </div>
           </div>
           <div className="w-full max-w-64 space-y-2.5 text-xs">
@@ -141,6 +147,68 @@ function SectionStatistiques({ titre, description, enfants }) {
       </div>
       <div className="grid gap-4 xl:grid-cols-2">{enfants}</div>
     </section>
+  );
+}
+
+const LIBELLES_STATUTS_MISSIONS = {
+  en_attente_confirmation: 'En attente de confirmation',
+  assigne: 'Assignées',
+  sur_les_lieux: 'Sur les lieux',
+  en_transport: 'En transport',
+  arrive_urgences: 'Arrivées aux urgences',
+  en_bionettoyage: 'En bionettoyage',
+  en_cours: 'En cours',
+  terminee: 'Terminées',
+  annulee: 'Annulées',
+};
+
+export function GraphiquesUrgences({ ambulances, missions, lits }) {
+  const statutsAmbulances = [
+    { label: 'Disponibles', valeur: ambulances.filter((ambulance) => ambulance.statut === 'disponible').length },
+    { label: 'En mission / indisponibles', valeur: ambulances.filter((ambulance) => ambulance.statut !== 'disponible').length },
+  ];
+  const tauxOccupation = lits.length
+    ? Math.round((lits.filter((lit) => lit.statut === 'occupe').length / lits.length) * 100)
+    : 0;
+
+  return (
+    <div className="space-y-8">
+      <SectionStatistiques
+        titre="Ambulances"
+        description="Disponibilité de la flotte et répartition des missions selon leur statut."
+        enfants={<>
+          <CarteGraphique
+            titre="Disponibilité de la flotte"
+            description={`${ambulances.length} ambulance(s) enregistrée(s).`}
+            items={statutsAmbulances}
+          />
+          <CarteBarres
+            titre="Missions par statut"
+            description={`${missions.length} mission(s) enregistrée(s).`}
+            items={construireRepartition(missions, 'statut', LIBELLES_STATUTS_MISSIONS)}
+          />
+        </>}
+      />
+
+      <SectionStatistiques
+        titre="Lits d’urgence"
+        description="État actuel des lits et répartition de l’inventaire par catégorie."
+        enfants={<>
+          <CarteGraphique
+            titre="État des lits"
+            description={`${lits.length} lit(s) configuré(s).`}
+            items={construireRepartition(lits, 'statut', LIBELLES_STATUTS_LITS)}
+            valeurCentre={`${tauxOccupation}%`}
+            libelleCentre="occupés"
+          />
+          <CarteBarres
+            titre="Lits par catégorie"
+            description="Nombre de lits configurés dans chaque catégorie."
+            items={construireRepartition(lits, 'categorie', LIBELLES_CATEGORIES_LITS)}
+          />
+        </>}
+      />
+    </div>
   );
 }
 

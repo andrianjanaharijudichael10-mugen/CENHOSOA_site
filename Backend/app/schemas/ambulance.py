@@ -117,9 +117,19 @@ class CreationDemandeAmbulanceInviteSchema(DonneesMissionAmbulanceSchema):
 
 class DemandeAmbulanceUrgenteSchema(CoordonneesDestinationSchema):
     destination: str = Field(min_length=1, max_length=255)
+    telephone_contact: str = Field(min_length=8, max_length=20)
     urgence_vitale: bool = False
     patient_infectieux: bool = False
     motif_infectieux: str | None = Field(default=None, max_length=255)
+
+    @field_validator("telephone_contact")
+    @classmethod
+    def valider_telephone_contact(cls, valeur: str) -> str:
+        telephone = valeur.strip()
+        chiffres = "".join(caractere for caractere in telephone if caractere.isdigit())
+        if len(chiffres) < 9 or len(chiffres) > 15:
+            raise ValueError("Saisissez un numéro de téléphone valide.")
+        return telephone
 
     @field_validator("destination")
     @classmethod
@@ -141,6 +151,7 @@ class RetourCentreAmbulanceSchema(BaseModel):
 class TransitionMissionSchema(BaseModel):
     statut: StatutMissionAmbulance
     lit_id: uuid.UUID | None = None
+    minutes_retard: int | None = Field(default=None, ge=0, le=1440)
 
 
 class LitUrgenceDisponibleOut(BaseModel):

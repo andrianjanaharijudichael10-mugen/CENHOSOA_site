@@ -298,10 +298,15 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
         setErreur('Saisissez l’adresse où se trouve le patient.');
         return;
       }
+      if (!formulaire.telephone_contact.trim()) {
+        setErreur('Saisissez le numéro de téléphone du demandeur.');
+        return;
+      }
       setSoumissionEnCours(true);
       try {
         const resultat = await creerMissionAmbulanceUrgente(token, {
           destination: formulaire.destination.trim(),
+          telephone_contact: formulaire.telephone_contact.trim(),
           ...(lieuSelectionne && {
             latitude_destination: lieuSelectionne.latitude,
             longitude_destination: lieuSelectionne.longitude,
@@ -470,10 +475,16 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
               </div>
               {modeUrgent && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-5 text-red-800">
-                  Saisissez l’adresse et envoyez la demande. Les informations médicales sont facultatives. En danger immédiat, appelez également le standard.
+                  Saisissez l’adresse et le numéro de téléphone du demandeur. Les informations médicales sont facultatives. En danger immédiat, appelez également le standard.
                 </div>
               )}
               <div className="grid gap-5 sm:grid-cols-2">
+                {modeUrgent && (
+                  <label className="block text-sm font-semibold text-slate-700 sm:col-span-2">
+                    <span className="mb-2 flex items-center gap-2"><Phone className="h-4 w-4 text-red-700" /> Téléphone du demandeur *</span>
+                    <input required type="tel" minLength={8} maxLength={20} autoComplete="tel" value={formulaire.telephone_contact} onChange={(event) => modifierChamp('telephone_contact', event.target.value)} placeholder="Numéro auquel le régulateur peut vous joindre" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-red-600" />
+                  </label>
+                )}
                 {!modeUrgent && (
                   <>
                 <label className="block text-sm font-semibold text-slate-700">

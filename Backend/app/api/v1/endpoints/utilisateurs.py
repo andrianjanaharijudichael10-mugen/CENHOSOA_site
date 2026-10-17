@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app.api.deps import exiger_roles, obtenir_utilisateur_courant
 from app.core.security import hasher_mot_de_passe
 from app.db.session import obtenir_db
-from app.models.consultation import Consultation
 from app.models.enums import ROLES_PERSONNEL, RoleUtilisateur
 from app.models.personnel import Personnel
 from app.models.service import Service
@@ -104,22 +103,6 @@ def supprimer_compte_personnel(
             status_code=status.HTTP_409_CONFLICT,
             detail="Cette action est réservée aux comptes du personnel.",
         )
-    if utilisateur.role == RoleUtilisateur.MEDECIN:
-        consultations = (
-            db.query(Consultation)
-            .join(Personnel, Consultation.medecin_id == Personnel.id)
-            .filter(Personnel.utilisateur_id == utilisateur.id)
-            .count()
-        )
-        if consultations:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "Ce compte médecin possède des consultations dans l’historique médical "
-                    "et ne peut pas être supprimé. Désactivez plutôt le compte."
-                ),
-            )
-
     db.delete(utilisateur)
     db.commit()
 

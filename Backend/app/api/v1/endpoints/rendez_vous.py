@@ -1,6 +1,6 @@
 """API de demande et de suivi des rendez-vous médicaux."""
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import extract, func, or_, update
@@ -11,7 +11,7 @@ from app.api.deps import exiger_roles, obtenir_utilisateur_courant
 from app.db.session import obtenir_db
 from app.models.enums import RoleUtilisateur
 from app.models.patient import Patient
-from app.models.rendez_vous import CreneauMedecin, RendezVous
+from app.models.rendez_vous import CreneauMedecin, QuotaRendezVousJournalier, RendezVous
 from app.models.service import Service
 from app.models.utilisateur import Utilisateur
 from app.schemas.rendez_vous import (
@@ -22,6 +22,7 @@ from app.schemas.rendez_vous import (
     ModificationCreneauSchema,
     ModificationRendezVousSchema,
     PatientCreneauOut,
+    PatientSansCompteSchema,
     ReservationCreneauSchema,
     RendezVousOut,
     StatistiquesRendezVousOut,
@@ -29,6 +30,36 @@ from app.schemas.rendez_vous import (
 
 routeur = APIRouter(prefix="/rendez-vous", tags=["Rendez-vous"])
 STATUTS_ACTIFS = {"en_attente", "confirme"}
+DELAI_FERMETURE_CRENEAU = timedelta(minutes=1)
+
+
+def _verifier_creneau_reservable(creneau: CreneauMedecin) -> None:
+    maintenant = datetime.now(timezone.utc)
+    if (
+        not creneau.est_ouvert
+        or creneau.date_fin + DELAI_FERMETURE_CRENEAU <= maintenant
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ce créneau n'est plus disponible.",
+        )
+
+
+def _fermer_creneaux_expires(db: Session) -> None:
+    limite_fermeture = datetime.now(timezone.utc) - DELAI_FERMETURE_CRENEAU
+    nombre_creneaux_fermes = (
+        db.query(CreneauMedecin)
+        .filter(
+            CreneauMedecin.est_ouvert.is_(True),
+            CreneauMedecin.date_fin <= limite_fermeture,
+        )
+        .update(
+            {CreneauMedecin.est_ouvert: False},
+            synchronize_session=False,
+        )
+    )
+    if nombre_creneaux_fermes:
+        db.commit()
 
 
 def _convertir_sortie(rendez_vous: RendezVous, patient: Patient) -> RendezVousOut:
@@ -201,6 +232,8 @@ def _ajouter_patient_au_creneau(
     patient: Patient,
     motif: str,
 ) -> RendezVous:
+    _verifier_creneau_reservable(creneau)
+    _verifier_quota_journalier(db, creneau.service_id, creneau.date_jour)
     reservation_existante = (
         db.query(RendezVous)
         .filter(
@@ -229,11 +262,106 @@ def _ajouter_patient_au_creneau(
         numero_file=numero_file,
         service_nom=service.nom,
         date_souhaitee=creneau.date_heure,
+        date_jour=creneau.date_jour,
         motif=motif,
         statut="en_attente",
     )
     db.add(rendez_vous)
+    db.flush()
+    _fermer_creneaux_quota_atteint(db, creneau.service_id, creneau.date_jour)
     return rendez_vous
+
+
+def _nombre_patients_jour(db: Session, service_id: uuid.UUID, date_jour: date) -> int:
+    return (
+        db.query(RendezVous)
+        .filter(
+            RendezVous.service_id == service_id,
+            RendezVous.date_jour == date_jour,
+            RendezVous.statut.notin_(("annule", "refuse")),
+        )
+        .count()
+    )
+
+
+def _verifier_quota_journalier(
+    db: Session, service_id: uuid.UUID, date_jour: date
+) -> None:
+    quota = (
+        db.query(QuotaRendezVousJournalier)
+        .filter(
+            QuotaRendezVousJournalier.service_id == service_id,
+            QuotaRendezVousJournalier.date_jour == date_jour,
+        )
+        .with_for_update()
+        .first()
+    )
+    if quota is not None and _nombre_patients_jour(db, service_id, date_jour) >= quota.limite:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Le quota journalier de rendez-vous de ce service est atteint.",
+        )
+
+
+def _fermer_creneaux_quota_atteint(
+    db: Session, service_id: uuid.UUID, date_jour: date
+) -> None:
+    quota = (
+        db.query(QuotaRendezVousJournalier)
+        .filter(
+            QuotaRendezVousJournalier.service_id == service_id,
+            QuotaRendezVousJournalier.date_jour == date_jour,
+        )
+        .first()
+    )
+    if quota is not None and _nombre_patients_jour(db, service_id, date_jour) >= quota.limite:
+        db.query(CreneauMedecin).filter(
+            CreneauMedecin.service_id == service_id,
+            CreneauMedecin.date_jour == date_jour,
+        ).update({CreneauMedecin.est_ouvert: False}, synchronize_session=False)
+
+
+def _configurer_quota_journalier(
+    db: Session, service_id: uuid.UUID, date_jour: date, limite: int
+) -> None:
+    quota = (
+        db.query(QuotaRendezVousJournalier)
+        .filter(
+            QuotaRendezVousJournalier.service_id == service_id,
+            QuotaRendezVousJournalier.date_jour == date_jour,
+        )
+        .with_for_update()
+        .first()
+    )
+    nombre_patients = _nombre_patients_jour(db, service_id, date_jour)
+    if limite < nombre_patients:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Le quota ne peut pas être inférieur au nombre de rendez-vous déjà pris.",
+        )
+    if quota is None:
+        db.add(QuotaRendezVousJournalier(
+            service_id=service_id,
+            date_jour=date_jour,
+            limite=limite,
+        ))
+        db.flush()
+    else:
+        quota.limite = limite
+
+
+def _creer_patient_sans_compte(
+    db: Session, donnees: PatientSansCompteSchema
+) -> Patient:
+    patient = Patient(
+        utilisateur_id=None,
+        nom=donnees.nom,
+        prenoms=donnees.prenoms,
+        telephone=donnees.telephone,
+    )
+    db.add(patient)
+    db.flush()
+    return patient
 
 
 def _sortie_creneau(db: Session, creneau: CreneauMedecin, service: Service) -> CreneauOut:
@@ -245,14 +373,27 @@ def _sortie_creneau(db: Session, creneau: CreneauMedecin, service: Service) -> C
         )
         .count()
     )
+    quota = (
+        db.query(QuotaRendezVousJournalier)
+        .filter(
+            QuotaRendezVousJournalier.service_id == creneau.service_id,
+            QuotaRendezVousJournalier.date_jour == creneau.date_jour,
+        )
+        .first()
+    )
     return CreneauOut(
         id=creneau.id,
         service_id=service.id,
         service_nom=service.nom,
         date_heure=creneau.date_heure,
         date_fin=creneau.date_fin,
+        date_jour=creneau.date_jour,
         est_ouvert=creneau.est_ouvert,
         nombre_patients=nombre_patients,
+        nombre_patients_jour=_nombre_patients_jour(
+            db, creneau.service_id, creneau.date_jour
+        ),
+        quota_journalier=quota.limite if quota is not None else None,
     )
 
 
@@ -296,6 +437,7 @@ def lister_creneaux(
     utilisateur_courant: Utilisateur = Depends(obtenir_utilisateur_courant),
     db: Session = Depends(obtenir_db),
 ):
+    _fermer_creneaux_expires(db)
     requete = (
         db.query(CreneauMedecin, Service)
         .join(Service, CreneauMedecin.service_id == Service.id)
@@ -304,7 +446,10 @@ def lister_creneaux(
     if utilisateur_courant.role == RoleUtilisateur.PATIENT:
         if utilisateur_courant.patient is None:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Profil patient introuvable.")
-        requete = requete.filter(CreneauMedecin.date_heure > datetime.now(timezone.utc))
+        requete = requete.filter(
+            CreneauMedecin.date_fin
+            > datetime.now(timezone.utc) - DELAI_FERMETURE_CRENEAU
+        )
     else:
         service_personnel = utilisateur_courant.personnel.service if utilisateur_courant.personnel else None
         if not service_personnel:
@@ -331,6 +476,18 @@ def creer_creneau(
     if service is None or not service.est_actif:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service actif introuvable.")
     _verifier_service_personnel(utilisateur_courant, service)
+    date_jour = donnees.date_jour or donnees.date_heure.date()
+    maintenant = datetime.now(timezone.utc)
+    if (
+        (donnees.patient_id is not None or donnees.nouveau_patient is not None)
+        and (
+            donnees.date_fin + DELAI_FERMETURE_CRENEAU <= maintenant
+        )
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Un patient ne peut pas être ajouté à un créneau terminé.",
+        )
     doublon = (
         db.query(CreneauMedecin)
         .filter(
@@ -342,20 +499,33 @@ def creer_creneau(
     if doublon:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Un créneau existe déjà à cette date.")
 
-    creneau = CreneauMedecin(
-        service_id=service.id,
-        date_heure=donnees.date_heure,
-        date_fin=donnees.date_fin,
-        est_ouvert=True,
-    )
-    db.add(creneau)
     try:
+        _configurer_quota_journalier(
+            db, service.id, date_jour, donnees.quota_journalier
+        )
+        nombre_patients = _nombre_patients_jour(db, service.id, date_jour)
+        creneau = CreneauMedecin(
+            service_id=service.id,
+            date_heure=donnees.date_heure,
+            date_fin=donnees.date_fin,
+            date_jour=date_jour,
+            est_ouvert=(
+                nombre_patients < donnees.quota_journalier
+                and donnees.date_fin + DELAI_FERMETURE_CRENEAU > maintenant
+            ),
+        )
+        db.add(creneau)
         db.flush()
-        if donnees.patient_id is not None:
-            patient = db.get(Patient, donnees.patient_id)
+        if donnees.patient_id is not None or donnees.nouveau_patient is not None:
+            patient = (
+                db.get(Patient, donnees.patient_id)
+                if donnees.patient_id is not None
+                else _creer_patient_sans_compte(db, donnees.nouveau_patient)
+            )
             if patient is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient introuvable.")
             _ajouter_patient_au_creneau(db, creneau, service, patient, donnees.motif)
+        _fermer_creneaux_quota_atteint(db, service.id, date_jour)
         db.commit()
     except IntegrityError as erreur:
         db.rollback()
@@ -397,6 +567,34 @@ def modifier_creneau(
         if doublon:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Un créneau existe déjà à cette date.")
 
+        nouvelle_date_jour = donnees.date_jour or donnees.date_heure.date()
+        if nouvelle_date_jour != creneau.date_jour:
+            reservations_du_creneau = (
+                db.query(RendezVous)
+                .filter(
+                    RendezVous.creneau_id == creneau.id,
+                    RendezVous.statut.notin_(("annule", "refuse")),
+                )
+                .count()
+            )
+            quota_destination = (
+                db.query(QuotaRendezVousJournalier)
+                .filter(
+                    QuotaRendezVousJournalier.service_id == service.id,
+                    QuotaRendezVousJournalier.date_jour == nouvelle_date_jour,
+                )
+                .with_for_update()
+                .first()
+            )
+            if quota_destination is not None and (
+                _nombre_patients_jour(db, service.id, nouvelle_date_jour)
+                + reservations_du_creneau
+                > quota_destination.limite
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Le déplacement dépasserait le quota journalier du service.",
+                )
         decalage = donnees.date_heure - creneau.date_heure
         rendez_vous_actifs = (
             db.query(RendezVous)
@@ -407,6 +605,7 @@ def modifier_creneau(
             .all()
         )
         for rendez_vous in rendez_vous_actifs:
+            rendez_vous.date_jour = nouvelle_date_jour
             if rendez_vous.statut == "confirme" and rendez_vous.date_confirmee is not None:
                 nouvelle_date_confirmee = rendez_vous.date_confirmee + decalage
                 conflit = (
@@ -432,9 +631,36 @@ def modifier_creneau(
             rendez_vous.date_souhaitee += decalage
         creneau.date_heure = donnees.date_heure
         creneau.date_fin = donnees.date_fin
+        creneau.date_jour = nouvelle_date_jour
+        _fermer_creneaux_quota_atteint(db, service.id, nouvelle_date_jour)
+    if donnees.quota_journalier is not None:
+        _configurer_quota_journalier(
+            db, service.id, creneau.date_jour, donnees.quota_journalier
+        )
+        _fermer_creneaux_quota_atteint(db, service.id, creneau.date_jour)
     if donnees.est_ouvert is not None:
-        if donnees.est_ouvert and creneau.date_heure <= datetime.now(timezone.utc):
+        if donnees.est_ouvert and (
+            creneau.date_fin
+            <= datetime.now(timezone.utc) - DELAI_FERMETURE_CRENEAU
+        ):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Un créneau passé ne peut pas être rouvert.")
+        if donnees.est_ouvert:
+            _verifier_quota_journalier(db, creneau.service_id, creneau.date_jour)
+            quota = (
+                db.query(QuotaRendezVousJournalier)
+                .filter(
+                    QuotaRendezVousJournalier.service_id == creneau.service_id,
+                    QuotaRendezVousJournalier.date_jour == creneau.date_jour,
+                )
+                .first()
+            )
+            if quota is not None and _nombre_patients_jour(
+                db, creneau.service_id, creneau.date_jour
+            ) >= quota.limite:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Le quota journalier de rendez-vous de ce service est atteint.",
+                )
         creneau.est_ouvert = donnees.est_ouvert
     try:
         db.commit()
@@ -472,9 +698,18 @@ def ajouter_patient_creneau(
     if service is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service introuvable.")
     _verifier_service_personnel(utilisateur_courant, service)
-    if not creneau.est_ouvert or creneau.date_heure <= datetime.now(timezone.utc):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ce créneau est fermé ou passé.")
-    patient = db.get(Patient, donnees.patient_id)
+    try:
+        _verifier_creneau_reservable(creneau)
+    except HTTPException as erreur:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ce créneau est fermé ou passé.",
+        ) from erreur
+    patient = (
+        db.get(Patient, donnees.patient_id)
+        if donnees.patient_id is not None
+        else _creer_patient_sans_compte(db, donnees.nouveau_patient)
+    )
     if patient is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient introuvable.")
     rendez_vous = _ajouter_patient_au_creneau(db, creneau, service, patient, donnees.motif)
@@ -516,8 +751,7 @@ def reserver_creneau(
     service = db.get(Service, creneau.service_id)
     if service is None or not service.est_actif:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service actif introuvable.")
-    if not creneau.est_ouvert or creneau.date_heure <= datetime.now(timezone.utc):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ce créneau n'est plus disponible.")
+    _verifier_creneau_reservable(creneau)
 
     rendez_vous = _ajouter_patient_au_creneau(db, creneau, service, patient, donnees.motif)
     try:
@@ -549,6 +783,8 @@ def creer_rendez_vous(
     service = db.get(Service, donnees.service_id)
     if service is None or not service.est_actif:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service actif introuvable.")
+    date_jour = donnees.date_souhaitee.date()
+    _verifier_quota_journalier(db, service.id, date_jour)
 
     reservation_existante = (
         db.query(RendezVous)
@@ -570,11 +806,14 @@ def creer_rendez_vous(
         service_id=service.id,
         service_nom=service.nom,
         date_souhaitee=donnees.date_souhaitee,
+        date_jour=date_jour,
         motif=donnees.motif,
         statut="en_attente",
     )
     db.add(rendez_vous)
     try:
+        db.flush()
+        _fermer_creneaux_quota_atteint(db, service.id, date_jour)
         db.commit()
     except IntegrityError as erreur:
         db.rollback()
@@ -674,6 +913,16 @@ def modifier_rendez_vous(
 
         if donnees.statut == "confirme":
             date_confirmation_precedente = rendez_vous.date_confirmee
+            date_jour_confirmee = date_confirmee.date()
+            if rendez_vous.service_id is not None and date_jour_confirmee != rendez_vous.date_jour:
+                _verifier_quota_journalier(
+                    db, rendez_vous.service_id, date_jour_confirmee
+                )
+                rendez_vous.date_jour = date_jour_confirmee
+                db.flush()
+                _fermer_creneaux_quota_atteint(
+                    db, rendez_vous.service_id, date_jour_confirmee
+                )
             rendez_vous.date_confirmee = date_confirmee
             if rendez_vous.statut != "confirme" or date_confirmation_precedente != date_confirmee:
                 rendez_vous.date_confirmee_vue = None

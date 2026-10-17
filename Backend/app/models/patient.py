@@ -15,9 +15,9 @@ class Patient(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    utilisateur_id: Mapped[uuid.UUID] = mapped_column(
+    utilisateur_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("utilisateurs.id", ondelete="CASCADE"),
-        unique=True, nullable=False,
+        unique=True, nullable=True,
     )
     nom: Mapped[str] = mapped_column(String(100), nullable=False)
     prenoms: Mapped[str] = mapped_column(String(150), nullable=False)
@@ -31,4 +31,3 @@ class Patient(Base):
     )
 
     utilisateur = relationship("Utilisateur", back_populates="patient")
-    consultations = relationship("Consultation", back_populates="patient")

@@ -211,7 +211,7 @@ export default function AuthCENHOSOA({ onBackToHome, onConnexion, espacePersonne
           {!espacePersonnel && <div className={`absolute top-0 left-0 w-[45%] h-full flex flex-col items-center justify-center text-center px-10 z-20 transition-all duration-500 ${estInscription ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 pointer-events-none'}`}>
             <h2 className="text-3xl font-bold text-white tracking-tight">Déjà inscrit ?</h2>
             <p className="text-xs text-white/85 max-w-[240px] mx-auto leading-relaxed mt-4">
-              Connectez-vous à votre espace patient CENHOSOA pour accéder à vos rendez-vous et à votre dossier médical.
+              Connectez-vous à votre espace patient CENHOSOA pour consulter et gérer vos rendez-vous.
             </p>
             <button
               type="button"

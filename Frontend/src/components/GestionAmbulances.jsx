@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Ambulance, ArrowRight, CheckCircle2, MapPin, Navigation, ShieldCheck,
-  TimerReset, UserRound, LogOut, AlertCircle, Clock, Siren, X,
+  TimerReset, UserRound, LogOut, AlertCircle, Clock, RefreshCw, Siren, X,
 } from 'lucide-react';
 import {
   confirmerDemandeAmbulance,
@@ -11,8 +11,9 @@ import {
   obtenirTokenStocke,
 } from '../services/api';
 import logoCenhosoa from '../assets/logo/logo.jpeg';
-import { StylesEspace, Compteur, BandeauPage, BTN_CLAIR, BTN_VERRE } from './StylesEspace';
+import { StylesEspace, BandeauPage, BTN_CLAIR, BTN_VERRE } from './StylesEspace';
 import { ecouterDonneesModifiees } from '../services/tempsReel';
+import FenetreFormulaire from './FenetreFormulaire';
 
 const DELAI_DECHARGEMENT_MINUTES = 30;
 const DELAI_BIONETTOYAGE_MINUTES = 45;
@@ -115,7 +116,7 @@ function normaliserMission(mission) {
   };
 }
 
-export default function GestionAmbulances({ profil, onDeconnexion }) {
+export default function GestionAmbulances({ profil, onDeconnexion, embedded = false }) {
   const [ambulances, fixerAmbulances] = useState([]);
   const [missions, fixerMissions] = useState([]);
   const [demandeAConfirmer, fixerDemandeAConfirmer] = useState(null);
@@ -137,9 +138,11 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
   const [simulationEnCours, fixerSimulationEnCours] = useState(false);
   const [rechargement, fixerRechargement] = useState(0);
   const [litsChoisis, fixerLitsChoisis] = useState({});
+  const [retardsDeclares, fixerRetardsDeclares] = useState({});
   const [transitionEnCours, setTransitionEnCours] = useState('');
   const [confirmationEnCours, fixerConfirmationEnCours] = useState(false);
   const [ambulanceConfirmation, fixerAmbulanceConfirmation] = useState('');
+  const [creationMissionOuverte, fixerCreationMissionOuverte] = useState(false);
   const [maintenant, fixerMaintenant] = useState(0);
 
   const token = obtenirTokenStocke();
@@ -342,14 +345,20 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
     fixerItineraireIndex(0);
     fixerAmbulanceSelectionnee(prochaineAmbulance?.id || '');
     fixerRechargement((precedent) => precedent + 1);
+    fixerCreationMissionOuverte(false);
   };
 
-  const avancerMission = async (mission, statutSuivant, litId = null) => {
+  const avancerMission = async (mission, statutSuivant, litId = null, minutesRetard = null) => {
     setTransitionEnCours(`${mission.id}:${statutSuivant}`);
     fixerErreur('');
     try {
-      await transitionnerMissionAmbulance(token, mission.id, statutSuivant, litId);
+      await transitionnerMissionAmbulance(token, mission.id, statutSuivant, litId, minutesRetard);
       fixerLitsChoisis((precedents) => {
+        const suivants = { ...precedents };
+        delete suivants[mission.id];
+        return suivants;
+      });
+      fixerRetardsDeclares((precedents) => {
         const suivants = { ...precedents };
         delete suivants[mission.id];
         return suivants;
@@ -387,11 +396,11 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
   };
 
   return (
-    <div className="espace min-h-screen bg-[#F4F2EE] font-body text-[#1E2333]">
+    <div className={embedded ? 'espace font-body text-[#1E2333]' : 'espace min-h-screen bg-[#F4F2EE] font-body text-[#1E2333]'}>
       <StylesEspace />
       {demandeAConfirmer && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm" role="presentation">
-          <section role="dialog" aria-modal="true" aria-labelledby="titre-demande-a-confirmer" className="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+          <section role="dialog" aria-modal="true" aria-labelledby="titre-demande-a-confirmer" className="max-h-[92dvh] w-full max-w-xl overflow-y-auto overscroll-contain rounded-3xl bg-white shadow-2xl">
             <header className="flex items-start justify-between gap-4 bg-gradient-to-r from-red-700 to-red-600 px-6 py-5 text-white">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15"><Siren className="h-6 w-6" /></span>
@@ -431,7 +440,7 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
           </section>
         </div>
       )}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-[#0A2233] via-[#0F3D52] to-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20 backdrop-blur-xl">
+      {!embedded && <header className="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-[#0A2233] via-[#0F3D52] to-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20 backdrop-blur-xl">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <div className="group flex min-w-0 items-center space-x-3.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white p-1.5 shadow-md shadow-black/20 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2 sm:h-14 sm:w-14">
@@ -458,9 +467,9 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
             </button>
           </div>
         </div>
-      </header>
+      </header>}
 
-      <main className="mx-auto max-w-[1440px] space-y-7 px-4 py-7 sm:px-7 lg:px-10 lg:py-9">
+      <main className={embedded ? 'space-y-5' : 'mx-auto max-w-[1440px] space-y-7 px-4 py-7 sm:px-7 lg:px-10 lg:py-9'}>
         {erreur && (
           <div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
@@ -473,13 +482,21 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
           titre="Coordonner les départs,"
           accent="suivre chaque mission."
           sousTitre="Consultez la disponibilité de la flotte, planifiez un trajet et suivez les retours au centre."
-          actions={<><a href="#nouvelle-mission" className={BTN_CLAIR}><Ambulance size={17} /> Nouvelle mission</a><a href="#missions" className={BTN_VERRE}><Clock size={17} /> Missions en cours</a></>}
-          stats={[
-            { libelle: 'Véhicules disponibles', valeur: chargement ? '—' : ambulances.filter((ambulance) => ambulance.statut === 'disponible').length },
-            { libelle: 'Missions en cours', valeur: chargement ? '—' : missionsActives.length },
-            { libelle: 'Lits libres · Urgences', valeur: chargement ? '—' : litsUrgenceDisponibles.filter((lit) => lit.categorie === 'urgence').length },
-            { libelle: 'En mission', valeur: chargement ? '—' : ambulances.filter((ambulance) => ambulance.statut !== 'disponible').length },
-          ]}
+          actions={<>
+            <button
+              type="button"
+              onClick={() => {
+                fixerChargement(true);
+                fixerRechargement((precedent) => precedent + 1);
+              }}
+              disabled={chargement}
+              className="inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm text-white transition hover:-translate-y-0.5 hover:bg-white/20 disabled:cursor-wait disabled:opacity-60"
+            >
+              <RefreshCw size={16} className={chargement ? 'animate-spin' : ''} /> Actualiser
+            </button>
+            <a href="#nouvelle-mission" className={BTN_CLAIR}><Ambulance size={17} /> Nouvelle mission</a>
+            <a href="#missions" className={BTN_VERRE}><Clock size={17} /> Missions en cours</a>
+          </>}
         />
 
         <section aria-labelledby="titre-flotte">
@@ -510,8 +527,11 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
         </section>
 
         <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(340px,0.85fr)_minmax(0,1.5fr)]">
-          <section id="nouvelle-mission" aria-labelledby="titre-creation" className="scroll-mt-28 xl:sticky xl:top-28 apparition rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm sm:p-6">
-            <div className="mb-5 flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.13em] text-[#5B7480]">Départ</p><h2 id="titre-creation" className="mt-1 text-lg font-bold">Créer une mission</h2></div><MapPin className="mt-1 text-[#1F7A8C]" size={20} /></div>
+          <section className="apparition rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm sm:p-6">
+            <div className="mb-5 flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.13em] text-[#5B7480]">Départ</p><h2 className="mt-1 text-lg font-bold">Nouvelle mission</h2></div><MapPin className="mt-1 text-[#1F7A8C]" size={20} /></div>
+            <button type="button" onClick={() => { fixerErreur(''); fixerCreationMissionOuverte(true); }} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#1F7A8C] px-5 text-sm font-bold text-white transition hover:bg-[#186575]"><Ambulance size={17} /> Créer une mission</button>
+          </section>
+          {creationMissionOuverte && <FenetreFormulaire titre="Créer une mission d’ambulance" description="Renseignez les informations du patient, l’itinéraire et l’ambulance à affecter." erreur={erreur} onFermer={() => fixerCreationMissionOuverte(false)} largeur="max-w-4xl">
             <form onSubmit={lancerMission} className="space-y-4">
               <label className="block text-sm font-semibold text-slate-700">Nom du patient
                 <input required maxLength={120} value={patient} onChange={(event) => fixerPatient(event.target.value)} placeholder="Nom et prénom" className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10" />
@@ -567,10 +587,10 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
 
               <button type="submit" disabled={chargement || simulationEnCours || !distance || !patient.trim() || !destination.trim() || (patientInfectieux && !motifInfectieux.trim()) || !ambulanceChoisie || ambulanceChoisie.statut !== 'disponible'} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#1F7A8C] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#186575] disabled:cursor-not-allowed disabled:opacity-50"><Ambulance size={17} />Affecter et réserver les lits</button>
             </form>
-          </section>
+          </FenetreFormulaire>}
 
           <section id="missions" aria-labelledby="titre-missions" className="scroll-mt-28 apparition space-y-4">
-            <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.13em] text-[#5B7480]">Suivi opérationnel</p><h2 id="titre-missions" className="mt-1 text-lg font-bold">Missions en cours <span className="ml-1 rounded-full bg-[#EAF1F1] px-2 py-0.5 text-xs text-[#0F3D52]">{missionsActives.length}</span></h2></div><span className="text-xs text-slate-500">Étapes et chronos déclarés par le gestionnaire</span></div>
+            <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.13em] text-[#5B7480]">Suivi opérationnel</p><h2 id="titre-missions" className="mt-1 text-lg font-bold">Missions en cours <span className="ml-1 rounded-full bg-[#EAF1F1] px-2 py-0.5 text-xs text-[#0F3D52]">{missionsActives.length}</span></h2></div><span className="text-xs text-slate-500">ETA aller-retour · retard communiqué au retour</span></div>
             {!missionsActives.length ? <div className="rounded-2xl border border-dashed border-[#D5DEE0] bg-white px-5 py-12 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF1F1] text-[#5B7480]"><Ambulance size={22} /></div><p className="mt-3 text-sm font-semibold text-slate-700">Aucune mission en cours</p><p className="mt-1 text-xs text-slate-500">Les départs enregistrés apparaîtront ici.</p></div> : missionsActives.map((mission) => {
               const statut = mission.statut === 'en_cours' ? 'assigne' : mission.statut;
               const indexEtape = ETAPES_MISSION.indexOf(statut);
@@ -595,21 +615,21 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
               ].filter((lit) => lit.id);
               const litChoisi = litsChoisis[mission.id] || (litsDestines.length === 1 ? litsDestines[0].id : '');
               const transitionSuivante = {
-                assigne: 'sur_les_lieux',
+                assigne: 'arrive_urgences',
                 sur_les_lieux: 'en_transport',
                 en_transport: 'arrive_urgences',
                 arrive_urgences: 'en_bionettoyage',
                 en_bionettoyage: 'terminee',
               }[statut];
               const actionSuivante = {
-                assigne: 'Confirmer · sur les lieux',
+                assigne: 'Marquer l’arrivée au CENHOSOA',
                 sur_les_lieux: 'Début du transport',
                 en_transport: 'Arrivée aux Urgences',
                 arrive_urgences: mission.patientInfectieux ? 'Décharge · démarrer le bionettoyage' : 'Patient déchargé · bionettoyage',
                 en_bionettoyage: 'Terminer · libérer l’ambulance',
               }[statut];
               const etiquetteEta = statut === 'assigne'
-                ? `Arrivée théorique au patient · ${formaterCompte(dureeRestante(mission.heureDepart, mission.dureeAller, maintenant))}`
+                ? `Retour estimé au CENHOSOA · ${formaterCompte(dureeRestante(mission.heureDepart, mission.dureeAller + mission.dureeRetour, maintenant))}`
                 : statut === 'en_transport'
                   ? `Arrivée théorique au CENHOSOA · ${formaterCompte(dureeRestante(mission.heureTransport, mission.dureeRetour, maintenant))}`
                   : statut === 'arrive_urgences'
@@ -642,10 +662,37 @@ export default function GestionAmbulances({ profil, onDeconnexion }) {
                     </div>
                     {etiquetteEta && <div role={estAlerteDechargement ? 'alert' : 'status'} className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-bold tabular-nums ${estAlerteDechargement ? 'animate-pulse border-red-300 bg-red-50 text-red-800 motion-reduce:animate-none' : 'border-amber-200 bg-amber-50 text-amber-900'}`}><TimerReset size={16} />{etiquetteEta}</div>}
                     <div className="flex flex-wrap items-end gap-3">
-                      {statut === 'en_transport' && litsDestines.length > 1 && <label className="text-xs font-semibold text-slate-700">Lit effectif à l’arrivée
+                      {(statut === 'assigne' || statut === 'en_transport') && litsDestines.length > 1 && <label className="text-xs font-semibold text-slate-700">Lit effectif à l’arrivée
                         <select value={litChoisi} onChange={(event) => fixerLitsChoisis((precedents) => ({ ...precedents, [mission.id]: event.target.value }))} className="mt-1 block h-10 min-w-48 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-[#1F7A8C]">{litsDestines.map((lit) => <option key={lit.id} value={lit.id}>{lit.numero} · {lit.categorie === 'dechocage' ? 'Déchoquage' : 'Salle septique'}</option>)}</select>
                       </label>}
-                      <button type="button" onClick={() => avancerMission(mission, transitionSuivante, statut === 'en_transport' ? litChoisi : null)} disabled={Boolean(transitionEnCours) || (statut === 'en_transport' && !litChoisi) || (statut === 'en_bionettoyage' && mission.patientInfectieux && tempsNettoyage > 0)} className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${estAlerteDechargement ? 'animate-pulse bg-red-600 hover:bg-red-700 motion-reduce:animate-none' : 'bg-[#0F3D52] hover:bg-[#0A2233]'}`}><ArrowRight size={15} />{prochaineEnCours ? 'Enregistrement…' : actionSuivante}</button>
+                      {statut === 'assigne' && <label className="text-xs font-semibold text-slate-700">
+                        Minutes de retard déclarées au retour
+                        <input
+                          type="number"
+                          min="0"
+                          max="1440"
+                          step="1"
+                          required
+                          inputMode="numeric"
+                          value={retardsDeclares[mission.id] ?? ''}
+                          onChange={(event) => fixerRetardsDeclares((precedents) => ({ ...precedents, [mission.id]: event.target.value }))}
+                          className="mt-1 block h-10 w-28 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-[#1F7A8C]"
+                        />
+                      </label>}
+                      <button
+                        type="button"
+                        onClick={() => avancerMission(
+                          mission,
+                          transitionSuivante,
+                          ['assigne', 'en_transport'].includes(statut) ? litChoisi : null,
+                          statut === 'assigne' ? Number(retardsDeclares[mission.id]) : null,
+                        )}
+                        disabled={Boolean(transitionEnCours)
+                          || (['assigne', 'en_transport'].includes(statut) && !litChoisi)
+                          || (statut === 'assigne' && (retardsDeclares[mission.id] === undefined || retardsDeclares[mission.id] === ''))
+                          || (statut === 'en_bionettoyage' && mission.patientInfectieux && tempsNettoyage > 0)}
+                        className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${estAlerteDechargement ? 'animate-pulse bg-red-600 hover:bg-red-700 motion-reduce:animate-none' : 'bg-[#0F3D52] hover:bg-[#0A2233]'}`}
+                      ><ArrowRight size={15} />{prochaineEnCours ? 'Enregistrement…' : actionSuivante}</button>
                       {statut === 'en_bionettoyage' && mission.patientInfectieux && tempsNettoyage > 0 && <span className="text-xs text-amber-800">Fin possible après le délai incompressible de 45 minutes.</span>}
                     </div>
                   </div>

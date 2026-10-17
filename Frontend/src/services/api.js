@@ -224,6 +224,34 @@ export function obtenirInfosCentre() {
   return requeteApi("/informations-centre");
 }
 
+export function listerActualites() {
+  return requeteApi("/actualites");
+}
+
+export function creerActualite(token, texte, details, photo) {
+  const formulaire = new FormData();
+  formulaire.append("texte", texte);
+  formulaire.append("details", details);
+  formulaire.append("fichier", photo);
+  return requeteApi("/actualites", {
+    method: "POST",
+    headers: enTeteAuth(token),
+    body: formulaire,
+  });
+}
+
+export function modifierActualite(token, actualiteId, texte, details, photo = null) {
+  const formulaire = new FormData();
+  formulaire.append("texte", texte);
+  formulaire.append("details", details);
+  if (photo) formulaire.append("fichier", photo);
+  return requeteApi(`/actualites/${actualiteId}`, {
+    method: "PATCH",
+    headers: enTeteAuth(token),
+    body: formulaire,
+  });
+}
+
 export function listerRendezVous(token) {
   return requeteApi("/rendez-vous", { headers: enTeteAuth(token) });
 }
@@ -296,32 +324,23 @@ export function listerPatientsPourCreneau(token) {
   return requeteApi("/rendez-vous/patients", { headers: enTeteAuth(token) });
 }
 
-export function obtenirDossierMedical(token, patientId) {
-  return requeteApi(`/dossiers-medicaux/patients/${patientId}`, {
-    headers: enTeteAuth(token),
-  });
-}
-
-export function obtenirDossierCompletPatient(token, patientId) {
-  return requeteApi(`/dossiers-medicaux/patients/${patientId}/complet`, {
-    headers: enTeteAuth(token),
-  });
-}
-
-export function creerConsultation(token, rendezVousId, donnees) {
-  return requeteApi(`/dossiers-medicaux/rendez-vous/${rendezVousId}/consultations`, {
-    method: "POST",
-    headers: enTeteAuth(token),
-    body: JSON.stringify(donnees),
-  });
-}
-
 export function listerLits(token) {
   return requeteApi("/lits", { headers: enTeteAuth(token) });
 }
 
 export function obtenirResumeLits(token) {
   return requeteApi("/lits/resume", { headers: enTeteAuth(token) });
+}
+
+export function listerHistoriqueLits(token, limit = 100, offset = 0) {
+  const parametres = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  return requeteApi(`/lits/historique?${parametres}`, { headers: enTeteAuth(token) });
+}
+
+export function obtenirHistoriquePatient(token, patientHistoriqueId) {
+  return requeteApi(`/lits/historique/patients/${patientHistoriqueId}`, {
+    headers: enTeteAuth(token),
+  });
 }
 
 export function creerCategorieLit(token, donnees) {
@@ -388,10 +407,11 @@ export function annulerReservationTransfertLit(token, litDestinationId, litSourc
   });
 }
 
-export function libererLit(token, litId) {
+export function libererLit(token, litId, donnees = { type_fin: "sortie" }) {
   return requeteApi(`/lits/${litId}/liberer`, {
     method: "POST",
     headers: enTeteAuth(token),
+    body: JSON.stringify(donnees),
   });
 }
 
@@ -584,11 +604,11 @@ export function terminerMissionAmbulance(token, missionId, minutesSurPlace, litI
   });
 }
 
-export function transitionnerMissionAmbulance(token, missionId, statut, litId = null) {
+export function transitionnerMissionAmbulance(token, missionId, statut, litId = null, minutesRetard = null) {
   return requeteApi(`/ambulances/missions/${missionId}/transition`, {
     method: "POST",
     headers: enTeteAuth(token),
-    body: JSON.stringify({ statut, lit_id: litId }),
+    body: JSON.stringify({ statut, lit_id: litId, minutes_retard: minutesRetard }),
   });
 }
 

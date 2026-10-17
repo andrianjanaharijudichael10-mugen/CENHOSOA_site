@@ -11,7 +11,6 @@ from app.api.v1.endpoints.utilisateurs import (
     supprimer_compte_personnel,
 )
 from app.models.ambulance import Ambulance, MissionAmbulance
-from app.models.consultation import Consultation
 from app.models.enums import RoleUtilisateur
 from app.models.service import Service
 from app.models.utilisateur import Utilisateur
@@ -190,16 +189,6 @@ def test_superadmin_can_delete_personnel_account_and_its_profile():
         role=RoleUtilisateur.MEDECIN,
     )
 
-    class RequeteFictive:
-        def join(self, *args):
-            return self
-
-        def filter(self, *conditions):
-            return self
-
-        def count(self):
-            return 0
-
     class SessionFictive:
         supprime = None
         est_validee = False
@@ -208,10 +197,6 @@ def test_superadmin_can_delete_personnel_account_and_its_profile():
             assert modele is Utilisateur
             assert identifiant == compte_personnel.id
             return compte_personnel
-
-        def query(self, modele):
-            assert modele is Consultation
-            return RequeteFictive()
 
         def delete(self, objet):
             self.supprime = objet
@@ -225,58 +210,6 @@ def test_superadmin_can_delete_personnel_account_and_its_profile():
     assert resultat is None
     assert session.supprime is compte_personnel
     assert session.est_validee
-
-
-def test_superadmin_cannot_delete_doctor_with_consultation_history():
-    superadmin = Utilisateur(
-        id=uuid.uuid4(),
-        identifiant="admin",
-        mot_de_passe_hash="hash",
-        role=RoleUtilisateur.SUPERADMIN,
-    )
-    medecin = Utilisateur(
-        id=uuid.uuid4(),
-        identifiant="MED-01",
-        mot_de_passe_hash="hash",
-        role=RoleUtilisateur.MEDECIN,
-    )
-
-    class RequeteFictive:
-        def join(self, *args):
-            return self
-
-        def filter(self, *conditions):
-            return self
-
-        def count(self):
-            return 1
-
-    class SessionFictive:
-        supprime = False
-        est_validee = False
-
-        def get(self, modele, identifiant):
-            assert modele is Utilisateur
-            return medecin
-
-        def query(self, modele):
-            assert modele is Consultation
-            return RequeteFictive()
-
-        def delete(self, objet):
-            self.supprime = True
-
-        def commit(self):
-            self.est_validee = True
-
-    session = SessionFictive()
-    with pytest.raises(HTTPException) as erreur:
-        supprimer_compte_personnel(medecin.id, superadmin, session)
-
-    assert erreur.value.status_code == 409
-    assert "Désactivez plutôt le compte." in erreur.value.detail
-    assert not session.supprime
-    assert not session.est_validee
 
 
 def test_superadmin_cannot_delete_own_account():

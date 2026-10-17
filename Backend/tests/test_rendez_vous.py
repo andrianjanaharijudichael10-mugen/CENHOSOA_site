@@ -7,6 +7,9 @@ from pydantic import ValidationError
 
 from app.api.v1.endpoints.rendez_vous import (
     _ajouter_patient_au_creneau,
+    _fermer_creneaux_quota_atteint,
+    _fermer_creneaux_expires,
+    _verifier_creneau_reservable,
     creer_rendez_vous,
     marquer_notification_rendez_vous_lue,
     modifier_creneau,
@@ -16,14 +19,16 @@ from app.api.v1.endpoints.rendez_vous import (
 from app.models.enums import RoleUtilisateur
 from app.models.patient import Patient
 from app.models.personnel import Personnel
-from app.models.rendez_vous import CreneauMedecin, RendezVous
+from app.models.rendez_vous import CreneauMedecin, QuotaRendezVousJournalier, RendezVous
 from app.models.service import Service
 from app.models.utilisateur import Utilisateur
 from app.schemas.rendez_vous import (
     CreationCreneauSchema,
     CreationRendezVousSchema,
+    AffectationPatientCreneauSchema,
     ModificationCreneauSchema,
     ModificationRendezVousSchema,
+    PatientSansCompteSchema,
 )
 
 
@@ -64,13 +69,14 @@ def test_superadmin_rendez_vous_statistics_are_aggregated_and_cover_six_months()
     }
 
 
-def test_slot_requires_a_future_timezone_aware_datetime():
+def test_slot_allows_past_start_times_but_requires_timezone_aware_datetimes():
     date_debut = datetime.now(timezone.utc) + timedelta(days=1)
     with pytest.raises(ValidationError):
         CreationCreneauSchema(
             service_id=uuid.uuid4(),
             date_heure=date_debut.replace(tzinfo=None),
             date_fin=date_debut + timedelta(hours=1),
+            quota_journalier=10,
         )
 
     with pytest.raises(ValidationError):
@@ -78,6 +84,7 @@ def test_slot_requires_a_future_timezone_aware_datetime():
             service_id=uuid.uuid4(),
             date_heure=date_debut,
             date_fin=date_debut.replace(tzinfo=None) + timedelta(hours=1),
+            quota_journalier=10,
         )
 
     with pytest.raises(ValidationError):
@@ -85,7 +92,39 @@ def test_slot_requires_a_future_timezone_aware_datetime():
             service_id=uuid.uuid4(),
             date_heure=date_debut,
             date_fin=date_debut,
+            quota_journalier=10,
         )
+
+    date_passee = datetime.now(timezone.utc) - timedelta(hours=3)
+    donnees = CreationCreneauSchema(
+        service_id=uuid.uuid4(),
+        date_heure=date_passee,
+        date_fin=date_passee + timedelta(hours=2),
+        quota_journalier=10,
+    )
+    assert donnees.date_heure == date_passee
+
+
+def test_started_slot_remains_reservable_until_the_end_of_its_period():
+    creneau = CreneauMedecin(
+        date_heure=datetime.now(timezone.utc) - timedelta(hours=1),
+        date_fin=datetime.now(timezone.utc) + timedelta(minutes=30),
+        est_ouvert=True,
+    )
+
+    _verifier_creneau_reservable(creneau)
+
+
+def test_ended_slot_cannot_be_reserved_after_the_grace_minute():
+    creneau = CreneauMedecin(
+        date_heure=datetime.now(timezone.utc) - timedelta(hours=3),
+        date_fin=datetime.now(timezone.utc) - timedelta(minutes=2),
+        est_ouvert=True,
+    )
+
+    with pytest.raises(HTTPException) as erreur:
+        _verifier_creneau_reservable(creneau)
+    assert erreur.value.status_code == 409
 
 
 def test_slot_schedule_modification_requires_valid_future_interval():
@@ -106,6 +145,115 @@ def test_slot_schedule_modification_requires_valid_future_interval():
         )
 
 
+def test_daily_quota_and_patient_without_account_are_validated():
+    debut = datetime.now(timezone.utc) + timedelta(days=1)
+    donnees = CreationCreneauSchema(
+        service_id=uuid.uuid4(),
+        date_heure=debut,
+        date_fin=debut + timedelta(hours=1),
+        date_jour=debut.date(),
+        quota_journalier=8,
+        nouveau_patient=PatientSansCompteSchema(
+            nom="Rabe",
+            prenoms="Miora",
+            telephone="+261331234567",
+        ),
+        motif="Consultation",
+    )
+    assert donnees.quota_journalier == 8
+    assert donnees.nouveau_patient is not None
+    assert donnees.nouveau_patient.telephone == "+261331234567"
+
+    with pytest.raises(ValidationError):
+        CreationCreneauSchema(
+            service_id=uuid.uuid4(),
+            date_heure=debut,
+            date_fin=debut + timedelta(hours=1),
+            quota_journalier=0,
+        )
+
+    with pytest.raises(ValidationError):
+        AffectationPatientCreneauSchema(motif="Consultation")
+
+
+def test_daily_quota_closes_all_service_slots_when_reached():
+    service_id = uuid.uuid4()
+    date_jour = datetime.now(timezone.utc).date()
+    quota = QuotaRendezVousJournalier(
+        service_id=service_id,
+        date_jour=date_jour,
+        limite=2,
+    )
+
+    class RequeteFictive:
+        def __init__(self, modele):
+            self.modele = modele
+            self.mise_a_jour = None
+
+        def filter(self, *conditions):
+            return self
+
+        def join(self, *conditions):
+            return self
+
+        def first(self):
+            return quota if self.modele is QuotaRendezVousJournalier else None
+
+        def count(self):
+            return 2
+
+        def update(self, valeurs, **options):
+            self.mise_a_jour = valeurs
+            return 1
+
+    class SessionFictive:
+        requete_creneau = None
+
+        def query(self, modele):
+            requete = RequeteFictive(modele)
+            if modele is CreneauMedecin:
+                self.requete_creneau = requete
+            return requete
+
+    session = SessionFictive()
+    _fermer_creneaux_quota_atteint(session, service_id, date_jour)
+
+    assert session.requete_creneau.mise_a_jour == {CreneauMedecin.est_ouvert: False}
+
+
+def test_expired_slots_are_closed_after_the_grace_minute():
+    class RequeteFictive:
+        def __init__(self):
+            self.mise_a_jour = None
+
+        def filter(self, *conditions):
+            self.conditions = conditions
+            return self
+
+        def update(self, valeurs, **options):
+            self.mise_a_jour = valeurs
+            return 1
+
+    class SessionFictive:
+        def __init__(self):
+            self.requete = RequeteFictive()
+            self.commit_effectue = False
+
+        def query(self, modele):
+            assert modele is CreneauMedecin
+            return self.requete
+
+        def commit(self):
+            self.commit_effectue = True
+
+    session = SessionFictive()
+    _fermer_creneaux_expires(session)
+
+    assert session.requete.mise_a_jour == {CreneauMedecin.est_ouvert: False}
+    assert len(session.requete.conditions) == 2
+    assert session.commit_effectue
+
+
 def test_doctor_can_move_slot_and_its_active_appointments(monkeypatch):
     date_debut = datetime.now(timezone.utc) + timedelta(days=2)
     creneau = CreneauMedecin(
@@ -113,6 +261,7 @@ def test_doctor_can_move_slot_and_its_active_appointments(monkeypatch):
         service_id=uuid.uuid4(),
         date_heure=date_debut,
         date_fin=date_debut + timedelta(hours=1),
+        date_jour=date_debut.date(),
         est_ouvert=True,
     )
     service = Service(id=creneau.service_id, nom="Neurologie", est_actif=True)
@@ -146,8 +295,14 @@ def test_doctor_can_move_slot_and_its_active_appointments(monkeypatch):
         def filter(self, *conditions):
             return self
 
+        def with_for_update(self):
+            return self
+
         def first(self):
             return None
+
+        def count(self):
+            return 0
 
         def all(self):
             return [rendez_vous]
@@ -163,6 +318,9 @@ def test_doctor_can_move_slot_and_its_active_appointments(monkeypatch):
             pass
 
         def refresh(self, objet):
+            pass
+
+        def flush(self):
             pass
 
     monkeypatch.setattr(
@@ -195,6 +353,7 @@ def test_adding_patient_to_slot_assigns_next_queue_number():
         service_id=service.id,
         date_heure=datetime.now(timezone.utc) + timedelta(days=2),
         date_fin=datetime.now(timezone.utc) + timedelta(days=2, hours=1),
+        date_jour=(datetime.now(timezone.utc) + timedelta(days=2)).date(),
         est_ouvert=True,
     )
 
@@ -205,6 +364,9 @@ def test_adding_patient_to_slot_assigns_next_queue_number():
         def filter(self, *conditions):
             return self
 
+        def join(self, *conditions):
+            return self
+
         def order_by(self, *conditions):
             return self
 
@@ -212,7 +374,13 @@ def test_adding_patient_to_slot_assigns_next_queue_number():
             return self
 
         def first(self):
-            return None if self.modele is RendezVous else (6,)
+            return None
+
+        def count(self):
+            return 0
+
+        def update(self, *args, **kwargs):
+            return 0
 
     class SessionFictive:
         def __init__(self):
@@ -226,6 +394,9 @@ def test_adding_patient_to_slot_assigns_next_queue_number():
 
         def add(self, objet):
             self.ajoute = objet
+
+        def flush(self):
+            pass
 
     class ResultatFictif:
         def __init__(self, numero_file):
@@ -256,6 +427,7 @@ def test_two_patients_get_distinct_queue_numbers_for_the_same_slot():
         service_id=service.id,
         date_heure=datetime.now(timezone.utc) + timedelta(days=2),
         date_fin=datetime.now(timezone.utc) + timedelta(days=2, hours=1),
+        date_jour=(datetime.now(timezone.utc) + timedelta(days=2)).date(),
         est_ouvert=True,
     )
 
@@ -263,8 +435,20 @@ def test_two_patients_get_distinct_queue_numbers_for_the_same_slot():
         def filter(self, *conditions):
             return self
 
+        def join(self, *conditions):
+            return self
+
+        def with_for_update(self):
+            return self
+
         def first(self):
             return None
+
+        def count(self):
+            return 0
+
+        def update(self, *args, **kwargs):
+            return 0
 
     class ResultatFictif:
         def __init__(self, numero_file):
@@ -278,7 +462,6 @@ def test_two_patients_get_distinct_queue_numbers_for_the_same_slot():
             self.numero_file = 0
 
         def query(self, modele):
-            assert modele is RendezVous
             return RequeteFictive()
 
         def execute(self, requete):
@@ -286,6 +469,9 @@ def test_two_patients_get_distinct_queue_numbers_for_the_same_slot():
             return ResultatFictif(self.numero_file)
 
         def add(self, rendez_vous):
+            pass
+
+        def flush(self):
             pass
 
     session = SessionFictive()
@@ -340,11 +526,17 @@ def test_patient_cannot_book_twice_in_same_service():
     service = Service(id=uuid.uuid4(), nom="Neurologie", est_actif=True)
 
     class RequeteFictive:
+        def __init__(self, modele):
+            self.modele = modele
+
         def filter(self, *conditions):
             return self
 
+        def with_for_update(self):
+            return self
+
         def first(self):
-            return object()
+            return None if self.modele is QuotaRendezVousJournalier else object()
 
     class SessionFictive:
         def get(self, modele, identifiant):
@@ -352,8 +544,7 @@ def test_patient_cannot_book_twice_in_same_service():
             return service
 
         def query(self, modele):
-            assert modele is RendezVous
-            return RequeteFictive()
+            return RequeteFictive(modele)
 
     with pytest.raises(HTTPException) as erreur:
         creer_rendez_vous(
@@ -814,6 +1005,7 @@ def test_confirmations_allow_same_waiting_list_slot_but_reject_other_slot_confli
             creneau_id=creneau_id,
             numero_file=2,
             date_souhaitee=date_rendez_vous,
+            date_jour=date_rendez_vous.date(),
             motif="Consultation",
             statut="en_attente",
             date_creation=datetime.now(timezone.utc),
@@ -827,6 +1019,7 @@ def test_confirmations_allow_same_waiting_list_slot_but_reject_other_slot_confli
             creneau_id=creneau_id if meme_creneau else uuid.uuid4(),
             numero_file=1,
             date_souhaitee=date_rendez_vous,
+            date_jour=date_rendez_vous.date(),
             date_confirmee=date_rendez_vous,
             motif="Consultation",
             statut="confirme",

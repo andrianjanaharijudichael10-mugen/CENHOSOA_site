@@ -6,6 +6,58 @@ body {
   font-family: 'Inter', ui-sans-serif, sans-serif;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+}
+
+html,
+body {
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+@supports (min-height: 100dvh) {
+  #root {
+    min-height: 100dvh;
+  }
+}
+
+@media (pointer: coarse) {
+  .espace input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .espace textarea,
+  .espace select {
+    font-size: 16px;
+  }
+}
+
+.modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 122, 140, 0.65) rgba(10, 34, 51, 0.08);
+}
+
+.modal-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(10, 34, 51, 0.08);
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(31, 122, 140, 0.65);
+}
+
 .font-display {
   font-family: 'Sora', ui-sans-serif, sans-serif;
 }

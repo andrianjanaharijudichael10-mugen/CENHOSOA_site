@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Phone, Calendar, Search, ShieldCheck, Award, Users, Ambulance,
-  Clock, HeartPulse, Stethoscope, Activity, FileText, MapPin,
+  Phone, Calendar, ShieldCheck, Award, Users, Ambulance,
+  Clock, HeartPulse, Stethoscope, Activity, MapPin,
   Mail, ChevronRight, Menu, X, ArrowRight, Star, Brain, Baby, ScanLine, User, Navigation, ExternalLink, ChevronLeft, LogOut, ChevronUp, ChevronDown
 } from 'lucide-react';
 
 import LoginCenhosoa from './components/LoginCenhosoa';
 import GestionRendezVousCenhosoa from './components/RendezVous';
-import GestionAmbulances from './components/GestionAmbulances';
 import SuperAdmin from './components/SuperAdmin';
-import TableauDeBordLits from './components/TableauDeBordLits';
+import GestionUrgences from './components/GestionUrgences';
 import DemandeAmbulancePatient from './components/DemandeAmbulancePatient';
 import {
   effacerTokens,
+  listerActualites,
   listerServices,
   obtenirProfil, obtenirTokenStocke,
 } from './services/api';
@@ -28,13 +28,6 @@ import logoAllAfrica from './assets/logo/logo_all_africa.png';
 const IMAGES_HERO = [
   { source: cenhosoaEntrance, alternative: "CENHOSOA Vue 1" },
   { source: image1787170777, alternative: "CENHOSOA Vue 2" }
-];
-
-const DONNEES_STATISTIQUES = [
-  { libelle: "Patients accueillis / an", valeur: 52000, suffixe: "+", icone: Users },
-  { libelle: "Spécialités médicales", valeur: 24, suffixe: "", icone: Stethoscope },
-  { libelle: "Praticiens experts", valeur: 180, suffixe: "+", icone: Award },
-  { libelle: "Années d'excellence", valeur: 135, suffixe: "", icone: Clock },
 ];
 
 const DONNEES_VALEURS = [
@@ -84,19 +77,11 @@ const ICONES_PAR_NOM_SERVICE = {
   "Imagerie Médicale": ScanLine,
 };
 
-const FONCTIONNALITES_PORTAIL = [
-  { titre: "Dossier médical en ligne", description: "Consultez vos résultats et votre historique de soins en toute sécurité.", icone: FileText },
-  { titre: "Rendez-vous instantané", description: "Réservez un créneau avec le praticien de votre choix en quelques clics.", icone: Calendar },
-  { titre: "Recherche de spécialiste", description: "Trouvez rapidement le bon service selon votre besoin médical.", icone: Search },
-  { titre: "Suivi personnalisé", description: "Recevez des rappels et un accompagnement adapté à votre parcours.", icone: Activity },
-];
-
 const LIENS_NAVIGATION = [
   { lien: '#accueil', libelle: 'Accueil' },
   { lien: '#specialites', libelle: 'Spécialités' },
-  { lien: '#services', libelle: 'Offre de soins' },
+  { lien: '#temoignages', libelle: 'Témoignages & Presse' },
   { lien: '#recherche', libelle: 'Localisation' },
-  { lien: '#temoignages', libelle: 'Témoignages' },
 ];
 
 const DONNEES_TEMOIGNAGES = [
@@ -124,6 +109,13 @@ const DONNEES_TEMOIGNAGES = [
     urlSource: "https://www.moov.mg/article/119985-hopital-militaire-de-soavinandriana-le-cenhosoa-celebre-135-ans-dhistoire-et-de-soins",
     urlLogo: logoMoov
   }
+];
+
+const DELAI_ROTATION_HERO = 15000; // 15 secondes
+
+// `debut` = partie en blanc, `accent` = partie estompée (comme "Antananarivo.")
+const ACTUALITES_HERO = [
+  { debut: "Des soins de référence, au cœur d'", accent: "Antananarivo." },
 ];
 
 /* ═════════════════════════════════════════════════════════════
@@ -255,38 +247,6 @@ const EstompageHero = ({ className = '', children }) => {
   );
 };
 
-// Carte 3D : inclinaison + halo lumineux qui suit le curseur
-const CarteInclinable = ({ children, className = '', force = 7 }) => {
-  const reference = useRef(null);
-
-  const surMouvement = (evenement) => {
-    if (evenement.pointerType !== 'mouse') return;
-    const noeud = reference.current;
-    if (!noeud) return;
-    const rect = noeud.getBoundingClientRect();
-    const x = (evenement.clientX - rect.left) / rect.width;
-    const y = (evenement.clientY - rect.top) / rect.height;
-    noeud.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
-    noeud.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
-    noeud.style.transform = `perspective(900px) rotateX(${((0.5 - y) * force).toFixed(2)}deg) rotateY(${((x - 0.5) * force).toFixed(2)}deg) translate3d(0, -4px, 0)`;
-  };
-
-  const surSortie = () => {
-    if (reference.current) reference.current.style.transform = '';
-  };
-
-  return (
-    <div
-      ref={reference}
-      onPointerMove={surMouvement}
-      onPointerLeave={surSortie}
-      className={`carte-lueur transition-all duration-300 ease-out ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
-
 // Bouton magnétique : suit légèrement le curseur
 const Magnetique = ({ children, force = 0.22, className = '' }) => {
   const reference = useRef(null);
@@ -316,12 +276,17 @@ const Magnetique = ({ children, force = 0.22, className = '' }) => {
 };
 
 // Titre : apparition mot par mot
-const MotsAnimes = ({ texte, debut = 0, pas = 70, collant = false }) => {
+const MotsAnimes = ({ texte, debut = 0, pas = 70, collant = false, anime = true }) => {
   const mots = texte.split(' ');
   return mots.map((mot, index) => (
     <React.Fragment key={`${mot}-${index}`}>
       <span className="inline-block overflow-hidden align-bottom pb-[0.12em] -mb-[0.12em]">
-        <span className="mot-anim" style={{ animationDelay: `${debut + index * pas}ms` }}>{mot}</span>
+        <span
+          className={anime ? 'mot-anim' : 'inline-block'}
+          style={anime ? { animationDelay: `${debut + index * pas}ms` } : undefined}
+        >
+          {mot}
+        </span>
       </span>
       {!(collant && index === mots.length - 1) && ' '}
     </React.Fragment>
@@ -619,11 +584,11 @@ const BarreNavigation = ({
   }, []);
 
   const solide = defile || menuMobileOuvert;
-  const liens = LIENS_NAVIGATION.filter(({ lien }) => profil?.role !== 'patient' || lien !== '#services');
+  const liens = LIENS_NAVIGATION;
   const estPatient = profil?.role === 'patient';
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${solide ? 'bg-white/80 backdrop-blur-xl border-b border-black/5 text-[#0A2233]' : 'bg-transparent text-white'} ${defile ? 'shadow-[0_8px_30px_-12px_rgba(10,34,51,0.25)]' : ''}`}>
+    <header     className={`fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-500 ${solide ? 'bg-white/80 backdrop-blur-xl border-b border-black/5 text-[#0A2233]' : 'bg-transparent text-white'} ${defile ? 'shadow-[0_8px_30px_-12px_rgba(10,34,51,0.25)]' : ''}`}>
       <div className={`max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between transition-[height] duration-500 ${defile ? 'h-16' : 'h-20'}`}>
         <a href="#accueil" className="group flex items-center space-x-3">
           <div className="w-11 h-11 rounded-xl bg-white p-1.5 flex items-center justify-center overflow-hidden transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105">
@@ -783,145 +748,120 @@ const ModaleDetailService = ({ service, onFermer, onPrendreRdv }) => {
 
   if (!service) return null;
 
-  const classeBloc = 'animate-lien-in group relative flex items-start gap-4 rounded-2xl border border-black/5 bg-[#F4F2EE]/70 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1F7A8C]/30 hover:bg-white hover:shadow-[0_12px_30px_-14px_rgba(10,34,51,0.35)]';
-  const classePastille = 'w-10 h-10 rounded-xl bg-[#1F7A8C]/10 text-[#1F7A8C] flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#1F7A8C] group-hover:text-white group-hover:scale-110 group-hover:-rotate-6';
-  const classeLibelle = 'text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400';
-
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="titre-modale-service"
+      className={`${enFermeture ? 'animate-modale-fond-sortie' : 'animate-modale-fond'} fixed inset-0 z-[120] flex items-center justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6`}
+      role="presentation"
+      onMouseDown={(evenement) => {
+        if (evenement.target === evenement.currentTarget) fermerAvecAnimation();
+      }}
     >
-      <div
-        className={`${enFermeture ? 'animate-modale-fond-sortie' : 'animate-modale-fond'} absolute inset-0 bg-[#0A2233]/70 backdrop-blur-md cursor-pointer`}
-        onClick={fermerAvecAnimation}
-      />
-
-      <div className={`${enFermeture ? 'animate-modale-panneau-sortie' : 'animate-modale-panneau'} modale-scroll relative w-full max-w-xl overflow-hidden rounded-[30px] border border-white/10 bg-white shadow-[0_40px_100px_rgba(10,34,51,0.45)] max-h-[88vh] overflow-y-auto overscroll-contain`}>
-        <button
-          onClick={fermerAvecAnimation}
-          aria-label="Fermer"
-          className="group/fermer absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:rotate-90 hover:bg-white/20 active:scale-90"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#0A2233] via-[#0F3D52] to-[#1F7A8C] px-6 pb-6 pt-7 sm:px-8">
-          <div className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-white/12 blur-3xl" />
-          <div className="absolute -bottom-16 left-6 h-36 w-36 rounded-full bg-[#7FD1CB]/20 blur-3xl" />
-
-          <div className="relative flex items-center gap-4">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[22px] border border-white/20 bg-white/10 shadow-[0_20px_40px_rgba(10,34,51,0.25)] backdrop-blur-sm">
-              {service.photo_responsable_url ? (
-                <img
-                  src={service.photo_responsable_url}
-                  alt={service.responsable || service.nom}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="font-display text-3xl font-black text-white">
-                  {(service.responsable || service.nom).charAt(0)}
-                </span>
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1 text-left">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#B5E8E3]">Service médical</p>
-              <h3 id="titre-modale-service" className="mt-2 text-2xl font-display font-black leading-tight text-white">
-                {service.nom}
-              </h3>
-              {service.responsable && (
-                <p className="mt-1 text-sm font-medium text-white/75">{service.responsable}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="relative mt-5 flex flex-wrap gap-2">
-            {service.horaires && (
-              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white/85">
-                {service.horaires}
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titre-modale-service"
+        className={`${enFermeture ? 'animate-modale-panneau-sortie' : 'animate-modale-panneau'} modal-scrollbar relative grid max-h-[92dvh] w-full max-w-6xl overflow-x-hidden overflow-y-auto overscroll-contain bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)] md:grid-cols-[1.08fr_0.92fr] md:overflow-hidden`}
+      >
+        <div className="relative h-[min(46dvh,24rem)] min-h-[15rem] overflow-hidden bg-[#0A2233] md:h-auto md:min-h-[620px]">
+          {service.photo_responsable_url ? (
+            <img
+              src={service.photo_responsable_url}
+              alt={service.responsable ? `Photo de ${service.responsable}` : service.nom}
+              className="absolute inset-0 h-full w-full object-contain md:object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0F3D52]">
+              <Stethoscope className="h-24 w-24 text-white/25" strokeWidth={0.8} />
+              <span className="absolute font-display text-8xl font-light text-white/80">
+                {service.nom.charAt(0)}
               </span>
-            )}
-            {service.localisation && (
-              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white/85">
-                {service.localisation}
-              </span>
-            )}
-          </div>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#071A27]/35 via-transparent to-transparent md:from-[#071A27]/70 md:to-[#071A27]/10" />
+          <p className="absolute bottom-5 left-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/85 sm:bottom-7 sm:left-7">
+            CENHOSOA <span className="mx-2 text-[#7FD1CB]">/</span> Service hospitalier
+          </p>
         </div>
 
-        <div className="bg-[#F4F2EE] px-5 pb-5 pt-5 sm:px-6">
-          <div className="rounded-[24px] border border-[#0A2233]/5 bg-white p-4 shadow-[0_12px_30px_rgba(10,34,51,0.05)]">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#1F7A8C]/10 text-[#1F7A8C]">
-                <FileText className="h-4 w-4" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#0A2233]/65">Description</p>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">
-              {service.description || 'Description non renseignée.'}
+        <div className="relative flex min-h-0 flex-col px-6 pb-8 pt-7 sm:px-9 sm:pb-10 sm:pt-9 md:overflow-y-auto md:px-12 md:py-12">
+          <button
+            type="button"
+            onClick={fermerAvecAnimation}
+            aria-label="Fermer les informations du service"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center border border-[#0A2233]/10 text-[#0A2233]/70 transition-colors hover:border-[#0A2233] hover:bg-[#0A2233] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] sm:right-6 sm:top-6"
+          >
+            <X size={18} />
+          </button>
+          <div className="mb-7 pr-12 sm:mb-10">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1F7A8C]">
+              Service médical
             </p>
+            <div className="mt-4 h-px w-12 bg-[#7FD1CB]" />
+          </div>
+          <h2
+            id="titre-modale-service"
+            className="max-w-xl font-display text-3xl font-semibold leading-[1.13] tracking-[-0.035em] text-[#0A2233] sm:text-4xl lg:text-[2.75rem]"
+          >
+            {service.nom}
+          </h2>
+          {service.responsable && (
+            <p className="mt-3 text-sm font-medium text-[#43515A]">
+              Responsable : {service.responsable}
+            </p>
+          )}
+          <div className="my-7 h-px w-full bg-[#0A2233]/10 sm:my-9" />
+          <div className="max-w-xl whitespace-pre-line text-sm leading-7 text-[#43515A] sm:text-base sm:leading-8">
+            {service.description || 'Description non renseignée.'}
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <dl className="mt-8 divide-y divide-[#0A2233]/10 border-y border-[#0A2233]/10">
             {service.horaires && (
-              <div className="rounded-2xl border border-[#0A2233]/5 bg-white p-3 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1F7A8C]/10 text-[#1F7A8C]">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2233]/60">Horaires</p>
-                </div>
-                <p className="mt-3 text-sm text-slate-600">{service.horaires}</p>
+              <div className="grid gap-1 py-4 sm:grid-cols-[120px_1fr] sm:gap-4">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Horaires</dt>
+                <dd className="text-sm leading-relaxed text-[#43515A]">{service.horaires}</dd>
               </div>
             )}
-
             {service.localisation && (
-              <div className="rounded-2xl border border-[#0A2233]/5 bg-white p-3 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1F7A8C]/10 text-[#1F7A8C]">
-                    <MapPin className="h-4 w-4" />
-                  </div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2233]/60">Localisation</p>
-                </div>
-                <p className="mt-3 text-sm text-slate-600">{service.localisation}</p>
+              <div className="grid gap-1 py-4 sm:grid-cols-[120px_1fr] sm:gap-4">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Localisation</dt>
+                <dd className="text-sm leading-relaxed text-[#43515A]">{service.localisation}</dd>
               </div>
             )}
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-[#0A2233]/5 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1F7A8C]/10 text-[#1F7A8C]">
-                <Phone className="h-4 w-4" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2233]/60">Contact</p>
+            <div className="grid gap-1 py-4 sm:grid-cols-[120px_1fr] sm:gap-4">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Contact</dt>
+              <dd className="text-sm leading-relaxed text-[#43515A]">
+                {service.telephone ? (
+                  <a href={`tel:${service.telephone}`} className="transition-colors hover:text-[#1F7A8C]">
+                    {service.telephone}
+                  </a>
+                ) : 'Non renseigné'}
+              </dd>
             </div>
-            {service.telephone ? (
-              <a href={`tel:${service.telephone}`} className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#0A2233] transition-colors hover:text-[#1F7A8C]">
-                <span>{service.telephone}</span>
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            ) : (
-              <p className="mt-3 text-sm text-slate-600">Non renseigné</p>
-            )}
-          </div>
+          </dl>
 
           <button
+            type="button"
             onClick={onPrendreRdv}
-            className="btn-brillance mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1F7A8C] to-[#186575] px-5 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-white shadow-lg shadow-[#1F7A8C]/20 transition-all duration-300 hover:from-[#0F3D52] hover:to-[#1F7A8C] hover:shadow-xl hover:shadow-[#1F7A8C]/30 active:scale-[0.98]"
+            className="mt-8 inline-flex min-h-12 w-full items-center justify-center gap-3 bg-[#0A2233] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#1F7A8C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] focus-visible:ring-offset-2 active:scale-[0.99] sm:w-auto sm:self-start"
           >
             <Calendar className="h-4 w-4" />
             <span>Prendre rendez-vous</span>
+            <ArrowRight className="h-4 w-4" />
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
 
 const CHEMIN_CONNEXION_PERSONNEL = '/connexion-personnel';
+const ROLES_GESTION_URGENCES = [
+  'major',
+  'major_de_garde',
+  'regulateur_ambulance',
+  'chef_division_auto',
+  'chef_sim',
+];
 
 export default function PageCenhosoa() {
   const [menuMobileOuvert, fixerMenuMobileOuvert] = useState(false);
@@ -936,13 +876,50 @@ export default function PageCenhosoa() {
   const [afficherSuperAdmin, fixerAfficherSuperAdmin] = useState(false);
   const [profilUtilisateur, fixerProfilUtilisateur] = useState(null);
   
-  const [diapositiveCourante, fixerDiapositiveCourante] = useState(0);
   const [temoignageCourant, fixerTemoignageCourant] = useState(0);
+  const [actualiteCourante, fixerActualiteCourante] = useState(0);
+  const [actualitesPubliees, fixerActualitesPubliees] = useState([]);
+  const [actualiteDetailsOuverte, fixerActualiteDetailsOuverte] = useState(null);
 
   const [services, fixerServices] = useState([]);
   const [chargementServices, fixerChargementServices] = useState(true);
   const [serviceSelectionne, fixerServiceSelectionne] = useState(null);
   const [serviceActif, fixerServiceActif] = useState(0);
+  const actualitesHero = [
+    ...ACTUALITES_HERO.map((actualite, index) => ({
+      ...actualite,
+      id: `defaut-${index}`,
+      photo: IMAGES_HERO[index % IMAGES_HERO.length].source,
+    })),
+    ...actualitesPubliees.map((actualite) => ({
+      debut: actualite.texte,
+      accent: '',
+      id: actualite.id,
+      photo: actualite.photo_url || IMAGES_HERO[0].source,
+      details: actualite.details,
+      dateCreation: actualite.date_creation,
+    })),
+  ];
+  const indexActualiteHero = actualiteCourante % actualitesHero.length;
+  const changerActualite = (direction) => {
+    fixerActualiteCourante(
+      (courante) => (courante + direction + actualitesHero.length) % actualitesHero.length,
+    );
+  };
+
+  useEffect(() => {
+    if (!actualiteDetailsOuverte) return undefined;
+    const debordementPrecedent = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const fermerAvecEchap = (evenement) => {
+      if (evenement.key === 'Escape') fixerActualiteDetailsOuverte(null);
+    };
+    window.addEventListener('keydown', fermerAvecEchap);
+    return () => {
+      document.body.style.overflow = debordementPrecedent;
+      window.removeEventListener('keydown', fermerAvecEchap);
+    };
+  }, [actualiteDetailsOuverte]);
 
   const ouvrirRendezVous = (service = null) => {
     fixerServiceSelectionne(service);
@@ -988,6 +965,24 @@ export default function PageCenhosoa() {
   }, []);
 
   useEffect(() => {
+    let actif = true;
+    const chargerActualites = () => {
+      listerActualites()
+        .then((donnees) => {
+          if (actif) fixerActualitesPubliees(donnees);
+        })
+        .catch((err) => console.error('Erreur chargement actualités :', err));
+    };
+
+    chargerActualites();
+    const arreterEcoute = ecouterDonneesModifiees(['actualites'], chargerActualites);
+    return () => {
+      actif = false;
+      arreterEcoute();
+    };
+  }, []);
+
+  useEffect(() => {
     const accessToken = obtenirTokenStocke();
     if (!accessToken) return;
 
@@ -999,18 +994,16 @@ export default function PageCenhosoa() {
           fixerAfficherSuperAdmin(true);
         } else if (profil.role === 'patient') {
           fixerProfilUtilisateur(profil);
-        } else if (profil.role === 'major_de_garde') {
+        } else if (ROLES_GESTION_URGENCES.includes(profil.role)) {
           fixerProfilUtilisateur(profil);
           fixerAfficherGestionLits(true);
+          fixerAfficherGestionAmbulances(true);
         } else if (profil.role === 'secretaire') {
           fixerProfilUtilisateur(profil);
           fixerAfficherRendezVous(true);
         } else if (profil.role === 'medecin') {
           fixerProfilUtilisateur(profil);
           fixerAfficherRendezVous(true);
-        } else if (['major', 'regulateur_ambulance', 'chef_division_auto', 'chef_sim'].includes(profil.role)) {
-          fixerProfilUtilisateur(profil);
-          fixerAfficherGestionAmbulances(true);
         }
       })
       .catch((err) => console.error('Erreur de vérification de session :', err));
@@ -1019,8 +1012,6 @@ export default function PageCenhosoa() {
   const gererConnexionPersonnel = async (espacePersonnel = false) => {
     try {
       const profil = await obtenirProfil(obtenirTokenStocke());
-      const rolesLits = ['major_de_garde'];
-      const rolesAmbulances = ['major', 'regulateur_ambulance', 'chef_division_auto', 'chef_sim'];
       if (profil.role === 'patient') {
         if (espacePersonnel) {
           effacerTokens();
@@ -1053,14 +1044,14 @@ export default function PageCenhosoa() {
         fixerAfficherConnexion(false);
         return true;
       }
-      if (![...rolesLits, ...rolesAmbulances].includes(profil.role)) {
+      if (!ROLES_GESTION_URGENCES.includes(profil.role)) {
         if (espacePersonnel) effacerTokens();
         return false;
       }
       quitterConnexionPersonnel();
       fixerProfilUtilisateur(profil);
-      fixerAfficherGestionLits(rolesLits.includes(profil.role));
-      fixerAfficherGestionAmbulances(rolesAmbulances.includes(profil.role));
+      fixerAfficherGestionLits(true);
+      fixerAfficherGestionAmbulances(true);
       fixerAfficherConnexion(false);
       return true;
     } catch (err) {
@@ -1117,11 +1108,11 @@ export default function PageCenhosoa() {
   }, []);
 
   useEffect(() => {
-    const minuterie = setInterval(() => {
-      fixerDiapositiveCourante((precedent) => (precedent === IMAGES_HERO.length - 1 ? 0 : precedent + 1));
-    }, 3500);
-    return () => clearInterval(minuterie);
-  }, []);
+    const minuterieActualite = setTimeout(() => {
+      fixerActualiteCourante((precedent) => (precedent + 1) % actualitesHero.length);
+    }, DELAI_ROTATION_HERO);
+    return () => clearTimeout(minuterieActualite);
+  }, [actualiteCourante, actualitesHero.length]);
 
   useEffect(() => {
     const minuterieTemoignage = setInterval(() => {
@@ -1148,28 +1139,11 @@ export default function PageCenhosoa() {
     );
   }
 
-  if (afficherGestionAmbulances) {
+  if (afficherGestionAmbulances || afficherGestionLits) {
     return (
-      <GestionAmbulances
+      <GestionUrgences
         profil={profilUtilisateur}
         onDeconnexion={deconnecterPersonnel}
-      />
-    );
-  }
-
-  if (afficherGestionLits) {
-    return (
-      <TableauDeBordLits
-        profil={profilUtilisateur}
-        onDeconnexion={deconnecterPersonnel}
-        onRetourAdministration={profilUtilisateur?.role === 'superadmin' ? () => {
-          fixerAfficherGestionLits(false);
-          fixerAfficherSuperAdmin(true);
-        } : undefined}
-        onOuvrirAmbulances={['major', 'regulateur_ambulance', 'chef_division_auto', 'chef_sim'].includes(profilUtilisateur?.role) ? () => {
-          fixerAfficherGestionLits(false);
-          fixerAfficherGestionAmbulances(true);
-        } : undefined}
       />
     );
   }
@@ -1223,9 +1197,9 @@ export default function PageCenhosoa() {
       <section id="accueil" className="relative min-h-[100svh] flex flex-col justify-end text-white overflow-hidden bg-[#0A2233]">
         <div className="absolute inset-0">
           <Parallaxe vitesse={0.14} className="absolute inset-x-0 -top-[14%] h-[128%]">
-            {IMAGES_HERO.map((img, index) => (
-              <img key={index} src={img.source} alt={img.alternative}
-                className={`animate-kenburns absolute inset-0 w-full h-full object-cover transition-opacity duration-[1400ms] ease-in-out ${index === diapositiveCourante ? 'opacity-70' : 'opacity-0'}`}
+            {actualitesHero.map((actualite, index) => (
+              <img key={actualite.id} src={actualite.photo} alt=""
+                className={`animate-kenburns absolute inset-0 w-full h-full object-cover transition-opacity duration-[1400ms] ease-in-out ${index === indexActualiteHero ? 'opacity-70' : 'opacity-0'}`}
                 style={{ animationDelay: `${index * -8}s` }} />
             ))}
           </Parallaxe>
@@ -1234,60 +1208,116 @@ export default function PageCenhosoa() {
           <div className="absolute -bottom-32 -left-24 w-[420px] h-[420px] rounded-full bg-[#1F7A8C]/25 blur-[120px] animate-blob pointer-events-none" />
         </div>
 
+        <button
+          type="button"
+          aria-label="Actualité précédente"
+          onClick={() => changerActualite(-1)}
+          className="group absolute left-4 top-1/2 z-30 hidden h-11 w-11 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/[0.08] text-white shadow-lg shadow-black/10 backdrop-blur-md transition-all duration-300 hover:-translate-y-[calc(50%+2px)] hover:border-[#7FD1CB]/80 hover:bg-[#7FD1CB] hover:text-[#0A2233] hover:shadow-[0_0_24px_rgba(127,209,203,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2233] active:scale-90 sm:left-6 md:flex"
+        >
+          <ChevronLeft size={19} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+        </button>
+        <button
+          type="button"
+          aria-label="Actualité suivante"
+          onClick={() => changerActualite(1)}
+          className="group absolute right-4 top-1/2 z-30 hidden h-11 w-11 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full border border-[#7FD1CB]/55 bg-[#7FD1CB] text-[#0A2233] shadow-lg shadow-[#7FD1CB]/15 transition-all duration-300 hover:translate-x-0.5 hover:border-[#A5EEE7] hover:bg-[#A5EEE7] hover:shadow-[0_0_28px_rgba(127,209,203,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2233] active:scale-90 sm:right-6 md:flex"
+        >
+          <ChevronRight size={19} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+        </button>
+
         <EstompageHero className="relative z-10 max-w-7xl w-full mx-auto px-5 sm:px-8 pt-40 pb-12 lg:pb-16">
           <Revelation>
             <p className="text-[11px] sm:text-xs tracking-[0.3em] uppercase text-white/60 mb-6">Antananarivo · Madagascar · depuis 1891</p>
           </Revelation>
-          <h1 className="text-5xl sm:text-7xl lg:text-[7rem] font-light tracking-[-0.045em] leading-[1.02] max-w-5xl">
-            <MotsAnimes texte="Des soins de référence, au cœur d'" debut={250} collant />
-            <span className="text-white/40">
-              <MotsAnimes texte="Antananarivo." debut={740} />
-            </span>
+          {indexActualiteHero >= 1 && (
+            <div
+              key={actualitesHero[indexActualiteHero].id}
+              className="mb-5 inline-flex items-center gap-2.5 border-l-2 border-[#7FD1CB] py-1 pl-3.5 animate-[fade-in_350ms_ease-out]"
+            >
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/75 sm:text-[11px]">
+                Actualité
+              </span>
+            </div>
+          )}
+          <h1 className="grid text-4xl sm:text-6xl lg:text-[5.5rem] font-light tracking-[-0.045em] leading-[1.05] max-w-5xl">
+            {actualitesHero.map((actualite, index) => {
+              const estActif = index === indexActualiteHero;
+              const nbMotsDebut = actualite.debut.split(' ').length;
+              return (
+                <span
+                  key={index}
+                  aria-hidden={!estActif}
+                  aria-live={estActif ? 'polite' : undefined}
+                  className={`col-start-1 row-start-1 transition-all duration-[1200ms] ease-out ${
+                    estActif
+                      ? 'opacity-100 blur-0 translate-y-0 delay-300'
+                      : 'opacity-0 blur-sm translate-y-3 pointer-events-none select-none'
+                  }`}
+                >
+                  <MotsAnimes
+                    texte={actualite.debut}
+                    debut={250}
+                    collant={actualite.debut.endsWith("'")}
+                    anime={estActif}
+                  />
+                  {actualite.accent && (
+                    <span className="text-white/40">
+                      <MotsAnimes
+                        texte={actualite.accent}
+                        debut={250 + nbMotsDebut * 70}
+                        anime={estActif}
+                      />
+                    </span>
+                  )}
+                </span>
+              );
+            })}
           </h1>
           <Revelation delai={900} variante="flou">
             <p className="mt-8 max-w-xl text-base sm:text-lg font-light text-white/70 leading-relaxed">
               Le Centre Hospitalier de Soavinandriana allie performance technologique et valeurs humaines pour accompagner chaque patient.
             </p>
           </Revelation>
+          {indexActualiteHero >= 1 && (
+            <button
+              type="button"
+              onClick={() => fixerActualiteDetailsOuverte(actualitesHero[indexActualiteHero])}
+              className="group mt-6 inline-flex items-center gap-3 border-b border-[#7FD1CB]/55 pb-2 text-sm font-medium text-white/90 transition-colors duration-200 hover:border-[#7FD1CB] hover:text-[#A5EEE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0A2233]"
+            >
+              Voir les détails
+              <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-1" />
+            </button>
+          )}
 
-          <Revelation delai={1050} variante="zoom" className="mt-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/15 divide-y md:divide-y-0 md:divide-x divide-white/15 overflow-hidden">
-              <div className="group flex items-center space-x-4 px-7 py-6 transition-colors duration-300 hover:bg-white/10">
-                <Clock className="w-5 h-5 text-[#7FD1CB] shrink-0 transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12" />
-                <div>
-                  <p className="text-[11px] tracking-[0.2em] uppercase text-white/50">Urgences</p>
-                  <p className="text-sm font-light">24h/24 et 7j/7</p>
-                </div>
-              </div>
-              <div className="group flex items-center space-x-4 px-7 py-6 transition-colors duration-300 hover:bg-white/10">
-                <Stethoscope className="w-5 h-5 text-[#7FD1CB] shrink-0 transition-transform duration-500 group-hover:scale-125 group-hover:-rotate-12" />
-                <div>
-                  <p className="text-[11px] tracking-[0.2em] uppercase text-white/50">Consultations</p>
-                  <p className="text-sm font-light">Lun – Ven · 08h00 – 16h00</p>
-                </div>
-              </div>
-              {profilUtilisateur?.role !== 'patient' ? (
-                <button onClick={() => fixerAfficherConnexion(true)} className="btn-brillance group flex items-center justify-between px-7 py-6 bg-white text-[#0A2233] hover:bg-[#F4F2EE] transition-colors text-left">
-                  <span className="flex items-center space-x-4">
-                    <User className="w-5 h-5 shrink-0 transition-transform duration-500 group-hover:scale-125" />
-                    <span className="text-sm font-medium">Accéder au Portail Patient</span>
-                  </span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
-                </button>
-              ) : (
-                <a href="#specialites" className="btn-brillance group flex items-center justify-between px-7 py-6 bg-white text-[#0A2233] hover:bg-[#F4F2EE] transition-colors">
+          {profilUtilisateur?.role === 'patient' && (
+            <Revelation delai={1050} variante="zoom" className="mt-12">
+              <a href="#specialites" className="btn-brillance group inline-flex items-center justify-between rounded-2xl bg-white px-7 py-6 text-[#0A2233] transition-colors hover:bg-[#F4F2EE]">
                   <span className="text-sm font-medium">Découvrir nos spécialités</span>
                   <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
-                </a>
-              )}
-            </div>
-          </Revelation>
+              </a>
+            </Revelation>
+          )}
 
-          <div className="flex space-x-2 mt-8">
-            {IMAGES_HERO.map((_, index) => (
-              <button key={index} type="button" aria-label={`Aller à la diapositive ${index + 1}`} onClick={() => fixerDiapositiveCourante(index)}
-                className={`h-px transition-all duration-500 hover:bg-white ${index === diapositiveCourante ? 'w-12 bg-white' : 'w-6 bg-white/40 hover:w-9'}`} />
-            ))}
+          <div className="mt-8 flex max-w-2xl items-center gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2" aria-label="Choisir une actualité">
+                {actualitesHero.map((actualite, index) => (
+                  <button
+                    key={actualite.id}
+                    type="button"
+                    aria-label={`Afficher l'actualité ${index + 1}`}
+                    aria-current={index === indexActualiteHero ? 'true' : undefined}
+                    onClick={() => fixerActualiteCourante(index)}
+                    className={`h-1 rounded-full transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2233] ${index === indexActualiteHero ? 'w-10 bg-[#7FD1CB] shadow-[0_0_12px_rgba(127,209,203,0.7)]' : 'w-4 bg-white/35 hover:w-7 hover:bg-white/75'}`}
+                  />
+                ))}
+              </div>
+              <span className="font-mono text-[11px] tracking-[0.18em] text-white/55" aria-live="polite">
+                {String(indexActualiteHero + 1).padStart(2, '0')}
+                <span className="mx-1.5 text-[#7FD1CB]/70">/</span>
+                {String(actualitesHero.length).padStart(2, '0')}
+              </span>
+            </div>
           </div>
         </EstompageHero>
 
@@ -1302,6 +1332,67 @@ export default function PageCenhosoa() {
           </span>
         </a>
       </section>
+
+      {actualiteDetailsOuverte && (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
+          role="presentation"
+          onMouseDown={(evenement) => {
+            if (evenement.target === evenement.currentTarget) fixerActualiteDetailsOuverte(null);
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titre-details-actualite"
+            className="modal-scrollbar relative grid max-h-[92dvh] w-full max-w-6xl overflow-x-hidden overflow-y-auto overscroll-contain bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)] md:grid-cols-[1.08fr_0.92fr] md:overflow-hidden"
+          >
+            <div className="relative h-[min(46dvh,24rem)] min-h-[15rem] overflow-hidden bg-[#0A2233] md:h-auto md:min-h-[620px]">
+              <img
+                src={actualiteDetailsOuverte.photo}
+                alt={actualiteDetailsOuverte.debut}
+                className="absolute inset-0 h-full w-full object-contain md:object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#071A27]/35 via-transparent to-transparent md:from-[#071A27]/70 md:to-[#071A27]/10" />
+              <p className="absolute bottom-5 left-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/85 sm:bottom-7 sm:left-7">
+                CENHOSOA <span className="mx-2 text-[#7FD1CB]">/</span> Actualité
+              </p>
+            </div>
+            <div className="relative flex min-h-0 flex-col px-6 pb-8 pt-7 sm:px-9 sm:pb-10 sm:pt-9 md:overflow-y-auto md:px-12 md:py-12">
+              <button
+                type="button"
+                onClick={() => fixerActualiteDetailsOuverte(null)}
+                aria-label="Fermer les détails de l’actualité"
+                className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center border border-[#0A2233]/10 text-[#0A2233]/70 transition-colors hover:border-[#0A2233] hover:bg-[#0A2233] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] sm:right-6 sm:top-6"
+              >
+                <X size={18} />
+              </button>
+              <div className="mb-7 pr-12 sm:mb-10">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1F7A8C]">
+                  Actualité
+                </p>
+                <div className="mt-4 h-px w-12 bg-[#7FD1CB]" />
+              </div>
+              <h2
+                id="titre-details-actualite"
+                className="max-w-xl font-display text-3xl font-semibold leading-[1.13] tracking-[-0.035em] text-[#0A2233] sm:text-4xl lg:text-[2.75rem]"
+              >
+                {actualiteDetailsOuverte.debut}
+              </h2>
+              <div className="my-7 h-px w-full bg-[#0A2233]/10 sm:my-9" />
+              <div className="max-w-xl whitespace-pre-line text-sm leading-7 text-[#43515A] sm:text-base sm:leading-8">
+                {actualiteDetailsOuverte.details
+                  || 'Les détails de cette actualité seront bientôt disponibles.'}
+              </div>
+              {actualiteDetailsOuverte.dateCreation && (
+                <p className="mt-auto pt-8 text-[11px] font-medium uppercase tracking-[0.12em] text-[#0A2233]/45">
+                  Publiée le {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(new Date(actualiteDetailsOuverte.dateCreation))}
+                </p>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* ───────── ENGAGEMENT : image + panneau ───────── */}
       <section id="engagement" className="bg-white">
@@ -1402,133 +1493,6 @@ export default function PageCenhosoa() {
                 </>
               );
             })()}
-          </Revelation>
-        </div>
-      </section>
-
-      {/* ───────── PORTAIL : fond immersif + cartes en verre dépoli ───────── */}
-      <section id="services" className="relative overflow-hidden bg-[#0A2233] text-white py-28 lg:py-36">
-        <Parallaxe vitesse={0.1} className="absolute inset-x-0 -top-[10%] h-[120%]">
-          <img src={cenhosoaEntrance} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-        </Parallaxe>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A2233] via-[#0A2233]/70 to-[#0A2233]" />
-        <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
-          <Revelation variante="flou" className="max-w-3xl mb-16">
-            <p className="text-[11px] tracking-[0.3em] uppercase text-white/50 mb-5">Offre de soins numérique</p>
-            <h2 className="text-4xl sm:text-6xl font-light tracking-[-0.04em] leading-[1.05]">
-              Votre parcours de soin, <span className="text-white/40">simplifié.</span>
-            </h2>
-            <p className="mt-6 text-white/65 font-light leading-relaxed max-w-xl">
-              Le portail patient CENHOSOA centralise vos démarches médicales pour vous faire gagner du temps, où que vous soyez à Madagascar.
-            </p>
-          </Revelation>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {FONCTIONNALITES_PORTAIL.map((featItem, index) => {
-              const ComposantIcone = featItem.icone;
-              return (
-                <Revelation key={featItem.titre} delai={index * 110} variante="zoom">
-                  <CarteInclinable className="group h-full rounded-3xl bg-white/[0.07] backdrop-blur-xl border border-white/10 hover:bg-white/[0.12] hover:border-white/25 p-7">
-                    <ComposantIcone className="w-6 h-6 text-[#7FD1CB] mb-12 transition-transform duration-500 group-hover:scale-125 group-hover:-rotate-6" strokeWidth={1.5} />
-                    <h3 className="text-lg font-light mb-2">{featItem.titre}</h3>
-                    <p className="text-sm font-light text-white/60 leading-relaxed transition-colors duration-300 group-hover:text-white/80">{featItem.description}</p>
-                  </CarteInclinable>
-                </Revelation>
-              );
-            })}
-          </div>
-
-          <Revelation delai={320} className="mt-5">
-            <div className="flex flex-col items-start justify-between gap-5 rounded-3xl border border-white/15 bg-white/[0.08] p-6 backdrop-blur-xl transition-colors duration-500 hover:border-[#7FD1CB]/40 hover:bg-white/[0.12] sm:flex-row sm:items-center sm:p-8">
-              <div className="flex items-start gap-4">
-                <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#7FD1CB]/15 text-[#7FD1CB]">
-                  <span className="absolute inset-0 rounded-2xl bg-[#7FD1CB]/30 animate-pulse-ring" aria-hidden="true" />
-                  <Ambulance className="relative h-6 w-6" />
-                </span>
-                <div>
-                  <h3 className="text-lg font-medium">Demande urgente d’ambulance</h3>
-                  <p className="mt-1 max-w-xl text-sm font-light leading-relaxed text-white/60">
-                    Estimez un trajet et transmettez une demande à la régulation, avec ou sans compte patient.
-                  </p>
-                </div>
-              </div>
-              <Magnetique className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => fixerAfficherDemandeAmbulance(true)}
-                  className="btn-brillance group inline-flex shrink-0 items-center gap-2 rounded-full bg-[#7FD1CB] px-6 py-3 text-sm font-bold text-[#0A2233] transition hover:bg-white active:scale-95"
-                >
-                  Faire une demande <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </button>
-              </Magnetique>
-            </div>
-          </Revelation>
-
-          {profilUtilisateur?.role !== 'patient' && (
-            <Revelation delai={360} className="mt-12">
-              <Magnetique>
-                <button onClick={() => fixerAfficherConnexion(true)} className="btn-brillance group inline-flex items-center space-x-3 bg-white text-[#0A2233] hover:bg-[#F4F2EE] px-8 py-4 rounded-full text-sm font-medium transition-colors active:scale-95">
-                  <span>Créer mon espace patient</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </button>
-              </Magnetique>
-            </Revelation>
-          )}
-        </div>
-      </section>
-
-      {/* ───────── LOCALISATION ───────── */}
-      <section id="recherche" className="bg-white">
-        <div className="grid lg:grid-cols-2 min-h-[620px]">
-          <div className="bg-[#EDECE9] px-6 sm:px-14 py-16 lg:py-20 flex flex-col justify-between gap-12">
-            <Revelation variante="flou">
-              <p className="text-[11px] tracking-[0.3em] uppercase text-slate-500 mb-5">Accès & emplacement</p>
-              <h2 className="text-4xl sm:text-5xl font-light tracking-[-0.035em] leading-[1.08] text-[#0A2233]">
-                Localisation <span className="text-[#0A2233]/40">du centre</span>
-              </h2>
-              <p className="mt-6 text-slate-600 font-light leading-relaxed max-w-md">
-                Situé au cœur d'Antananarivo, le Centre Hospitalier de Soavinandriana est facilement accessible.
-              </p>
-            </Revelation>
-
-            <Revelation delai={120} className="space-y-6">
-              <div className="group flex items-start space-x-4 border-t border-black/10 pt-6 transition-all duration-500 hover:pl-2 hover:border-[#1F7A8C]/50">
-                <MapPin className="w-5 h-5 text-[#1F7A8C] shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-125 group-hover:-translate-y-0.5" strokeWidth={1.5} />
-                <div>
-                  <h4 className="text-sm text-[#0A2233] mb-1">Adresse principale</h4>
-                  <p className="text-sm font-light text-slate-600 leading-relaxed">{COORDONNEES_CENTRE.adresse}</p>
-                </div>
-              </div>
-              <div className="group flex items-start space-x-4 border-t border-black/10 pt-6 transition-all duration-500 hover:pl-2 hover:border-[#1F7A8C]/50">
-                <Clock className="w-5 h-5 text-[#1F7A8C] shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12" strokeWidth={1.5} />
-                <div>
-                  <h4 className="text-sm text-[#0A2233] mb-1">Horaires d'ouverture</h4>
-                  <p className="text-sm font-light text-slate-600 leading-relaxed">Urgences : 24h/24 et 7j/7<br />Consultations : Lun - Ven (08h00 - 16h00)</p>
-                </div>
-              </div>
-              <Magnetique>
-                <a href="https://www.google.com/maps/place/Centre+Hospitalier+de+Soavinandriana/@-18.8979848,47.5432881,876m/data=!3m2!1e3!4b1!4m6!3m5!1s0x21f0875465f35ec3:0x5d3e2c5d0256b83d!8m2!3d-18.8979848!4d47.5432881!16s%2Fg%2F1tr865vv?entry=ttu" target="_blank" rel="noopener noreferrer"
-                  className="btn-brillance group inline-flex items-center space-x-3 bg-[#0A2233] hover:bg-[#0F3D52] text-white px-7 py-3.5 rounded-full text-sm transition-colors active:scale-95">
-                  <Navigation className="w-4 h-4 transition-transform duration-500 group-hover:rotate-45" />
-                  <span>Ouvrir dans Google Maps</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </a>
-              </Magnetique>
-            </Revelation>
-          </div>
-
-          <Revelation variante="droite" className="relative min-h-[420px] bg-slate-100">
-            <iframe
-              title="Carte Google Maps CENHOSOA"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3776.9947721867964!2d47.5407078!3d-18.8979848!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x21f0875465f35ec3%3A0x5d3e2c5d0256b83d!2sCentre%20Hospitalier%20de%20Soavinandriana!5e0!3m2!1sfr!2smg!4v1700000000000!5m2!1sfr!2smg"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0 w-full h-full grayscale-[30%] transition-[filter] duration-700 hover:grayscale-0"
-            ></iframe>
           </Revelation>
         </div>
       </section>
@@ -1668,25 +1632,61 @@ export default function PageCenhosoa() {
         </div>
       </section>
 
-      {profilUtilisateur?.role !== 'patient' && <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <Revelation variante="zoom" className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#0A2233] via-[#0F3D52] to-[#1F7A8C] px-8 py-16 sm:px-16 sm:py-20 text-center">
-          <div className="absolute inset-0 dot-grid opacity-60 pointer-events-none" />
-          <div className="absolute -top-16 -right-16 w-72 h-72 bg-[#7FD1CB]/20 rounded-full blur-[100px] pointer-events-none animate-blob" />
-          <div className="absolute -bottom-20 -left-16 w-72 h-72 bg-[#1F7A8C]/30 rounded-full blur-[100px] pointer-events-none animate-blob-slow" />
-          <div className="relative">
-            <h2 className="text-3xl sm:text-4xl font-display font-black text-white tracking-tight mb-4">Prêt à prendre soin de vous ?</h2>
-            <p className="text-slate-300 text-base sm:text-lg max-w-xl mx-auto mb-8">Créez votre espace patient en quelques minutes et accédez à l'ensemble de nos services en ligne.</p>
-            <div className="flex flex-wrap justify-center gap-4">
+      {/* ───────── LOCALISATION ───────── */}
+      <section id="recherche" className="bg-white">
+        <div className="grid lg:grid-cols-2 min-h-[620px]">
+          <div className="bg-[#EDECE9] px-6 sm:px-14 py-16 lg:py-20 flex flex-col justify-between gap-12">
+            <Revelation variante="flou">
+              <p className="text-[11px] tracking-[0.3em] uppercase text-slate-500 mb-5">Accès & emplacement</p>
+              <h2 className="text-4xl sm:text-5xl font-light tracking-[-0.035em] leading-[1.08] text-[#0A2233]">
+                Localisation <span className="text-[#0A2233]/40">du centre</span>
+              </h2>
+              <p className="mt-6 text-slate-600 font-light leading-relaxed max-w-md">
+                Situé au cœur d'Antananarivo, le Centre Hospitalier de Soavinandriana est facilement accessible.
+              </p>
+            </Revelation>
+
+            <Revelation delai={120} className="space-y-6">
+              <div className="group flex items-start space-x-4 border-t border-black/10 pt-6 transition-all duration-500 hover:pl-2 hover:border-[#1F7A8C]/50">
+                <MapPin className="w-5 h-5 text-[#1F7A8C] shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-125 group-hover:-translate-y-0.5" strokeWidth={1.5} />
+                <div>
+                  <h4 className="text-sm text-[#0A2233] mb-1">Adresse principale</h4>
+                  <p className="text-sm font-light text-slate-600 leading-relaxed">{COORDONNEES_CENTRE.adresse}</p>
+                </div>
+              </div>
+              <div className="group flex items-start space-x-4 border-t border-black/10 pt-6 transition-all duration-500 hover:pl-2 hover:border-[#1F7A8C]/50">
+                <Clock className="w-5 h-5 text-[#1F7A8C] shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12" strokeWidth={1.5} />
+                <div>
+                  <h4 className="text-sm text-[#0A2233] mb-1">Horaires d'ouverture</h4>
+                  <p className="text-sm font-light text-slate-600 leading-relaxed">Urgences : 24h/24 et 7j/7<br />Consultations : Lun - Ven (08h00 - 16h00)</p>
+                </div>
+              </div>
               <Magnetique>
-                <button onClick={() => fixerAfficherConnexion(true)} className="btn-brillance bg-white hover:bg-slate-100 text-[#0A2233] px-7 py-4 rounded-2xl font-bold text-sm tracking-wide shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl active:scale-95 inline-flex items-center space-x-2.5">
-                  <User className="w-5 h-5" />
-                  <span>Accéder au Portail Patient</span>
-                </button>
+                <a href="https://www.google.com/maps/place/Centre+Hospitalier+de+Soavinandriana/@-18.8979848,47.5432881,876m/data=!3m2!1e3!4b1!4m6!3m5!1s0x21f0875465f35ec3:0x5d3e2c5d0256b83d!8m2!3d-18.8979848!4d47.5432881!16s%2Fg%2F1tr865vv?entry=ttu" target="_blank" rel="noopener noreferrer"
+                  className="btn-brillance group inline-flex items-center space-x-3 bg-[#0A2233] hover:bg-[#0F3D52] text-white px-7 py-3.5 rounded-full text-sm transition-colors active:scale-95">
+                  <Navigation className="w-4 h-4 transition-transform duration-500 group-hover:rotate-45" />
+                  <span>Ouvrir dans Google Maps</span>
+                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
               </Magnetique>
-            </div>
+            </Revelation>
           </div>
-        </Revelation>
-      </section>}
+
+          <Revelation variante="droite" className="relative min-h-[420px] bg-slate-100">
+            <iframe
+              title="Carte Google Maps CENHOSOA"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3776.9947721867964!2d47.5407078!3d-18.8979848!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x21f0875465f35ec3%3A0x5d3e2c5d0256b83d!2sCentre%20Hospitalier%20de%20Soavinandriana!5e0!3m2!1sfr!2smg!4v1700000000000!5m2!1sfr!2smg"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="absolute inset-0 w-full h-full grayscale-[30%] transition-[filter] duration-700 hover:grayscale-0"
+            ></iframe>
+          </Revelation>
+        </div>
+      </section>
 
       <footer id="urgence" className="bg-[#0A2233] text-slate-300 pt-16 pb-12 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1705,10 +1705,9 @@ export default function PageCenhosoa() {
               <h4 className="text-white font-display font-bold text-xs uppercase tracking-wider mb-4">Navigation</h4>
               <ul className="space-y-2.5 text-sm">
                 <li><a href="#accueil" className="inline-block hover:text-[#7FD1CB] hover:translate-x-1 transition-all duration-300">Accueil</a></li>
-                {profilUtilisateur?.role !== 'patient' && <li><a href="#services" className="inline-block hover:text-[#7FD1CB] hover:translate-x-1 transition-all duration-300">Offre de soins</a></li>}
+                <li><a href="#temoignages" className="inline-block hover:text-[#7FD1CB] hover:translate-x-1 transition-all duration-300">Témoignages & Presse</a></li>
                 <li><a href="#specialites" className="inline-block hover:text-[#7FD1CB] hover:translate-x-1 transition-all duration-300">Spécialités</a></li>
                 <li><a href="#recherche" className="inline-block hover:text-[#7FD1CB] hover:translate-x-1 transition-all duration-300">Localisation</a></li>
-                <li><a href="#temoignages" className="inline-block hover:text-[#7FD1CB] hover:translate-x-1 transition-all duration-300">Témoignages</a></li>
                 {profilUtilisateur?.role !== 'patient' && (
                   <li>
                     <a

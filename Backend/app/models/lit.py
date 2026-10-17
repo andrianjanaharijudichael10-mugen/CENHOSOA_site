@@ -35,6 +35,8 @@ class Lit(Base):
         UUID(as_uuid=True), ForeignKey("patients.id", ondelete="SET NULL"), nullable=True
     )
     motif_admission: Mapped[str | None] = mapped_column(Text, nullable=True)
+    episode_id_actuel: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    motif_transfert_reservation: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     date_occupation: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     date_liberation: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
