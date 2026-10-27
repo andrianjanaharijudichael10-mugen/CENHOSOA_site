@@ -427,7 +427,7 @@ export default function TableauDeBordLits({
   return (
     <div className={embedded ? 'espace font-body text-[#1E2333]' : 'espace min-h-screen bg-[#F4F2EE] font-body text-[#1E2333] selection:bg-[#1F7A8C] selection:text-white'}>
       <StylesEspace />
-      {!embedded && <header className="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-[#0A2233] via-[#0F3D52] to-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20 backdrop-blur-xl">
+      {!embedded && <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <div className="group flex min-w-0 items-center space-x-3.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white p-1.5 shadow-md shadow-black/20 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2 sm:h-14 sm:w-14">
@@ -734,7 +734,7 @@ export default function TableauDeBordLits({
         </>
         )}
 
-        <div role="tablist" aria-label="Vue des lits" className="mb-6 inline-flex rounded-3xl border border-[#1F7A8C]/10 bg-white p-1.5 shadow-sm">
+        <div role="tablist" aria-label="Vue des lits" className="mb-6 inline-flex flex-wrap gap-1.5 rounded-3xl border border-[#1F7A8C]/10 bg-white p-1.5 shadow-sm">
           <button
             type="button"
             role="tab"
@@ -1076,7 +1076,7 @@ export default function TableauDeBordLits({
 
       {formulaireCategorie && profil?.role === 'superadmin' && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
+          className="mobile-scroll-overlay fixed inset-0 z-[100] flex justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
           onMouseDown={(event) => { if (event.target === event.currentTarget) fixerFormulaireCategorie(false); }}
         >
           <section role="dialog" aria-modal="true" aria-labelledby="titre-nouvelle-categorie" className="max-h-[92dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-white p-6 shadow-2xl">
@@ -1117,7 +1117,7 @@ export default function TableauDeBordLits({
 
       {categorieALitAjouter && profil?.role === 'superadmin' && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
+          className="mobile-scroll-overlay fixed inset-0 z-[100] flex justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
           onMouseDown={(event) => { if (event.target === event.currentTarget) fixerCategorieALitAjouter(null); }}
         >
           <section role="dialog" aria-modal="true" aria-labelledby="titre-nouveau-lit" className="max-h-[92dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-white p-6 shadow-2xl">
@@ -1158,7 +1158,7 @@ export default function TableauDeBordLits({
 
       {litDetails && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
+          className="mobile-scroll-overlay fixed inset-0 z-[100] flex justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm"
           onMouseDown={(event) => { if (event.target === event.currentTarget) fixerLitDetailsId(null); }}
         >
           <section
@@ -1181,7 +1181,7 @@ export default function TableauDeBordLits({
                 onClick={() => fixerLitDetailsId(null)}
                 title="Fermer les détails"
                 aria-label="Fermer les détails du lit"
-                className="rounded-xl p-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-white/75 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1249,7 +1249,7 @@ export default function TableauDeBordLits({
       )}
 
       {clotureLit && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#0A2233]/75 p-4 backdrop-blur-sm">
+        <div className="mobile-scroll-overlay fixed inset-0 z-[110] flex justify-center bg-[#0A2233]/75 p-4 backdrop-blur-sm">
           <section role="dialog" aria-modal="true" aria-labelledby="titre-cloture-lit" className="max-h-[92dvh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-3xl bg-white shadow-2xl">
             <div className="bg-gradient-to-r from-[#0A2233] to-[#1F7A8C] px-6 py-5 text-white">
               <p className="text-xs font-bold uppercase tracking-widest text-[#B5E8E3]">Fin du passage aux urgences</p>
@@ -1289,10 +1289,9 @@ export default function TableauDeBordLits({
         </div>
       )}
 
-      {/* Modal d'Admission */}
       {litSelectionne && (
         <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0A2233]/70 backdrop-blur-sm"
+          className="mobile-scroll-overlay fixed inset-0 z-[100] flex justify-center p-4 bg-[#0A2233]/70 backdrop-blur-sm"
           onMouseDown={(event) => { if (event.target === event.currentTarget) fixerLitSelectionne(null); }}
         >
           <section
@@ -1317,7 +1316,7 @@ export default function TableauDeBordLits({
                 type="button"
                 onClick={() => fixerLitSelectionne(null)}
                 aria-label="Fermer"
-                className="rounded-xl p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white/70 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="w-6 h-6" />
               </button>

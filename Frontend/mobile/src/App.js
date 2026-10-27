@@ -16,6 +16,18 @@ import { WebView } from 'react-native-webview';
 const URL_SITE = process.env.EXPO_PUBLIC_WEB_URL?.trim() || '';
 const AUTORISER_HTTP_LOCAL = process.env.EXPO_PUBLIC_ALLOW_INSECURE_WEBVIEW === 'true';
 
+function estAdresseIpv4Privee(hote) {
+  if (!/^\d{1,3}(?:\.\d{1,3}){3}$/.test(hote)) return false;
+
+  const octets = hote.split('.').map(Number);
+  if (octets.some((octet) => octet > 255)) return false;
+
+  return octets[0] === 10
+    || octets[0] === 127
+    || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
+    || (octets[0] === 192 && octets[1] === 168);
+}
+
 function validerUrlSite(valeur) {
   if (!valeur) return null;
 
@@ -23,7 +35,10 @@ function validerUrlSite(valeur) {
     const url = new URL(valeur);
     const estHttpAutorise = AUTORISER_HTTP_LOCAL
       && url.protocol === 'http:'
-      && ['localhost', '127.0.0.1', '10.0.2.2'].includes(url.hostname);
+      && (
+        ['localhost', '10.0.2.2'].includes(url.hostname)
+        || estAdresseIpv4Privee(url.hostname)
+      );
     if (url.protocol !== 'https:' && !estHttpAutorise) return null;
     if (url.username || url.password) return null;
     return url;
@@ -38,26 +53,10 @@ function ouvrirLienExterne(url) {
   });
 }
 
-function BoutonBarre({ label, onPress, disabled, children }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.action,
-        (pressed || disabled) && styles.actionInactive,
-      ]}
-    >
-      <Text style={styles.actionText}>{children}</Text>
-    </Pressable>
-  );
-}
-
 export default function App() {
   const webView = useRef(null);
   const navigation = useRef({ canGoBack: false });
+  const chargementInitialTermine = useRef(false);
   const siteUrl = useMemo(() => validerUrlSite(URL_SITE), []);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState('');
@@ -80,6 +79,8 @@ export default function App() {
   const recharger = () => {
     setErreur('');
     setChargement(true);
+    setProgression(0);
+    chargementInitialTermine.current = false;
     webView.current?.reload();
   };
 
@@ -91,7 +92,7 @@ export default function App() {
     try {
       const cible = new URL(url);
       if (siteUrl && cible.origin === siteUrl.origin) return true;
-      if (cible.protocol === 'tel:' || cible.protocol === 'mailto:' || cible.protocol === 'sms:') {
+      if (cible.protocol === 'tel:' || cible.protocol === 'mailto:') {
         ouvrirLienExterne(url);
         return false;
       }
@@ -110,20 +111,15 @@ export default function App() {
     setErreur(message || 'Le site est momentanément inaccessible. Vérifiez votre connexion puis réessayez.');
   };
 
+  const terminerChargement = () => {
+    chargementInitialTermine.current = true;
+    setProgression(1);
+    setChargement(false);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" backgroundColor="#0A2233" />
-      <View style={styles.header}>
-        <BoutonBarre
-          label="Revenir à la page précédente"
-          onPress={revenir}
-          disabled={!navigation.current.canGoBack}
-        >
-          ‹
-        </BoutonBarre>
-        <Text accessibilityRole="header" style={styles.title}>CENHOSOA</Text>
-        <BoutonBarre label="Actualiser la page" onPress={recharger}>↻</BoutonBarre>
-      </View>
 
       {siteUrl ? (
         <View style={styles.content}>
@@ -133,6 +129,11 @@ export default function App() {
             style={styles.webView}
             javaScriptEnabled
             domStorageEnabled
+            automaticallyAdjustContentInsets={false}
+            contentInsetAdjustmentBehavior="never"
+            textZoom={100}
+            setBuiltInZoomControls={false}
+            setDisplayZoomControls={false}
             sharedCookiesEnabled
             thirdPartyCookiesEnabled
             allowsBackForwardNavigationGestures
@@ -140,14 +141,18 @@ export default function App() {
             onShouldStartLoadWithRequest={verifierNavigation}
             onNavigationStateChange={(etat) => {
               navigation.current.canGoBack = etat.canGoBack;
+              if (!etat.loading) terminerChargement();
             }}
             onLoadStart={() => {
-              setChargement(true);
+              if (!chargementInitialTermine.current) setChargement(true);
               setErreur('');
-              setProgression(0);
+              if (!chargementInitialTermine.current) setProgression(0);
             }}
-            onLoadProgress={({ nativeEvent }) => setProgression(nativeEvent.progress)}
-            onLoadEnd={() => setChargement(false)}
+            onLoadProgress={({ nativeEvent }) => {
+              setProgression(nativeEvent.progress);
+              if (nativeEvent.progress >= 1) terminerChargement();
+            }}
+            onLoadEnd={terminerChargement}
             onError={({ nativeEvent }) => afficherErreur(nativeEvent.description)}
             onHttpError={({ nativeEvent }) => {
               if (nativeEvent.statusCode >= 500) {
@@ -197,36 +202,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#0A2233',
-  },
-  header: {
-    minHeight: 52,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#0A2233',
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 1.4,
-  },
-  action: {
-    width: 42,
-    height: 42,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 21,
-  },
-  actionInactive: {
-    opacity: 0.4,
-  },
-  actionText: {
-    color: '#7FD1CB',
-    fontSize: 29,
-    lineHeight: 34,
-    fontWeight: '500',
   },
   content: {
     flex: 1,

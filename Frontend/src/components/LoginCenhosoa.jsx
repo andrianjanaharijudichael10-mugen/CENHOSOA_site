@@ -1,4 +1,4 @@
-// creation des imports
+
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2, Phone, UserCheck } from 'lucide-react';
 import imageFondHopital from '../assets/logo/Gemini_Generated_Image_ndofqwndofqwndof.jpg';
@@ -26,6 +26,17 @@ function validerForceMotDePasse(motDePasse) {
   if (!/[0-9]/.test(motDePasse)) return 'Le mot de passe doit contenir au moins un chiffre.';
   if (!/[a-zA-Z]/.test(motDePasse)) return 'Le mot de passe doit contenir au moins une lettre.';
   return '';
+}
+
+function afficherChampAuClavier(evenement) {
+  if (!window.matchMedia('(pointer: coarse)').matches) return;
+
+  const champ = evenement.currentTarget;
+  window.setTimeout(() => {
+    if (champ.isConnected) {
+      champ.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }, 300);
 }
 
 function BoutonInvite({ onBackToHome }) {
@@ -179,7 +190,7 @@ export default function AuthCENHOSOA({ onBackToHome, onConnexion, espacePersonne
   const decoupeDroite = 'polygon(53% 0%, 100% 0%, 100% 100%, 63.3% 100%)';
 
   return (
-    <div className="espace min-h-screen bg-[#0A2233] font-body antialiased flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+    <div className="espace min-h-screen bg-[#0A2233] font-body antialiased flex items-start justify-center overflow-x-hidden overflow-y-auto p-4 pt-20 pb-8 sm:p-6 sm:pt-24 lg:items-center lg:overflow-hidden lg:p-8 relative">
       <StylesEspace />
       <img src={imageFondHopital} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-30" />
       <div className="absolute inset-0 bg-gradient-to-br from-[#0A2233]/90 via-[#0F3D52]/70 to-[#0A2233]/95" />
@@ -297,24 +308,25 @@ export default function AuthCENHOSOA({ onBackToHome, onConnexion, espacePersonne
                       name="motDePasse"
                       required
                       autoComplete="current-password"
+                      onFocus={afficherChampAuClavier}
                       value={donneesFormulaire.motDePasse}
                       onChange={gererChangement}
                       placeholder="Votre mot de passe"
-                      className="w-full pl-4 pr-11 py-3 bg-[#F4F2EE] border border-transparent hover:border-slate-200 rounded-full text-slate-800 text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1F7A8C] focus:bg-white transition-all"
-                    /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
+                      className="w-full pl-4 pr-12 py-3 bg-[#F4F2EE] border border-transparent hover:border-slate-200 rounded-full text-slate-800 text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1F7A8C] focus:bg-white transition-all"
+                    /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
                     {erreursChamps.motDePasse && <p className="text-[11px] text-red-500 mt-1">{erreursChamps.motDePasse}</p>}
                   </div>
                 )}
 
                 {!estInscription && (
                   <div className="flex items-center justify-between text-xs pt-1">
-                    <label className="flex items-center space-x-2 select-none cursor-pointer">
+                    <label className="flex min-h-11 items-center space-x-2 select-none cursor-pointer">
                       <input
                         type="checkbox"
                         name="seSouvenirDeMoi"
                         checked={donneesFormulaire.seSouvenirDeMoi}
                         onChange={changerSouvenir}
-                        className="w-4 h-4 rounded border-slate-300 text-[#1F7A8C] focus:ring-0 cursor-pointer"
+                        className="h-5 w-5 shrink-0 rounded border-slate-300 text-[#1F7A8C] focus:ring-0 cursor-pointer"
                       />
                       <span className="text-slate-600 text-[11px]">Se souvenir de moi</span>
                     </label>
@@ -410,7 +422,7 @@ export default function AuthCENHOSOA({ onBackToHome, onConnexion, espacePersonne
                     onChange={gererChangement}
                     placeholder="Minimum 8 caractères"
                     className="w-full pl-4 pr-11 py-3 bg-[#F4F2EE] border border-transparent hover:border-slate-200 rounded-full text-slate-800 text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1F7A8C] focus:bg-white transition-all"
-                  /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
+                  /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
                   {erreursChamps.motDePasse && <p className="text-[11px] text-red-500 mt-1">{erreursChamps.motDePasse}</p>}
                 </div>
 
@@ -497,21 +509,21 @@ export default function AuthCENHOSOA({ onBackToHome, onConnexion, espacePersonne
               {estInscription && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700" htmlFor="mot-de-passe-inscription-mobile">Mot de passe</label>
-                  <div className="relative"><input id="mot-de-passe-inscription-mobile" type={voirMotDePasse ? 'text' : 'password'} name="motDePasse" required autoComplete="new-password" placeholder="8 caractères minimum" value={donneesFormulaire.motDePasse} onChange={gererChangement} className="mt-1.5 h-12 w-full rounded-xl border border-slate-200 bg-white pl-4 pr-11 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10" /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
+                  <div className="relative"><input id="mot-de-passe-inscription-mobile" type={voirMotDePasse ? 'text' : 'password'} name="motDePasse" required autoComplete="new-password" placeholder="8 caractères minimum" onFocus={afficherChampAuClavier} value={donneesFormulaire.motDePasse} onChange={gererChangement} className="mt-1.5 h-12 w-full rounded-xl border border-slate-200 bg-white pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10" /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
                   {erreursChamps.motDePasse && <p className="text-[11px] text-red-500 mt-1">{erreursChamps.motDePasse}</p>}
                 </div>
               )}
               {!estInscription && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700" htmlFor="mot-de-passe-connexion-mobile">Mot de passe</label>
-                  <div className="relative"><input id="mot-de-passe-connexion-mobile" type={voirMotDePasse ? 'text' : 'password'} name="motDePasse" required autoComplete="current-password" placeholder="Votre mot de passe" value={donneesFormulaire.motDePasse} onChange={gererChangement} className="mt-1.5 h-12 w-full rounded-xl border border-slate-200 bg-white pl-4 pr-11 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10" /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
+                  <div className="relative"><input id="mot-de-passe-connexion-mobile" type={voirMotDePasse ? 'text' : 'password'} name="motDePasse" required autoComplete="current-password" placeholder="Votre mot de passe" onFocus={afficherChampAuClavier} value={donneesFormulaire.motDePasse} onChange={gererChangement} className="mt-1.5 h-12 w-full rounded-xl border border-slate-200 bg-white pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10" /><button type="button" onClick={() => fixerVoirMotDePasse((precedent) => !precedent)} aria-label={voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-slate-400 transition hover:text-[#1F7A8C]">{voirMotDePasse ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
                   {erreursChamps.motDePasse && <p className="text-[11px] text-red-500 mt-1">{erreursChamps.motDePasse}</p>}
                 </div>
               )}
               {!estInscription && (
                 <div className="flex items-center justify-between text-xs">
-                  <label className="flex items-center gap-2 select-none cursor-pointer">
-                    <input type="checkbox" checked={donneesFormulaire.seSouvenirDeMoi} onChange={changerSouvenir} className="w-4 h-4 rounded border-slate-300 text-[#1F7A8C]" />
+                  <label className="flex min-h-11 items-center gap-2 select-none cursor-pointer">
+                    <input type="checkbox" checked={donneesFormulaire.seSouvenirDeMoi} onChange={changerSouvenir} className="h-5 w-5 shrink-0 rounded border-slate-300 text-[#1F7A8C]" />
                     <span className="text-slate-600 text-[11px]">Se souvenir de moi</span>
                   </label>
                 </div>

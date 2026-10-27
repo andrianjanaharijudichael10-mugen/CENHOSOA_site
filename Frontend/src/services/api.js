@@ -1,6 +1,38 @@
 const URL_BASE_API = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 let requeteRafraichissement = null;
 
+function normaliserUrlsFichiers(donnees, origineApi) {
+  if (typeof donnees === "string") {
+    try {
+      const url = new URL(donnees);
+      const hoteLocal = ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+      if (url.pathname.startsWith("/fichiers/") && hoteLocal) {
+        url.protocol = origineApi.protocol;
+        url.host = origineApi.host;
+        return url.toString();
+      }
+    } catch {
+      return donnees;
+    }
+    return donnees;
+  }
+
+  if (Array.isArray(donnees)) {
+    return donnees.map((element) => normaliserUrlsFichiers(element, origineApi));
+  }
+
+  if (donnees && typeof donnees === "object") {
+    return Object.fromEntries(
+      Object.entries(donnees).map(([cle, valeur]) => [
+        cle,
+        normaliserUrlsFichiers(valeur, origineApi),
+      ]),
+    );
+  }
+
+  return donnees;
+}
+
 export function obtenirUrlTempsReel() {
   const url = new URL(URL_BASE_API, window.location.href);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
@@ -105,7 +137,7 @@ async function requeteApi(chemin, options = {}) {
     throw erreur;
   }
 
-  return donnees;
+  return normaliserUrlsFichiers(donnees, new URL(URL_BASE_API, window.location.href));
 }
 
 function enTeteAuth(token) {
@@ -415,7 +447,7 @@ export function libererLit(token, litId, donnees = { type_fin: "sortie" }) {
   });
 }
 
-// ---------- Ambulances ----------
+
 
 export function listerAmbulances(token) {
   if (!token) return requeteApi("/ambulances/public/ambulances-disponibles");
@@ -450,6 +482,14 @@ export function confirmerDemandeAmbulance(token, missionId, ambulanceId) {
     method: "POST",
     headers: enTeteAuth(token),
     body: JSON.stringify({ ambulance_id: ambulanceId }),
+  });
+}
+
+export function refuserDemandeAmbulance(token, missionId, motifs) {
+  return requeteApi(`/ambulances/missions/${missionId}/refuser`, {
+    method: "POST",
+    headers: enTeteAuth(token),
+    body: JSON.stringify({ motifs }),
   });
 }
 

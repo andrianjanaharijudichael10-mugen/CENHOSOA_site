@@ -43,6 +43,35 @@ canvas {
 .modal-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(31, 122, 140, 0.65) rgba(10, 34, 51, 0.08);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.mobile-scroll-overlay {
+  align-items: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.mobile-scroll-dialog {
+  max-height: calc(100vh - 1.5rem);
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1.5rem);
+}
+
+[role="dialog"] {
+  overscroll-behavior-y: contain;
+}
+
+[role="dialog"] [class*="overflow-y-auto"],
+[role="dialog"].overflow-y-auto,
+[role="dialog"] .modal-scrollbar {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
 }
 
 .modal-scrollbar::-webkit-scrollbar {
@@ -68,4 +97,20 @@ canvas {
 
 .font-mono {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+@media (min-width: 640px) {
+  .mobile-scroll-overlay {
+    align-items: center;
+  }
+}
+
+@media (pointer: coarse) {
+  .rev-cache {
+    opacity: 1;
+  }
+
+  .rev-visible {
+    animation: none;
+  }
 }

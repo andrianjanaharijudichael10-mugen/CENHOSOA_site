@@ -11,7 +11,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.models.enums import StatutLit
 
-
 class Lit(Base):
     __tablename__ = "lits"
 
@@ -26,9 +25,6 @@ class Lit(Base):
         Enum(StatutLit, name="statut_lit"), default=StatutLit.LIBRE, nullable=False
     )
 
-    # Patient actuellement admis (texte libre, car un patient peut arriver en
-    # urgence sans compte préexistant). patient_id est optionnel, renseigné
-    # seulement si le patient est déjà identifié dans le système.
     nom_patient_actuel: Mapped[str | None] = mapped_column(String(100), nullable=True)
     prenoms_patient_actuel: Mapped[str | None] = mapped_column(String(150), nullable=True)
     patient_id: Mapped[uuid.UUID | None] = mapped_column(

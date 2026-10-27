@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Phone, Calendar, ShieldCheck, Award, Users, Ambulance,
   Clock, HeartPulse, Stethoscope, Activity, MapPin,
@@ -53,9 +53,6 @@ const DONNEES_VALEURS = [
   },
 ];
 
-// Les services eux-mêmes viennent maintenant du backend (table `services`).
-// Le backend ne connaît pas les icônes : on les associe ici côté frontend,
-// par nom de service, avec une icône de repli si le nom n'est pas reconnu.
 const ICONE_PAR_DEFAUT = Stethoscope;
 const COORDONNEES_CENTRE = {
   adresse: '6 bis, Rue du Dr Moss, Soavinandriana, Antananarivo 101, Madagascar',
@@ -111,22 +108,16 @@ const DONNEES_TEMOIGNAGES = [
   }
 ];
 
-const DELAI_ROTATION_HERO = 15000; // 15 secondes
+const DELAI_ROTATION_HERO = 15000;
 
-// `debut` = partie en blanc, `accent` = partie estompée (comme "Antananarivo.")
 const ACTUALITES_HERO = [
   { debut: "Des soins de référence, au cœur d'", accent: "Antananarivo." },
 ];
-
-/* ═════════════════════════════════════════════════════════════
-   MOTEUR DE SCROLL & D'ANIMATIONS
-   ═════════════════════════════════════════════════════════════ */
 
 const prefereMouvementReduit = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Un seul écouteur de scroll partagé (throttlé via requestAnimationFrame)
 const abonnesDefilement = new Set();
 let imageDefilement = 0;
 
@@ -154,7 +145,7 @@ function abonnerDefilement(rappel) {
   };
 }
 
-function utiliserRevelation(seuil = 0.15) {
+function useRevelation(seuil = 0.15) {
   const reference = useRef(null);
   const [estVisible, fixerEstVisible] = useState(false);
   
@@ -177,8 +168,7 @@ function utiliserRevelation(seuil = 0.15) {
   return [reference, estVisible];
 }
 
-// Parallaxe : décale l'élément selon sa position par rapport au centre de l'écran
-function utiliserParallaxe(vitesse = 0.12) {
+function useParallaxe(vitesse = 0.12) {
   const reference = useRef(null);
 
   useEffect(() => {
@@ -209,8 +199,7 @@ function utiliserParallaxe(vitesse = 0.12) {
   return reference;
 }
 
-// Hero : le contenu s'estompe et glisse doucement pendant le scroll
-function utiliserEstompageHero() {
+function useEstompageHero() {
   const reference = useRef(null);
 
   useEffect(() => {
@@ -230,7 +219,7 @@ function utiliserEstompageHero() {
 }
 
 const Parallaxe = ({ vitesse = 0.12, className = '', children }) => {
-  const reference = utiliserParallaxe(vitesse);
+  const reference = useParallaxe(vitesse);
   return (
     <div ref={reference} className={`will-change-transform ${className}`}>
       {children}
@@ -239,7 +228,7 @@ const Parallaxe = ({ vitesse = 0.12, className = '', children }) => {
 };
 
 const EstompageHero = ({ className = '', children }) => {
-  const reference = utiliserEstompageHero();
+  const reference = useEstompageHero();
   return (
     <div ref={reference} className={className}>
       {children}
@@ -247,7 +236,6 @@ const EstompageHero = ({ className = '', children }) => {
   );
 };
 
-// Bouton magnétique : suit légèrement le curseur
 const Magnetique = ({ children, force = 0.22, className = '' }) => {
   const reference = useRef(null);
 
@@ -275,7 +263,6 @@ const Magnetique = ({ children, force = 0.22, className = '' }) => {
   );
 };
 
-// Titre : apparition mot par mot
 const MotsAnimes = ({ texte, debut = 0, pas = 70, collant = false, anime = true }) => {
   const mots = texte.split(' ');
   return mots.map((mot, index) => (
@@ -293,7 +280,6 @@ const MotsAnimes = ({ texte, debut = 0, pas = 70, collant = false, anime = true 
   ));
 };
 
-// Barre de progression du scroll + bouton « retour en haut » avec anneau de progression
 const OutilsDefilement = () => {
   const barre = useRef(null);
   const anneau = useRef(null);
@@ -375,7 +361,6 @@ const StylesGlobaux = () => (
       to { width: 100%; }
     }
 
-    /* ── Révélation au scroll ── */
     @keyframes rev-in {
       from { opacity: 0; transform: var(--rev-from, translate3d(0, 40px, 0)); }
       to { opacity: 1; transform: none; }
@@ -392,7 +377,6 @@ const StylesGlobaux = () => (
     }
     .rev-visible.rev-flou { animation-name: rev-in-flou; }
 
-    /* ── Hero ── */
     @keyframes mot-monte {
       from { transform: translateY(110%) rotate(4deg); opacity: 0; }
       to { transform: none; opacity: 1; }
@@ -411,7 +395,6 @@ const StylesGlobaux = () => (
     }
     .animate-defiler-point { animation: defiler-point 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
 
-    /* ── Navigation mobile ── */
     @keyframes menu-in {
       from { opacity: 0; transform: translateY(-12px); }
       to { opacity: 1; transform: none; }
@@ -428,7 +411,6 @@ const StylesGlobaux = () => (
     }
     .animate-icone-rot { animation: icone-rot 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-    /* ── Cartes, boutons, micro-interactions ── */
     @keyframes carte-entree {
       from { opacity: 0; transform: translateY(18px) scale(0.985); }
       to { opacity: 1; transform: none; }
@@ -472,11 +454,9 @@ const StylesGlobaux = () => (
     }
     .btn-brillance:hover::after { transform: translateX(120%); }
 
-    /* ── Modale ── */
     @keyframes modale-fond { from { opacity: 0; } to { opacity: 1; } }
     .animate-modale-fond { animation: modale-fond 0.35s ease-out both; }
 
-    /* ── Modale détail service (v2) ── */
     @keyframes modale-fond-sortie { from { opacity: 1; } to { opacity: 0; } }
     @keyframes modale-panneau-sortie {
       from { opacity: 1; transform: none; }
@@ -528,7 +508,7 @@ const VARIANTES_REVELATION = {
 };
 
 const Revelation = ({ children, className = '', delai = 0, variante = 'haut', as: Balise = 'div' }) => {
-  const [reference, estVisible] = utiliserRevelation();
+  const [reference, estVisible] = useRevelation();
   const classeEtat = estVisible
     ? (variante === 'flou' ? 'rev-visible rev-flou' : 'rev-visible')
     : 'rev-cache';
@@ -565,7 +545,6 @@ const BarreNavigation = ({
     return () => window.removeEventListener('scroll', surDefilement);
   }, []);
 
-  // Scrollspy : met en avant le lien de la section visible
   useEffect(() => {
     const noeuds = LIENS_NAVIGATION
       .map(({ lien }) => document.getElementById(lien.slice(1)))
@@ -583,12 +562,16 @@ const BarreNavigation = ({
     return () => observateur.disconnect();
   }, []);
 
-  const solide = defile || menuMobileOuvert;
   const liens = LIENS_NAVIGATION;
   const estPatient = profil?.role === 'patient';
+  const navigationTransparente = sectionActive === 'accueil' && !menuMobileOuvert;
 
   return (
-    <header     className={`fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-500 ${solide ? 'bg-white/80 backdrop-blur-xl border-b border-black/5 text-[#0A2233]' : 'bg-transparent text-white'} ${defile ? 'shadow-[0_8px_30px_-12px_rgba(10,34,51,0.25)]' : ''}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 border-b pt-[env(safe-area-inset-top)] transition-all duration-500 ${
+      navigationTransparente
+        ? 'border-transparent bg-transparent text-white'
+        : 'border-black/5 bg-white text-[#0A2233]'
+    } ${defile && !navigationTransparente ? 'shadow-[0_8px_30px_-12px_rgba(10,34,51,0.25)]' : ''}`}>
       <div className={`max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between transition-[height] duration-500 ${defile ? 'h-16' : 'h-20'}`}>
         <a href="#accueil" className="group flex items-center space-x-3">
           <div className="w-11 h-11 rounded-xl bg-white p-1.5 flex items-center justify-center overflow-hidden transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105">
@@ -596,7 +579,7 @@ const BarreNavigation = ({
           </div>
           <div className="leading-tight">
             <span className="text-lg font-light tracking-[0.18em] block">CENHOSOA</span>
-            <span className={`hidden sm:block text-[10px] tracking-[0.2em] uppercase transition-all duration-500 ${solide ? 'text-slate-500' : 'text-white/60'} ${defile ? 'max-h-0 opacity-0' : 'max-h-4 opacity-100'}`}>Centre Hospitalier de Soavinandriana</span>
+            <span className={`hidden sm:block text-[10px] tracking-[0.2em] uppercase transition-all duration-500 ${navigationTransparente ? 'text-white/70' : 'text-slate-500'} ${defile ? 'max-h-0 opacity-0' : 'max-h-4 opacity-100'}`}>Centre Hospitalier de Soavinandriana</span>
           </div>
         </a>
 
@@ -628,7 +611,7 @@ const BarreNavigation = ({
           </button>
           <button
             onClick={estPatient ? surOuvertureRendezVous : surOuvertureConnexion}
-            className={`rounded-full border transition-all duration-300 active:scale-95 flex items-center ${estPatient ? 'space-x-1.5 px-3 py-2 text-xs tracking-normal' : 'space-x-2 px-5 py-2.5 text-[13px] tracking-wide'} ${solide ? 'border-[#0A2233]/20 hover:bg-[#0A2233] hover:text-white' : 'border-white/30 bg-white/10 backdrop-blur-md hover:bg-white hover:text-[#0A2233]'}`}
+            className={`rounded-full border ${navigationTransparente ? 'border-white/50' : 'border-[#0A2233]/20'} transition-all duration-300 active:scale-95 flex items-center hover:bg-[#0A2233] hover:text-white ${estPatient ? 'space-x-1.5 px-3 py-2 text-xs tracking-normal' : 'space-x-2 px-5 py-2.5 text-[13px] tracking-wide'}`}
           >
             {estPatient ? <Calendar className="h-3.5 w-3.5 shrink-0" /> : <User className="w-4 h-4" />}
             <span>{estPatient ? 'Rendez-vous' : 'Login'}</span>
@@ -648,61 +631,67 @@ const BarreNavigation = ({
         <button
           onClick={() => fixerMenuMobileOuvert(!menuMobileOuvert)}
           aria-label="Menu"
+          aria-expanded={menuMobileOuvert}
+          aria-controls="navigation-mobile"
           className="md:hidden p-2.5 rounded-full focus:outline-none active:scale-90 transition-transform"
         >
           <span key={menuMobileOuvert ? 'ferme' : 'ouvre'} className="inline-flex animate-icone-rot">
             {menuMobileOuvert ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </span>
         </button>
+        {estPatient && (
+          <button
+            type="button"
+            onClick={surDeconnexion}
+            aria-label="Déconnexion"
+            title="Déconnexion"
+            className="md:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-red-600 bg-red-50 text-red-600 transition-colors hover:bg-red-100 active:scale-95"
+          >
+            <LogOut className="h-4 w-4 text-red-600" />
+          </button>
+        )}
       </div>
 
       {menuMobileOuvert && (
-        <div className="animate-menu-in md:hidden bg-white text-[#0A2233] border-b border-black/5 px-6 pt-2 pb-6 space-y-1">
-          {liens.map(({ lien, libelle }, index) => (
-            <a
-              key={lien}
-              href={lien}
-              onClick={() => fixerMenuMobileOuvert(false)}
-              className="animate-lien-in block py-3 text-xl font-light border-b border-black/5"
-              style={{ animationDelay: `${60 + index * 60}ms` }}
-            >
-              {libelle}
-            </a>
-          ))}
-          <div className="pt-4 space-y-2 animate-lien-in" style={{ animationDelay: `${60 + liens.length * 60}ms` }}>
+        <div
+          id="navigation-mobile"
+          className="animate-menu-in fixed inset-x-0 top-[calc(env(safe-area-inset-top)+5rem)] z-[60] max-h-[calc(100dvh-env(safe-area-inset-top)-5rem)] overflow-y-auto overscroll-contain border-b border-black/5 bg-white px-6 pt-2 pb-6 text-[#0A2233] md:hidden"
+        >
+          <nav aria-label="Navigation mobile" className="space-y-1">
+            {liens.map(({ lien, libelle }, index) => (
+              <a
+                key={lien}
+                href={lien}
+                onClick={() => fixerMenuMobileOuvert(false)}
+                className="animate-lien-in block border-b border-black/5 py-3 text-xl font-light"
+                style={{ animationDelay: `${60 + index * 60}ms` }}
+              >
+                {libelle}
+              </a>
+            ))}
+          </nav>
+          <div className="animate-lien-in space-y-2 pt-4" style={{ animationDelay: `${60 + liens.length * 60}ms` }}>
             <button
               type="button"
               onClick={() => {
                 fixerMenuMobileOuvert(false);
                 surDemandeAmbulance();
               }}
-              className="flex w-full items-center justify-center space-x-2 rounded-full bg-[#1F7A8C] py-3.5 text-sm font-semibold text-white active:scale-[0.98] transition-transform"
+              className="flex w-full items-center justify-center space-x-2 rounded-full bg-[#1F7A8C] py-3.5 text-sm font-semibold text-white transition-transform active:scale-[0.98]"
             >
               <Ambulance className="h-4 w-4" />
               <span>Demander une ambulance</span>
             </button>
             <button
+              type="button"
               onClick={() => {
                 fixerMenuMobileOuvert(false);
                 (estPatient ? surOuvertureRendezVous : surOuvertureConnexion)();
               }}
-              className="w-full py-3.5 rounded-full bg-[#0A2233] text-white text-sm tracking-wide active:scale-[0.98] transition-transform"
+              className="w-full rounded-full bg-[#0A2233] py-3.5 text-sm tracking-wide text-white transition-transform active:scale-[0.98]"
             >
               {estPatient ? 'Mes rendez-vous' : 'Portail Patient'}
             </button>
-            {estPatient && (
-              <button
-                type="button"
-                onClick={() => {
-                  fixerMenuMobileOuvert(false);
-                  surDeconnexion();
-                }}
-                className="w-full py-3.5 rounded-full bg-red-600 text-white text-sm tracking-wide flex items-center justify-center space-x-2 active:scale-[0.98] transition-transform"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Déconnexion</span>
-              </button>
-            )}
           </div>
         </div>
       )}
@@ -715,13 +704,10 @@ const ModaleDetailService = ({ service, onFermer, onPrendreRdv }) => {
   const [enFermeture, fixerEnFermeture] = useState(false);
   const minuterieFermeture = useRef(null);
 
-  // Réinitialise l'état de fermeture à chaque nouvelle ouverture
   useEffect(() => {
-    if (ouverte) fixerEnFermeture(false);
     return () => clearTimeout(minuterieFermeture.current);
-  }, [service]);
+  }, []);
 
-  // Bloque le scroll de la page derrière la modale
   useEffect(() => {
     if (!ouverte) return;
     const precedent = document.body.style.overflow;
@@ -731,26 +717,24 @@ const ModaleDetailService = ({ service, onFermer, onPrendreRdv }) => {
     };
   }, [ouverte]);
 
-  // Fermeture animée (le parent reste maître de l'état via onFermer)
-  const fermerAvecAnimation = () => {
+  const fermerAvecAnimation = useCallback(() => {
     if (enFermeture) return;
     fixerEnFermeture(true);
     minuterieFermeture.current = setTimeout(onFermer, 280);
-  };
+  }, [enFermeture, onFermer]);
 
-  // Fermeture à la touche Échap
   useEffect(() => {
     if (!ouverte) return;
     const surTouche = (e) => { if (e.key === 'Escape') fermerAvecAnimation(); };
     window.addEventListener('keydown', surTouche);
     return () => window.removeEventListener('keydown', surTouche);
-  }, [ouverte, enFermeture]);
+  }, [ouverte, fermerAvecAnimation]);
 
   if (!service) return null;
 
   return (
     <div
-      className={`${enFermeture ? 'animate-modale-fond-sortie' : 'animate-modale-fond'} fixed inset-0 z-[120] flex items-center justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6`}
+      className={`${enFermeture ? 'animate-modale-fond-sortie' : 'animate-modale-fond'} mobile-scroll-overlay fixed inset-0 z-[120] flex justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6`}
       role="presentation"
       onMouseDown={(evenement) => {
         if (evenement.target === evenement.currentTarget) fermerAvecAnimation();
@@ -760,7 +744,7 @@ const ModaleDetailService = ({ service, onFermer, onPrendreRdv }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="titre-modale-service"
-        className={`${enFermeture ? 'animate-modale-panneau-sortie' : 'animate-modale-panneau'} modal-scrollbar relative grid max-h-[92dvh] w-full max-w-6xl overflow-x-hidden overflow-y-auto overscroll-contain bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)] md:grid-cols-[1.08fr_0.92fr] md:overflow-hidden`}
+        className={`${enFermeture ? 'animate-modale-panneau-sortie' : 'animate-modale-panneau'} mobile-scroll-dialog modal-scrollbar relative my-auto grid w-full max-w-6xl overflow-x-hidden overflow-y-auto overscroll-contain bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)] md:grid-cols-[1.08fr_0.92fr] md:overflow-hidden`}
       >
         <div className="relative h-[min(46dvh,24rem)] min-h-[15rem] overflow-hidden bg-[#0A2233] md:h-auto md:min-h-[620px]">
           {service.photo_responsable_url ? (
@@ -788,7 +772,7 @@ const ModaleDetailService = ({ service, onFermer, onPrendreRdv }) => {
             type="button"
             onClick={fermerAvecAnimation}
             aria-label="Fermer les informations du service"
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center border border-[#0A2233]/10 text-[#0A2233]/70 transition-colors hover:border-[#0A2233] hover:bg-[#0A2233] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] sm:right-6 sm:top-6"
+            className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center border border-[#0A2233]/10 text-[#0A2233]/70 transition-colors hover:border-[#0A2233] hover:bg-[#0A2233] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] sm:right-6 sm:top-6"
           >
             <X size={18} />
           </button>
@@ -926,18 +910,31 @@ export default function PageCenhosoa() {
     fixerAfficherRendezVous(true);
   };
 
+  const naviguerVers = useCallback((chemin, remplacer = false) => {
+    const methodeHistorique = remplacer ? 'replaceState' : 'pushState';
+    window.history[methodeHistorique]({}, '', chemin);
+    window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
+  }, []);
+
   const retournerAuPortailPublic = () => {
-    window.history.pushState({}, '', '/');
-    fixerEspaceConnexionPersonnel(false);
+    naviguerVers('/');
     fixerAfficherConnexion(false);
   };
 
-  const quitterConnexionPersonnel = () => {
-    if (window.location.pathname === CHEMIN_CONNEXION_PERSONNEL) {
-      window.history.replaceState({}, '', '/');
-    }
-    fixerEspaceConnexionPersonnel(false);
+  const retournerALAccueilPatient = () => {
+    naviguerVers('/');
+    fixerAfficherRendezVous(false);
+    fixerServiceSelectionne(null);
+    window.scrollTo(0, 0);
   };
+
+  const quitterConnexionPersonnel = useCallback(() => {
+    if (window.location.pathname === CHEMIN_CONNEXION_PERSONNEL) {
+      naviguerVers('/', true);
+    } else {
+      fixerEspaceConnexionPersonnel(false);
+    }
+  }, [naviguerVers]);
 
   useEffect(() => {
     return demarrerConnexionTempsReel();
@@ -1007,7 +1004,7 @@ export default function PageCenhosoa() {
         }
       })
       .catch((err) => console.error('Erreur de vérification de session :', err));
-  }, []);
+  }, [quitterConnexionPersonnel]);
 
   const gererConnexionPersonnel = async (espacePersonnel = false) => {
     try {
@@ -1020,38 +1017,26 @@ export default function PageCenhosoa() {
         quitterConnexionPersonnel();
         fixerProfilUtilisateur(profil);
         fixerAfficherRendezVous(false);
+        fixerAfficherGestionLits(false);
+        fixerAfficherGestionAmbulances(false);
+        fixerAfficherSuperAdmin(false);
+        fixerAfficherDemandeAmbulance(false);
         fixerAfficherConnexion(false);
         return true;
       }
-      if (profil.role === 'secretaire') {
-        quitterConnexionPersonnel();
-        fixerProfilUtilisateur(profil);
-        fixerAfficherRendezVous(true);
-        fixerAfficherConnexion(false);
-        return true;
-      }
-      if (profil.role === 'medecin') {
-        quitterConnexionPersonnel();
-        fixerProfilUtilisateur(profil);
-        fixerAfficherRendezVous(true);
-        fixerAfficherConnexion(false);
-        return true;
-      }
-      if (profil.role === 'superadmin') {
-        quitterConnexionPersonnel();
-        fixerProfilUtilisateur(profil);
-        fixerAfficherSuperAdmin(true);
-        fixerAfficherConnexion(false);
-        return true;
-      }
-      if (!ROLES_GESTION_URGENCES.includes(profil.role)) {
+      const rolePersonnelAutorise = ROLES_GESTION_URGENCES.includes(profil.role)
+        || ['secretaire', 'medecin', 'superadmin'].includes(profil.role);
+      if (!rolePersonnelAutorise) {
         if (espacePersonnel) effacerTokens();
         return false;
       }
       quitterConnexionPersonnel();
       fixerProfilUtilisateur(profil);
-      fixerAfficherGestionLits(true);
-      fixerAfficherGestionAmbulances(true);
+      fixerAfficherRendezVous(profil.role === 'secretaire' || profil.role === 'medecin');
+      fixerAfficherSuperAdmin(profil.role === 'superadmin');
+      fixerAfficherGestionLits(ROLES_GESTION_URGENCES.includes(profil.role));
+      fixerAfficherGestionAmbulances(ROLES_GESTION_URGENCES.includes(profil.role));
+      fixerAfficherDemandeAmbulance(false);
       fixerAfficherConnexion(false);
       return true;
     } catch (err) {
@@ -1062,26 +1047,28 @@ export default function PageCenhosoa() {
 
   const deconnecterPersonnel = () => {
     effacerTokens();
-    window.history.replaceState({}, '', CHEMIN_CONNEXION_PERSONNEL);
+    naviguerVers(CHEMIN_CONNEXION_PERSONNEL, true);
     fixerProfilUtilisateur(null);
+    fixerServiceSelectionne(null);
+    fixerMenuMobileOuvert(false);
     fixerAfficherGestionLits(false);
     fixerAfficherGestionAmbulances(false);
     fixerAfficherSuperAdmin(false);
     fixerAfficherRendezVous(false);
     fixerAfficherConnexion(false);
-    fixerEspaceConnexionPersonnel(true);
   };
 
   const deconnecterPatient = () => {
     effacerTokens();
-    window.history.replaceState({}, '', '/');
+    naviguerVers('/', true);
     fixerProfilUtilisateur(null);
+    fixerServiceSelectionne(null);
+    fixerMenuMobileOuvert(false);
     fixerAfficherGestionLits(false);
     fixerAfficherGestionAmbulances(false);
     fixerAfficherSuperAdmin(false);
     fixerAfficherRendezVous(false);
     fixerAfficherConnexion(false);
-    fixerEspaceConnexionPersonnel(false);
   };
 
   useEffect(() => {
@@ -1170,11 +1157,8 @@ export default function PageCenhosoa() {
         onDemandeAmbulance={() => fixerAfficherDemandeAmbulance(true)}
         services={services}
         serviceInitial={serviceSelectionne}
-        onBackToHome={() => {
-          fixerAfficherRendezVous(false);
-          fixerServiceSelectionne(null);
-        }}
-        onDeconnexion={deconnecterPersonnel}
+        onDeconnexion={profilUtilisateur?.role === 'patient' ? deconnecterPatient : deconnecterPersonnel}
+        onRetourAccueil={retournerALAccueilPatient}
       />
     );
   }
@@ -1193,7 +1177,6 @@ export default function PageCenhosoa() {
         fixerMenuMobileOuvert={fixerMenuMobileOuvert}
       />
 
-      {/* ───────── HERO ───────── */}
       <section id="accueil" className="relative min-h-[100svh] flex flex-col justify-end text-white overflow-hidden bg-[#0A2233]">
         <div className="absolute inset-0">
           <Parallaxe vitesse={0.14} className="absolute inset-x-0 -top-[14%] h-[128%]">
@@ -1308,8 +1291,10 @@ export default function PageCenhosoa() {
                     aria-label={`Afficher l'actualité ${index + 1}`}
                     aria-current={index === indexActualiteHero ? 'true' : undefined}
                     onClick={() => fixerActualiteCourante(index)}
-                    className={`h-1 rounded-full transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2233] ${index === indexActualiteHero ? 'w-10 bg-[#7FD1CB] shadow-[0_0_12px_rgba(127,209,203,0.7)]' : 'w-4 bg-white/35 hover:w-7 hover:bg-white/75'}`}
-                  />
+                    className="group flex h-11 w-11 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2233]"
+                  >
+                    <span className={`block h-1 rounded-full transition-all duration-500 ${index === indexActualiteHero ? 'w-10 bg-[#7FD1CB] shadow-[0_0_12px_rgba(127,209,203,0.7)]' : 'w-4 bg-white/35 group-hover:w-7 group-hover:bg-white/75'}`} />
+                  </button>
                 ))}
               </div>
               <span className="font-mono text-[11px] tracking-[0.18em] text-white/55" aria-live="polite">
@@ -1335,7 +1320,7 @@ export default function PageCenhosoa() {
 
       {actualiteDetailsOuverte && (
         <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
+          className="mobile-scroll-overlay fixed inset-0 z-[120] flex justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
           role="presentation"
           onMouseDown={(evenement) => {
             if (evenement.target === evenement.currentTarget) fixerActualiteDetailsOuverte(null);
@@ -1345,7 +1330,7 @@ export default function PageCenhosoa() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="titre-details-actualite"
-            className="modal-scrollbar relative grid max-h-[92dvh] w-full max-w-6xl overflow-x-hidden overflow-y-auto overscroll-contain bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)] md:grid-cols-[1.08fr_0.92fr] md:overflow-hidden"
+            className="mobile-scroll-dialog modal-scrollbar relative my-auto grid w-full max-w-6xl overflow-x-hidden overflow-y-auto overscroll-contain bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)] md:grid-cols-[1.08fr_0.92fr] md:overflow-hidden"
           >
             <div className="relative h-[min(46dvh,24rem)] min-h-[15rem] overflow-hidden bg-[#0A2233] md:h-auto md:min-h-[620px]">
               <img
@@ -1394,7 +1379,6 @@ export default function PageCenhosoa() {
         </div>
       )}
 
-      {/* ───────── ENGAGEMENT : image + panneau ───────── */}
       <section id="engagement" className="bg-white">
         <div className="grid lg:grid-cols-2 min-h-[680px]">
           <Revelation variante="gauche" className="group relative min-h-[360px] lg:min-h-full overflow-hidden">
@@ -1435,7 +1419,6 @@ export default function PageCenhosoa() {
         </div>
       </section>
 
-      {/* ───────── SPÉCIALITÉS : liste focus ───────── */}
       <section id="specialites" className="bg-white py-28 lg:py-36">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <Revelation variante="flou" className="text-center mb-10">
@@ -1618,21 +1601,22 @@ export default function PageCenhosoa() {
                 type="button"
                 aria-label={`Aller au témoignage ${index + 1}`}
                 onClick={() => fixerTemoignageCourant(index)}
-                className={`relative h-1.5 rounded-full overflow-hidden bg-white/15 transition-all duration-300 ${index === temoignageCourant ? 'w-10' : 'w-3 hover:w-5 hover:bg-white/30'}`}
+                className="group relative flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB]"
               >
+                <span className={`relative block h-1.5 overflow-hidden rounded-full bg-white/15 transition-all duration-300 ${index === temoignageCourant ? 'w-10' : 'w-3 group-hover:w-5 group-hover:bg-white/30'}`}>
                 {index === temoignageCourant && (
                   <span
                     key={temoignageCourant}
                     className="absolute inset-y-0 left-0 bg-[#7FD1CB] rounded-full animate-[progress-fill_5.5s_linear]"
                   />
                 )}
+                </span>
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ───────── LOCALISATION ───────── */}
       <section id="recherche" className="bg-white">
         <div className="grid lg:grid-cols-2 min-h-[620px]">
           <div className="bg-[#EDECE9] px-6 sm:px-14 py-16 lg:py-20 flex flex-col justify-between gap-12">
@@ -1688,7 +1672,7 @@ export default function PageCenhosoa() {
         </div>
       </section>
 
-      <footer id="urgence" className="bg-[#0A2233] text-slate-300 pt-16 pb-12 border-t border-white/5">
+      <footer id="urgence" className="bg-[#0A2233] pt-16 pb-12 text-white border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
             <Revelation className="space-y-4">
@@ -1698,7 +1682,7 @@ export default function PageCenhosoa() {
                 </div>
                 <span className="text-lg font-display font-bold tracking-tight">CENHOSOA</span>
               </div>
-              <p className="text-sm text-slate-400 leading-relaxed">Centre Hospitalier de Soavinandriana. Établissement public de santé de référence fondé en 1891 à Antananarivo.</p>
+              <p className="text-sm leading-relaxed text-white">Centre Hospitalier de Soavinandriana. Établissement public de santé de référence fondé en 1891 à Antananarivo.</p>
             </Revelation>
 
             <Revelation delai={100}>
@@ -1714,9 +1698,8 @@ export default function PageCenhosoa() {
                       href={CHEMIN_CONNEXION_PERSONNEL}
                       onClick={(event) => {
                         event.preventDefault();
-                        window.history.pushState({}, '', CHEMIN_CONNEXION_PERSONNEL);
+                        naviguerVers(CHEMIN_CONNEXION_PERSONNEL);
                         fixerAfficherConnexion(false);
-                        fixerEspaceConnexionPersonnel(true);
                       }}
                       className="inline-block hover:text-[#7FD1CB] hover:translate-x-1 transition-all duration-300"
                     >
@@ -1757,7 +1740,7 @@ export default function PageCenhosoa() {
 
             <Revelation delai={300}>
               <h4 className="text-white font-display font-bold text-xs uppercase tracking-wider mb-4">Urgences 24h/24</h4>
-              <div className="space-y-3 text-sm text-slate-400">
+              <div className="space-y-3 text-sm text-white">
                 <p className="flex items-center space-x-2 text-[#7FD1CB] font-semibold">
                   <Clock className="w-4 h-4" />
                   <span>Service d'urgence ouvert 7j/7</span>
@@ -1766,7 +1749,7 @@ export default function PageCenhosoa() {
             </Revelation>
           </div>
 
-          <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white">
             <span>© CENHOSOA · Tous droits réservés</span>
             <button
               onClick={profilUtilisateur?.role === 'patient' ? () => ouvrirRendezVous() : () => fixerAfficherConnexion(true)}
@@ -1779,6 +1762,7 @@ export default function PageCenhosoa() {
       </footer>
 
       <ModaleDetailService
+        key={serviceSelectionne?.id ?? 'aucun-service'}
         service={serviceSelectionne}
         onFermer={() => fixerServiceSelectionne(null)}
         onPrendreRdv={() => ouvrirRendezVous(serviceSelectionne)}

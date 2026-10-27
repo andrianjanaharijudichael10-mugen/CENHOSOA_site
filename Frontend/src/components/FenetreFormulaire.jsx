@@ -29,7 +29,7 @@ export default function FenetreFormulaire({
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center overflow-y-auto bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
+      className="mobile-scroll-overlay fixed inset-0 z-[120] flex justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
       onMouseDown={(evenement) => {
         if (evenement.target === evenement.currentTarget) onFermer();
       }}
@@ -38,7 +38,7 @@ export default function FenetreFormulaire({
         role="dialog"
         aria-modal="true"
         aria-labelledby="titre-fenetre-formulaire"
-        className={`flex max-h-[92dvh] w-full ${largeur} flex-col overflow-hidden bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)]`}
+        className={`mobile-scroll-dialog my-auto flex w-full ${largeur} flex-col overflow-hidden bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)]`}
       >
         <header className="flex shrink-0 items-start justify-between gap-4 bg-gradient-to-r from-[#0A2233] via-[#0F3D52] to-[#1F7A8C] px-5 py-5 text-white sm:px-7">
           <div>
@@ -50,7 +50,7 @@ export default function FenetreFormulaire({
             type="button"
             onClick={onFermer}
             aria-label="Fermer la fenêtre"
-            className="shrink-0 rounded-xl border border-white/15 bg-white/10 p-2 text-white/80 transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB]"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB]"
           >
             <X size={20} />
           </button>

@@ -9,7 +9,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.models.enums import RoleUtilisateur
 
-
 class Utilisateur(Base):
     __tablename__ = "utilisateurs"
 
@@ -29,8 +28,6 @@ class Utilisateur(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    # Relations 1-1 vers les profils métier (un seul des deux est rempli
-    # selon le rôle du compte)
     patient = relationship(
         "Patient", back_populates="utilisateur", uselist=False, cascade="all, delete-orphan"
     )

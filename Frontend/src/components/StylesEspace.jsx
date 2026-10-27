@@ -1,11 +1,10 @@
-// ───────────────────────── StylesEspace.jsx ─────────────────────────
+
 import { useEffect, useRef, useState } from 'react';
 
 const SELECTEUR_REVELATION = '.apparition, [data-reveal], main article';
 let utilisateursMoteur = 0;
 let arreterMoteur = null;
 
-// Moteur d'animations au scroll (un seul exemplaire actif, même si StylesEspace est monté plusieurs fois).
 function demarrerMoteur() {
   const reduit = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
@@ -45,7 +44,6 @@ function demarrerMoteur() {
   window.addEventListener('resize', surDefilement);
   majDefilement();
 
-  // Révélation au scroll
   const vus = new WeakSet();
   const caches = new Set();
   let observateur = null;
@@ -90,7 +88,6 @@ function demarrerMoteur() {
   mutations.observe(document.body, { childList: true, subtree: true });
   analyser();
 
-  // Halo dynamique au survol des cartes
   const surPointeur = (evenement) => {
     const carte = evenement.target.closest?.('main article');
     if (!carte) return;
@@ -118,7 +115,6 @@ function demarrerMoteur() {
   };
 }
 
-// Habillage commun des espaces connectés (design uniquement, aucune logique métier).
 export const StylesEspace = () => {
   useEffect(() => {
     utilisateursMoteur += 1;
@@ -177,12 +173,10 @@ export const StylesEspace = () => {
     .animate-in { animation: zoom-entree .22s ease-out; }
     .espace button:not(:disabled):active { transform: scale(.97); }
 
-    /* Révélation au scroll */
     @keyframes revelation { from { opacity: 0; transform: translate3d(0, 28px, 0) scale(.985); } }
     .rv-hidden { opacity: 0 !important; transform: translate3d(0, 28px, 0) scale(.985) !important; animation: none !important; }
     .rv-in { animation: revelation .8s cubic-bezier(.2,.7,.2,1) var(--rv-delay, 0s) backwards !important; }
 
-    /* Barre de progression du scroll */
     .fx-progress {
       position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 200; pointer-events: none;
       transform-origin: left center; transform: scaleX(0);
@@ -191,7 +185,6 @@ export const StylesEspace = () => {
       transition: transform .12s linear;
     }
 
-    /* Bouton retour en haut */
     .fx-top {
       position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 90; width: 46px; height: 46px;
       display: flex; align-items: center; justify-content: center; border-radius: 9999px;
@@ -204,7 +197,6 @@ export const StylesEspace = () => {
     .fx-top:hover { background: #7FD1CB; color: #0A2233; transform: translateY(-3px); }
     .fx-top:active { transform: scale(.94); }
 
-    /* En-tête dynamique */
     .espace > header { padding-top: env(safe-area-inset-top); transition: box-shadow .35s ease, background-color .35s ease; }
     .espace > header.fx-header-scrolled { box-shadow: 0 14px 34px -14px rgba(10,34,51,.6); }
     @media (max-width: 639px) {
@@ -212,7 +204,6 @@ export const StylesEspace = () => {
       .espace :where(button, a[href]) { touch-action: manipulation; }
     }
 
-    /* Cartes : survol + halo qui suit le curseur */
     .espace main article, main.anim article { position: relative; transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease, border-color .35s ease; }
     .espace main article::after, main.anim article::after {
       content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
@@ -225,18 +216,15 @@ export const StylesEspace = () => {
       .espace main li:hover > article { transform: none; }
     }
 
-    /* Boutons & liens : retour tactile */
     .espace button:not(:disabled), .espace a[href], main.anim button:not(:disabled) { cursor: pointer; }
     @media (hover: hover) {
       .espace button:not(:disabled):not(.fx-top):hover { filter: brightness(1.04); }
       .espace tbody tr { transition: background-color .25s ease; }
     }
 
-    /* Accordéons : contenu qui se déploie */
     @keyframes deploiement { from { opacity: 0; transform: translateY(-8px); } }
     .espace details[open] > :not(summary) { animation: deploiement .4s cubic-bezier(.2,.7,.2,1); }
 
-    /* Barres et graphiques : croissance quand ils entrent à l'écran */
     @keyframes croissance { from { transform: scaleX(0); } }
     @keyframes anneau { from { opacity: 0; transform: scale(.8) rotate(-40deg); } }
     .espace .overflow-hidden.rounded-full > div[style*="width"],
@@ -261,27 +249,30 @@ export const StylesEspace = () => {
   );
 };
 
-// Compteur animé : démarre quand l'indicateur devient visible.
 export function Compteur({ valeur, duree = 900 }) {
   const reference = useRef(null);
   const [vu, setVu] = useState(false);
-  const [affiche, setAffiche] = useState(typeof valeur === 'number' ? 0 : valeur);
+  const [affiche, setAffiche] = useState(0);
   const precedent = useRef(0);
+  const observateurDisponible = typeof IntersectionObserver !== 'undefined';
+  const mouvementReduit = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
     const element = reference.current;
-    if (!element || typeof IntersectionObserver === 'undefined') { setVu(true); return undefined; }
+    if (!element || !observateurDisponible) return undefined;
     const observateur = new IntersectionObserver(([entree]) => {
       if (entree.isIntersecting) { setVu(true); observateur.disconnect(); }
     }, { threshold: 0.2 });
     observateur.observe(element);
     return () => observateur.disconnect();
-  }, []);
+  }, [observateurDisponible]);
 
   useEffect(() => {
-    if (typeof valeur !== 'number') { setAffiche(valeur); return undefined; }
-    if (!vu) return undefined;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setAffiche(valeur); return undefined; }
+    if (typeof valeur !== 'number' || !vu) return undefined;
+    if (mouvementReduit) {
+      precedent.current = valeur;
+      return undefined;
+    }
     const depart = precedent.current;
     const debut = performance.now();
     let image;
@@ -293,15 +284,17 @@ export function Compteur({ valeur, duree = 900 }) {
     };
     image = requestAnimationFrame(pas);
     return () => cancelAnimationFrame(image);
-  }, [valeur, duree, vu]);
+  }, [valeur, duree, vu, mouvementReduit]);
 
-  return <span ref={reference}>{affiche}</span>;
+  const valeurAffichee = typeof valeur !== 'number' || !observateurDisponible || mouvementReduit
+    ? valeur
+    : affiche;
+  return <span ref={reference}>{valeurAffichee}</span>;
 }
 
 export const BTN_CLAIR = 'group inline-flex items-center gap-2.5 rounded-full bg-white px-6 py-3 text-sm font-medium text-[#0A2233] transition hover:-translate-y-0.5 hover:bg-[#7FD1CB] hover:shadow-lg hover:shadow-black/20';
 export const BTN_VERRE = 'inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm text-white backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/20';
 
-// Grand bandeau d'en-tête de page : titre fin, sous-titre, actions et indicateurs animés.
 export function BandeauPage({ etiquette, titre, accent, sousTitre, actions, stats = [] }) {
   return (
     <section className="apparition relative overflow-hidden rounded-[2rem] bg-[#0A2233] px-6 py-9 text-white sm:px-10 sm:py-12">

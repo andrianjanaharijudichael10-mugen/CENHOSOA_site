@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  AlertCircle, Ambulance, ArrowLeft, Bell, Calendar, Camera, CheckCircle2, ChevronLeft,
-  ChevronRight, ClipboardList, Clock, LogOut, Menu, Plus, Search,
+  AlertCircle, Ambulance, Bell, Calendar, CheckCircle2, ChevronLeft,
+  ChevronRight, ClipboardList, Clock, House, LogOut, Menu, Plus, Search,
   Stethoscope, UserPlus, UserRound, X, XCircle,
 } from 'lucide-react';
 import {
@@ -13,11 +13,8 @@ import {
   listerRendezVous,
   marquerNotificationRendezVousLue,
   modifierProfilPatient,
-  modifierPhotoProfilPatient,
   modifierCreneau,
   modifierRendezVous,
-  obtenirPhotoProfilPatient,
-  supprimerPhotoProfilPatient,
   reserverCreneau,
 } from '../services/api';
 import logoCenhosoa from '../assets/logo/logo.jpeg';
@@ -32,7 +29,6 @@ import {
   obtenirNomUtilisateur,
   versDateLocaleInput,
 } from './rendezVousUtils';
-
 
 function CalendrierCreneaux({
   creneaux,
@@ -95,7 +91,71 @@ function CalendrierCreneaux({
           </button>
         </div>
       </div>
-      <div className="overflow-x-auto p-3 sm:p-5">
+      {patientMode && (
+        <div className="space-y-3 p-3 sm:hidden">
+          {jours.filter((jour) => (creneauxParJour[cleDateLocale(jour)] || []).length > 0).map((jour) => {
+            const cle = cleDateLocale(jour);
+            const creneauxJour = creneauxParJour[cle];
+            return (
+              <section key={cle} className="rounded-2xl border border-slate-200 bg-white p-3">
+                <h3 className="mb-2 text-sm font-semibold capitalize text-[#0A2233]">
+                  {new Intl.DateTimeFormat('fr-FR', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                  }).format(jour)}
+                </h3>
+                <div className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                  {creneauxJour.map((creneau) => {
+                    const estSelectionne = creneauSelectionne?.id === creneau.id;
+                    const maintenant = new Date();
+                    const estPasse = creneau.date_fin
+                      ? new Date(creneau.date_fin).getTime() + 60000 <= maintenant.getTime()
+                      : new Date(creneau.date_heure) <= maintenant;
+                    const reservable = creneau.est_ouvert && !estPasse;
+                    return (
+                      <button
+                        key={creneau.id}
+                        type="button"
+                        disabled={patientMode && !reservable}
+                        onClick={() => onSelectionner(creneau)}
+                        className={`flex min-h-11 items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold transition ${
+                          estSelectionne ? 'bg-[#1F7A8C] text-white shadow-md ring-2 ring-[#7FD1CB]'
+                            : reservable ? 'bg-[#1F7A8C]/10 text-[#0F3D52] hover:bg-[#1F7A8C]/20'
+                              : 'bg-slate-100 text-slate-400'
+                        } disabled:cursor-not-allowed`}
+                        title={`${creneau.est_ouvert ? 'Ouvert' : 'Fermé'} · ${creneau.nombre_patients} patient(s) sur ce créneau · ${creneau.nombre_patients_jour}/${creneau.quota_journalier || 'sans limite'} pour le jour`}
+                      >
+                        <span>
+                          {new Intl.DateTimeFormat('fr-FR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }).format(new Date(creneau.date_heure))}
+                          {creneau.date_fin && `–${new Intl.DateTimeFormat('fr-FR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }).format(new Date(creneau.date_fin))}`}
+                        </span>
+                        <span className="truncate font-medium">
+                          {creneau.est_ouvert
+                            ? `${creneau.nombre_patients_jour}/${creneau.quota_journalier || '∞'} jour`
+                            : 'Fermé'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+          {!jours.some((jour) => (creneauxParJour[cleDateLocale(jour)] || []).length > 0) && (
+            <p className="rounded-2xl bg-slate-50 p-5 text-center text-sm text-slate-500">
+              Aucun créneau n’est affiché pour ce mois.
+            </p>
+          )}
+        </div>
+      )}
+      <div className={`overflow-x-auto p-3 sm:p-5 ${patientMode ? 'hidden sm:block' : ''}`}>
         <div className="min-w-[680px] md:min-w-[760px]">
           <div className="grid grid-cols-6 border-b border-slate-100 pb-2 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
             {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map((jour) => <div key={jour} className="py-2">{jour}</div>)}
@@ -173,8 +233,8 @@ function CalendrierCreneaux({
 }
 
 export default function GestionRendezVous({
-  onBackToHome,
   onDeconnexion,
+  onRetourAccueil,
   onProfilMisAJour,
   onDemandeAmbulance,
   profil,
@@ -188,10 +248,6 @@ export default function GestionRendezVous({
   const [actualisationTempsReel, setActualisationTempsReel] = useState(0);
   const [notificationsOuvertes, setNotificationsOuvertes] = useState(false);
   const [profilOuvert, setProfilOuvert] = useState(false);
-  const [photoProfil, setPhotoProfil] = useState('');
-  const photoProfilUrl = useRef('');
-  const [erreurPhoto, setErreurPhoto] = useState('');
-  const [enregistrementPhoto, setEnregistrementPhoto] = useState(false);
   const [profilPatient, setProfilPatient] = useState({
     nom: profil?.patient?.nom || '',
     prenoms: profil?.patient?.prenoms || '',
@@ -255,87 +311,6 @@ export default function GestionRendezVous({
     ['patients', 'rendez-vous', 'services'],
     () => setActualisationTempsReel((precedent) => precedent + 1),
   ), []);
-
-  useEffect(() => {
-    if (profil?.role !== 'patient' || !profil.patient?.id) {
-      photoProfilUrl.current = '';
-      return undefined;
-    }
-    let actif = true;
-    const chargerPhoto = async () => {
-      try {
-        let photo = await obtenirPhotoProfilPatient(token, profil.patient.id);
-        const clePhotoLocale = `photo-profil-patient:${profil.patient.id}`;
-        if (!photo) {
-          const anciennePhotoLocale = localStorage.getItem(clePhotoLocale);
-          if (anciennePhotoLocale) {
-            const blob = await fetch(anciennePhotoLocale).then((reponse) => reponse.blob());
-            await modifierPhotoProfilPatient(token, blob);
-            localStorage.removeItem(clePhotoLocale);
-            photo = await obtenirPhotoProfilPatient(token, profil.patient.id);
-          }
-        }
-        if (actif && photo) {
-          const url = URL.createObjectURL(photo);
-          photoProfilUrl.current = url;
-          setPhotoProfil(url);
-        }
-      } catch (err) {
-        if (actif) setErreurPhoto(err.message || 'Impossible de charger votre photo de profil.');
-      }
-    };
-    void chargerPhoto();
-    return () => {
-      actif = false;
-      if (photoProfilUrl.current) URL.revokeObjectURL(photoProfilUrl.current);
-      photoProfilUrl.current = '';
-    };
-  }, [profil?.patient?.id, profil?.role, token]);
-
-  const choisirPhotoProfil = async (evenement) => {
-    const fichier = evenement.target.files?.[0];
-    evenement.target.value = '';
-    if (!fichier) return;
-    setErreurPhoto('');
-    if (!fichier.type.startsWith('image/')) {
-      setErreurPhoto('Choisissez un fichier image.');
-      return;
-    }
-    if (fichier.size > 2 * 1024 * 1024) {
-      setErreurPhoto('La photo ne doit pas dépasser 2 Mo.');
-      return;
-    }
-    setEnregistrementPhoto(true);
-    try {
-      await modifierPhotoProfilPatient(token, fichier);
-      const photo = await obtenirPhotoProfilPatient(token, profil.patient.id);
-      if (photo) {
-        if (photoProfilUrl.current) URL.revokeObjectURL(photoProfilUrl.current);
-        photoProfilUrl.current = URL.createObjectURL(photo);
-        setPhotoProfil(photoProfilUrl.current);
-      }
-    } catch (err) {
-      setErreurPhoto(err.message || 'La photo n’a pas pu être enregistrée.');
-    } finally {
-      setEnregistrementPhoto(false);
-    }
-  };
-
-  const supprimerPhotoProfil = async () => {
-    if (!profil?.patient?.id) return;
-    setErreurPhoto('');
-    setEnregistrementPhoto(true);
-    try {
-      await supprimerPhotoProfilPatient(token);
-      if (photoProfilUrl.current) URL.revokeObjectURL(photoProfilUrl.current);
-      photoProfilUrl.current = '';
-      setPhotoProfil('');
-    } catch (err) {
-      setErreurPhoto(err.message || 'Impossible de supprimer la photo de profil.');
-    } finally {
-      setEnregistrementPhoto(false);
-    }
-  };
 
   const enregistrerProfilPatient = async (evenement) => {
     evenement.preventDefault();
@@ -836,7 +811,7 @@ export default function GestionRendezVous({
   return (
     <div className="espace min-h-screen bg-[#F4F2EE] font-body text-[#1E2333]">
       <StylesEspace />
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-[#0A2233] via-[#0F3D52] to-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20">
         <div className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-3 px-3 py-3 sm:gap-4 sm:px-6 lg:h-20 lg:flex-nowrap lg:px-8 lg:py-0">
           <div className="group flex min-w-0 max-w-full items-center space-x-2.5 sm:space-x-3.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white p-1.5 shadow-md shadow-black/20 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2 sm:h-14 sm:w-14">
@@ -923,7 +898,7 @@ export default function GestionRendezVous({
                 {notificationsOuvertes && (
                   <section
                     aria-label="Notifications de rendez-vous"
-                    className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-xl"
+                    className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+6rem)] z-[60] flex max-h-[min(80vh,calc(100dvh-env(safe-area-inset-top)-7rem))] flex-col overflow-hidden overscroll-contain rounded-2xl border border-slate-200 bg-white text-black shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:max-h-[min(80vh,46rem)] sm:w-[min(22rem,calc(100vw-2rem))]"
                   >
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                       <h2 className="text-sm font-bold">Notifications</h2>
@@ -937,7 +912,7 @@ export default function GestionRendezVous({
                       </button>
                     </div>
                     {notificationsRendezVous.length ? (
-                      <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                      <ul className="min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto overscroll-contain">
                         {notificationsRendezVous.map((rdv) => {
                           const heureDemandee = new Date(rdv.date_souhaitee).getTime();
                           const heureConfirmee = new Date(rdv.date_confirmee || rdv.date_souhaitee).getTime();
@@ -953,7 +928,7 @@ export default function GestionRendezVous({
                                 className={`w-full px-4 py-3 text-left transition hover:bg-slate-50 ${notificationNonLue ? 'bg-blue-50/60' : ''}`}
                               >
                                 <div className="flex items-start justify-between gap-2">
-                                  <p className="text-xs font-bold text-[#0A2233]">
+                                  <p className="text-xs font-bold text-black">
                                     {heureModifiee
                                       ? 'Horaire modifié par le médecin'
                                       : 'Rendez-vous confirmé par le médecin'}
@@ -964,13 +939,13 @@ export default function GestionRendezVous({
                                     </span>
                                   )}
                                 </div>
-                                <p className="mt-1 text-xs text-slate-600">{rdv.service_nom}</p>
+                                <p className="mt-1 text-xs text-black">{rdv.service_nom}</p>
                                 {heureModifiee && (
-                                  <p className="mt-1 text-[11px] text-slate-500">
+                                  <p className="mt-1 text-[11px] text-black">
                                     Horaire demandé : {formaterDateNotification(rdv.date_souhaitee)}
                                   </p>
                                 )}
-                                <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+                                <p className="mt-1 text-[11px] font-semibold text-black">
                                   {heureModifiee ? 'Nouvel horaire' : 'Rendez-vous'} : {formaterDateNotification(rdv.date_confirmee || rdv.date_souhaitee)}
                                 </p>
                               </button>
@@ -979,7 +954,7 @@ export default function GestionRendezVous({
                         })}
                       </ul>
                     ) : (
-                      <p className="px-4 py-5 text-xs text-slate-500">Aucun rendez-vous accordé à venir.</p>
+                      <p className="px-4 py-5 text-xs text-black">Aucun rendez-vous accordé à venir.</p>
                     )}
                   </section>
                 )}
@@ -999,9 +974,7 @@ export default function GestionRendezVous({
                   className="flex h-10 items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-2 text-white transition hover:bg-white/20"
                 >
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10">
-                    {photoProfil
-                      ? <img src={photoProfil} alt="" className="h-full w-full object-cover" />
-                      : <UserRound className="h-4 w-4" />}
+                    <UserRound className="h-4 w-4" />
                   </span>
                   <span className="hidden min-w-0 text-left sm:block">
                     <span className="block max-w-36 truncate text-xs font-bold">{nomUtilisateur}</span>
@@ -1012,11 +985,11 @@ export default function GestionRendezVous({
                   <section
                     id="panneau-profil-patient"
                     aria-labelledby="titre-profil-patient"
-                    className="absolute right-0 top-12 z-50 max-h-[min(80vh,46rem)] w-[min(28rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-xl"
+                    className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+6rem)] z-[60] max-h-[min(80vh,calc(100dvh-env(safe-area-inset-top)-7rem))] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white text-black shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:max-h-[min(80vh,46rem)] sm:w-[min(28rem,calc(100vw-2rem))]"
                   >
                     <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#5B7480]">Compte actif</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-black">Compte actif</p>
                         <h2 id="titre-profil-patient" className="mt-1 text-base font-bold">Mon profil</h2>
                       </div>
                       <button
@@ -1028,43 +1001,13 @@ export default function GestionRendezVous({
                         <XCircle className="h-5 w-5" />
                       </button>
                     </div>
-                    <div className="flex items-center gap-4 border-b border-slate-100 px-4 py-4">
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-[#1F7A8C]">
-                        {photoProfil
-                          ? <img src={photoProfil} alt={`Photo de ${nomUtilisateur}`} className="h-full w-full object-cover" />
-                          : <UserRound className="h-8 w-8" />}
-                      </div>
+                    <div className="border-b border-slate-100 px-4 py-4">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-bold">{nomUtilisateur}</p>
-                        <p className="mt-0.5 text-xs text-slate-500">Photo sécurisée et accessible au médecin lors du rendez-vous.</p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <label className={`inline-flex h-8 items-center gap-1.5 rounded-xl border border-slate-200 px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 ${enregistrementPhoto ? 'cursor-wait opacity-50' : 'cursor-pointer'}`}>
-                            <Camera className="h-3.5 w-3.5" />
-                            {enregistrementPhoto ? 'Enregistrement…' : 'Choisir une photo'}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={choisirPhotoProfil}
-                              disabled={enregistrementPhoto}
-                              className="sr-only"
-                            />
-                          </label>
-                          {photoProfil && (
-                            <button
-                              type="button"
-                              onClick={supprimerPhotoProfil}
-                              disabled={enregistrementPhoto}
-                              className="h-8 rounded-xl px-2 text-xs font-semibold text-red-700 hover:bg-red-50"
-                            >
-                              Supprimer
-                            </button>
-                          )}
-                        </div>
-                        {erreurPhoto && <p role="alert" className="mt-2 text-xs text-red-700">{erreurPhoto}</p>}
                       </div>
                     </div>
-                    <form onSubmit={enregistrerProfilPatient} className="grid gap-3 p-4 sm:grid-cols-2">
-                      <label className="text-xs font-semibold text-slate-700">
+                    <form onSubmit={enregistrerProfilPatient} className="grid gap-3 p-4 text-black sm:grid-cols-2">
+                      <label className="text-xs font-semibold text-black">
                         Nom
                         <input
                           required
@@ -1074,7 +1017,7 @@ export default function GestionRendezVous({
                           className="mt-1 h-9 w-full rounded-xl border border-slate-200 px-2.5 text-sm font-normal outline-none focus:border-[#1F7A8C]"
                         />
                       </label>
-                      <label className="text-xs font-semibold text-slate-700">
+                      <label className="text-xs font-semibold text-black">
                         Prénoms
                         <input
                           required
@@ -1084,7 +1027,7 @@ export default function GestionRendezVous({
                           className="mt-1 h-9 w-full rounded-xl border border-slate-200 px-2.5 text-sm font-normal outline-none focus:border-[#1F7A8C]"
                         />
                       </label>
-                      <label className="text-xs font-semibold text-slate-700">
+                      <label className="text-xs font-semibold text-black">
                         Date de naissance
                         <input
                           type="date"
@@ -1093,7 +1036,7 @@ export default function GestionRendezVous({
                           className="mt-1 h-9 w-full rounded-xl border border-slate-200 px-2.5 text-sm font-normal outline-none focus:border-[#1F7A8C]"
                         />
                       </label>
-                      <label className="text-xs font-semibold text-slate-700">
+                      <label className="text-xs font-semibold text-black">
                         Lieu de naissance
                         <input
                           maxLength={150}
@@ -1103,7 +1046,7 @@ export default function GestionRendezVous({
                           className="mt-1 h-9 w-full rounded-xl border border-slate-200 px-2.5 text-sm font-normal outline-none focus:border-[#1F7A8C]"
                         />
                       </label>
-                      <label className="text-xs font-semibold text-slate-700 sm:col-span-2">
+                      <label className="text-xs font-semibold text-black sm:col-span-2">
                         Adresse
                         <textarea
                           maxLength={255}
@@ -1142,22 +1085,29 @@ export default function GestionRendezVous({
               </div>
             </div>
             )}
-            <button
-              type="button"
-              onClick={estGestionnaireRdv ? onDeconnexion : onBackToHome}
-              title={estGestionnaireRdv ? 'Se déconnecter' : 'Retour aux services'}
-              aria-label={estGestionnaireRdv ? 'Se déconnecter' : 'Retour aux services'}
-              className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border px-3 transition-all duration-200 ${
-                estGestionnaireRdv
-                  ? 'border-red-200 bg-red-600 text-white hover:bg-red-700'
-                  : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              {estGestionnaireRdv ? <LogOut className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
-              <span className="hidden text-xs font-semibold sm:inline">
-                {estGestionnaireRdv ? 'Déconnexion' : 'Retour aux services'}
-              </span>
-            </button>
+            {profil?.role === 'patient' ? (
+              <button
+                type="button"
+                onClick={onRetourAccueil}
+                title="Retour à l’accueil"
+                aria-label="Retour à l’accueil"
+                className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-white/20 bg-[#1F7A8C] px-3 text-white transition-all duration-200 hover:bg-[#186575]"
+              >
+                <House className="h-5 w-5" />
+                <span className="text-[10px] font-semibold sm:text-xs">Retour à l’accueil</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onDeconnexion}
+                title="Se déconnecter"
+                aria-label="Se déconnecter"
+                className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-red-200 bg-red-600 px-3 text-white transition-all duration-200 hover:bg-red-700"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="text-[10px] font-semibold sm:text-xs">Déconnexion</span>
+              </button>
+            )}
           </div>
         </div>
         {estGestionnaireRdv && navigationPersonnelOuverte && (
@@ -1839,7 +1789,7 @@ export default function GestionRendezVous({
           </>
         ) : (
           <>
-            {/* ───────── BIENVENUE ───────── */}
+
             <section className="apparition relative overflow-hidden rounded-[2rem] bg-[#0A2233] px-6 py-10 text-white sm:px-12 sm:py-14">
               <div className="absolute inset-0 bg-gradient-to-br from-[#0A2233] via-[#0F3D52]/80 to-[#0A2233]" />
               <div className="absolute -left-20 -top-24 h-72 w-72 animate-pulse rounded-full bg-[#1F7A8C]/50 blur-[90px]" />
@@ -1886,7 +1836,6 @@ export default function GestionRendezVous({
               </div>
             </section>
 
-            {/* ───────── ÉTAPES ───────── */}
             <ol id="reservation" aria-label="Étapes de réservation" className="apparition grid scroll-mt-28 grid-cols-3 gap-2 sm:gap-4">
               {[['Service', 'Choisissez le service'], ['Créneau', 'Sélectionnez un horaire'], ['Confirmation', 'Précisez le motif']].map(([titre, aide], index) => {
                 const numero = index + 1;
@@ -1906,7 +1855,6 @@ export default function GestionRendezVous({
               })}
             </ol>
 
-            {/* ───────── SERVICE + CALENDRIER ───────── */}
             <section className="apparition space-y-4">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.25em] text-[#5B7480]">Consultations hospitalières</p>
@@ -1962,7 +1910,6 @@ export default function GestionRendezVous({
               </div>
             )}
 
-            {/* ───────── RÉSERVATION + MES RENDEZ-VOUS ───────── */}
             <div className="grid min-w-0 grid-cols-1 items-start gap-5 sm:gap-6 xl:grid-cols-[minmax(340px,0.8fr)_minmax(0,1.4fr)]">
               <section aria-labelledby="titre-formulaire-rdv" className="apparition relative overflow-hidden rounded-3xl bg-[#0A2233] p-6 text-white shadow-xl shadow-[#0A2233]/20 sm:p-7 xl:sticky xl:top-28">
                 <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-[#1F7A8C]/50 blur-[70px]" />
@@ -2059,7 +2006,7 @@ export default function GestionRendezVous({
                 )}
               </section>
             </div>
-            {/* ───────── DOSSIER MÉDICAL ───────── */}
+
           </>
         )}
         {erreur && (

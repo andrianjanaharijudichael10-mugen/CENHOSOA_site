@@ -21,13 +21,11 @@ app = FastAPI(
 )
 logger = logging.getLogger(__name__)
 
-# Sert les fichiers uploadés (photos des responsables de service...) sur /fichiers/...
 DOSSIER_FICHIERS = Path("app/static")
 DOSSIER_FICHIERS.mkdir(parents=True, exist_ok=True)
 app.mount("/fichiers", StaticFiles(directory=DOSSIER_FICHIERS), name="fichiers")
 
 app.include_router(routeur_api)
-
 
 @app.on_event("startup")
 def creer_superadmin_initial() -> None:
@@ -62,11 +60,9 @@ def creer_superadmin_initial() -> None:
     finally:
         db.close()
 
-
 @app.get("/", tags=["Santé"])
 def verifier_etat():
     return {"statut": "ok", "service": "API CENHOSOA"}
-
 
 @app.middleware("http")
 async def diffuser_modifications(request: Request, call_next):
@@ -82,7 +78,6 @@ async def diffuser_modifications(request: Request, call_next):
         except Exception:
             logger.exception("Impossible de diffuser la mise à jour temps réel du domaine %s.", domaine)
     return response
-
 
 @app.websocket("/api/v1/temps-reel")
 async def connexion_temps_reel(websocket: WebSocket):
@@ -101,7 +96,6 @@ async def connexion_temps_reel(websocket: WebSocket):
         pass
     finally:
         gestionnaire_temps_reel.deconnecter(websocket)
-
 
 app = CORSMiddleware(
     app=app,

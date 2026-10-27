@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, contains_eager, joinedload
 
 from app.api.deps import exiger_roles, obtenir_utilisateur_courant
 from app.core.osrm import (
@@ -47,6 +47,7 @@ from app.schemas.ambulance import (
     OptionItineraireOut,
     PriseEnChargeAmbulanceSchema,
     RetourCentreAmbulanceSchema,
+    RefusDemandeAmbulanceSchema,
     RattacherDemandeAmbulanceSchema,
     SimulationTrajetOut,
     SimulationTrajetSchema,
@@ -148,6 +149,7 @@ def _sortie_mission(mission: MissionAmbulance) -> MissionAmbulanceOut:
         minutes_retard=mission.minutes_retard,
         frais_retard=int(mission.frais_retard or 0),
         cout_total=int(mission.cout_total),
+        message_refus=mission.message_refus,
     )
 
 
@@ -314,6 +316,11 @@ def lister_missions(db: Session = Depends(obtenir_db)):
     missions = (
         db.query(MissionAmbulance)
         .join(Ambulance)
+        .options(
+            contains_eager(MissionAmbulance.ambulance),
+            joinedload(MissionAmbulance.lit),
+            joinedload(MissionAmbulance.lit_secondaire),
+        )
         .order_by(MissionAmbulance.heure_depart.desc())
         .all()
     )
@@ -483,6 +490,53 @@ def confirmer_demande_ambulance(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cette ambulance n'est plus disponible.")
     _affecter_ambulance_a_demande(db, demande, ambulance)
     return _sortie_mission(demande)
+
+
+@routeur.post(
+    "/missions/{mission_id}/refuser",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(exiger_roles(*ROLES_ACCES))],
+)
+def refuser_demande_ambulance(
+    mission_id: uuid.UUID,
+    donnees: RefusDemandeAmbulanceSchema,
+    db: Session = Depends(obtenir_db),
+):
+    demande = (
+        db.query(MissionAmbulance)
+        .filter(MissionAmbulance.id == mission_id)
+        .with_for_update()
+        .one_or_none()
+    )
+    if demande is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Demande introuvable.")
+    if demande.statut != StatutMissionAmbulance.EN_ATTENTE_CONFIRMATION.value:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cette demande a déjà été traitée.")
+    motifs_message = []
+    if "lit_indisponible" in donnees.motifs:
+        if demande.urgence_vitale:
+            precisions_lit = "lit de déchocage (urgence vitale)"
+            if demande.patient_infectieux:
+                precisions_lit += " et de salle septique"
+        elif demande.patient_infectieux:
+            precisions_lit = "lit de salle septique"
+        else:
+            precisions_lit = "lit d'urgence"
+        motifs_message.append(f"manque de {precisions_lit}")
+    if "ambulance_indisponible" in donnees.motifs:
+        motifs_message.append("manque d'ambulance disponible")
+
+    message = f"Nous ne pouvons pas procéder à votre demande en raison de {' et '.join(motifs_message)}."
+
+    message += (
+        "\nVeuillez contacter l'un de ces établissements :\n"
+        "- CHU HJRA (Anosy) : +261 20 22 279 79 ou +261 33 11 890 58\n"
+        "- Ambulance Municipale (Commune d'Antananarivo) : +261 20 22 200 40"
+    )
+
+    demande.statut = StatutMissionAmbulance.ANNULEE.value
+    demande.message_refus = message
+    db.commit()
 
 
 @routeur.get(
@@ -776,6 +830,11 @@ def lister_missions_patient(
     missions = (
         db.query(MissionAmbulance)
         .filter(MissionAmbulance.patient_id == utilisateur.patient.id)
+        .options(
+            joinedload(MissionAmbulance.ambulance),
+            joinedload(MissionAmbulance.lit),
+            joinedload(MissionAmbulance.lit_secondaire),
+        )
         .order_by(MissionAmbulance.heure_depart.desc())
         .all()
     )

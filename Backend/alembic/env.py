@@ -1,12 +1,13 @@
+from importlib import import_module
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-# Importe la config et les modèles de l'application
 from app.core.config import parametres
 from app.db.base import Base
-import app.models  # noqa: F401  (nécessaire pour enregistrer les modèles)
+
+import_module("app.models")
 
 config = context.config
 config.set_main_option("sqlalchemy.url", parametres.DATABASE_URL)

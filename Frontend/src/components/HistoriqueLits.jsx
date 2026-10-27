@@ -205,7 +205,7 @@ export default function HistoriqueLits({ token, rechargement }) {
 
       {patientSelectionne && (
         <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
+          className="mobile-scroll-overlay fixed inset-0 z-[120] flex justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
           role="presentation"
           onMouseDown={(evenement) => {
             if (evenement.target === evenement.currentTarget) fermerParcours();
@@ -242,7 +242,7 @@ export default function HistoriqueLits({ token, rechargement }) {
                 type="button"
                 onClick={fermerParcours}
                 aria-label="Fermer l’historique du patient"
-                className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center border border-[#0A2233]/10 text-[#0A2233]/70 transition-colors hover:border-[#0A2233] hover:bg-[#0A2233] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] sm:right-6 sm:top-6"
+                className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center border border-[#0A2233]/10 text-[#0A2233]/70 transition-colors hover:border-[#0A2233] hover:bg-[#0A2233] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] sm:right-6 sm:top-6"
               >
                 <X size={18} />
               </button>

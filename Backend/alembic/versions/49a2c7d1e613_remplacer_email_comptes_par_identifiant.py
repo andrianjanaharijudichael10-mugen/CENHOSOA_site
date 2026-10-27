@@ -86,7 +86,7 @@ def upgrade() -> None:
     ).scalar_one()
     if telephones_patients_manquants:
         raise RuntimeError(
-            "Migration interrompue : chaque patient doit avoir un téléphone Malagasy avant l'activation des SMS."
+            "Migration interrompue : chaque patient doit avoir un numéro de téléphone Malagasy avant que son téléphone devienne son identifiant."
         )
 
     op.alter_column("utilisateurs", "identifiant", nullable=False)

@@ -1,7 +1,6 @@
 """Énumérations partagées entre modèles et schémas."""
 import enum
 
-
 class RoleUtilisateur(str, enum.Enum):
     """Rôle global au niveau du compte (contrôle d'accès)."""
     PATIENT = "patient"
@@ -14,9 +13,6 @@ class RoleUtilisateur(str, enum.Enum):
     CHEF_SIM = "chef_sim"
     SUPERADMIN = "superadmin"
 
-
-# Rôles considérés comme "personnel" (créés uniquement par un SuperAdmin,
-# par opposition au patient qui s'inscrit lui-même)
 ROLES_PERSONNEL = {
     RoleUtilisateur.SECRETAIRE,
     RoleUtilisateur.REGULATEUR_AMBULANCE,
@@ -27,7 +23,6 @@ ROLES_PERSONNEL = {
     RoleUtilisateur.CHEF_SIM,
 }
 
-
 ROLES_GESTION_URGENCES = {
     RoleUtilisateur.MAJOR,
     RoleUtilisateur.MAJOR_DE_GARDE,
@@ -36,28 +31,23 @@ ROLES_GESTION_URGENCES = {
     RoleUtilisateur.CHEF_SIM,
 }
 
-
 ROLES_REGULATION_AMBULANCE = {
     RoleUtilisateur.MAJOR,
     RoleUtilisateur.CHEF_DIVISION_AUTO,
     RoleUtilisateur.CHEF_SIM,
 }
 
-
 ROLES_ACCES_AMBULANCES = ROLES_GESTION_URGENCES | {
     RoleUtilisateur.SUPERADMIN,
 }
-
 
 class TypeAmbulance(str, enum.Enum):
     PRINCIPALE = "principale"
     SECONDAIRE = "secondaire"
 
-
 class StatutAmbulance(str, enum.Enum):
     DISPONIBLE = "disponible"
     NON_DISPONIBLE = "non_disponible"
-
 
 class StatutMissionAmbulance(str, enum.Enum):
     EN_ATTENTE_CONFIRMATION = "en_attente_confirmation"
@@ -70,7 +60,6 @@ class StatutMissionAmbulance(str, enum.Enum):
     TERMINEE = "terminee"
     ANNULEE = "annulee"
 
-
 class CategorieLit(str, enum.Enum):
     """Clés des catégories standard auxquelles s'appliquent des règles dédiées."""
     VIP = "vip"
@@ -78,7 +67,6 @@ class CategorieLit(str, enum.Enum):
     DECHOCAGE = "dechocage"
     URGENCE = "urgence"
     TRIAGE = "triage"
-
 
 class StatutLit(str, enum.Enum):
     """Cycle de vie d'un lit ; la réservation est uniquement transitoire pour un transfert immédiat."""

@@ -230,7 +230,44 @@ def test_superadmin_cannot_delete_own_account():
     assert erreur.value.status_code == 409
 
 
-def test_superadmin_cannot_delete_patient_account():
+def test_superadmin_can_delete_another_superadmin_account():
+    admin = Utilisateur(
+        id=uuid.uuid4(),
+        identifiant="admin",
+        mot_de_passe_hash="hash",
+        role=RoleUtilisateur.SUPERADMIN,
+    )
+    autre_admin = Utilisateur(
+        id=uuid.uuid4(),
+        identifiant="admin-2",
+        mot_de_passe_hash="hash",
+        role=RoleUtilisateur.SUPERADMIN,
+    )
+
+    class SessionFictive:
+        supprime = None
+        est_validee = False
+
+        def get(self, modele, identifiant):
+            assert modele is Utilisateur
+            assert identifiant == autre_admin.id
+            return autre_admin
+
+        def delete(self, objet):
+            self.supprime = objet
+
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+    resultat = supprimer_compte_personnel(autre_admin.id, admin, session)
+
+    assert resultat is None
+    assert session.supprime is autre_admin
+    assert session.est_validee
+
+
+def test_superadmin_can_delete_patient_account():
     admin = Utilisateur(
         id=uuid.uuid4(),
         identifiant="admin",
@@ -245,13 +282,26 @@ def test_superadmin_cannot_delete_patient_account():
     )
 
     class SessionFictive:
+        supprime = None
+        est_validee = False
+
         def get(self, modele, identifiant):
+            assert modele is Utilisateur
+            assert identifiant == patient.id
             return patient
 
-    with pytest.raises(HTTPException) as erreur:
-        supprimer_compte_personnel(patient.id, admin, SessionFictive())
+        def delete(self, objet):
+            self.supprime = objet
 
-    assert erreur.value.status_code == 409
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+    resultat = supprimer_compte_personnel(patient.id, admin, session)
+
+    assert resultat is None
+    assert session.supprime is patient
+    assert session.est_validee
 
 
 def test_superadmin_cannot_disable_last_active_superadmin():

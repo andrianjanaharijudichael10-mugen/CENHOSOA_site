@@ -18,4 +18,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    files: ['mobile/src/**/*.js'],
+    languageOptions: {
+      globals: { process: 'readonly' },
+    },
+  },
 ])

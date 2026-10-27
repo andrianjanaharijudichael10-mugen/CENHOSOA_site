@@ -89,7 +89,7 @@ def supprimer_compte_personnel(
     utilisateur_courant: Utilisateur = Depends(obtenir_utilisateur_courant),
     db: Session = Depends(obtenir_db),
 ):
-    """Supprime un compte du personnel et son profil associé (réservé au SuperAdmin)."""
+    """Supprime tout compte sauf celui du SuperAdmin actuellement connecté."""
     utilisateur = db.get(Utilisateur, utilisateur_id)
     if utilisateur is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Compte introuvable.")
@@ -97,11 +97,6 @@ def supprimer_compte_personnel(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Vous ne pouvez pas supprimer votre propre compte.",
-        )
-    if utilisateur.role not in ROLES_PERSONNEL:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Cette action est réservée aux comptes du personnel.",
         )
     db.delete(utilisateur)
     db.commit()

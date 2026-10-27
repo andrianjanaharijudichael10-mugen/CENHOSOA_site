@@ -11,11 +11,13 @@ from app.api.v1.endpoints.ambulances import routeur as routeur_ambulances
 from app.api.v1.endpoints.ambulances import (
     _affecter_ambulance_a_demande,
     _creer_demande_en_attente,
+    _sortie_mission,
     completer_mission_invite,
     creer_mission_invite,
     creer_mission_patient,
     creer_mission_urgente_invite,
     creer_mission_urgente_patient,
+    refuser_demande_ambulance,
     rattacher_mission_au_patient,
     simuler_trajet,
     terminer_mission,
@@ -45,10 +47,311 @@ from app.schemas.ambulance import (
     DemandeAmbulanceUrgenteSchema,
     DonneesMissionAmbulanceSchema,
     MissionAmbulanceOut,
+    RefusDemandeAmbulanceSchema,
     RattacherDemandeAmbulanceSchema,
     TransitionMissionSchema,
 )
 from app.core import osrm
+
+
+def test_refus_demande_ambulance_persiste_message_patient_sans_envoi_externe():
+    mission_id = uuid.uuid4()
+    demande = SimpleNamespace(
+        id=mission_id,
+        statut=StatutMissionAmbulance.EN_ATTENTE_CONFIRMATION.value,
+        urgence_vitale=True,
+        patient_infectieux=False,
+        message_refus=None,
+    )
+
+    class Requete:
+        def __init__(self, modele):
+            self.modele = modele
+
+        def filter(self, *args):
+            return self
+
+        def with_for_update(self):
+            return self
+
+        def one_or_none(self):
+            assert self.modele is MissionAmbulance
+            return demande
+
+        def first(self):
+            assert self.modele is Lit
+            return None
+
+    class SessionFictive:
+        est_validee = False
+
+        def query(self, modele):
+            return Requete(modele)
+
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+    resultat = refuser_demande_ambulance(
+        mission_id,
+        RefusDemandeAmbulanceSchema(motifs=["lit_indisponible"]),
+        session,
+    )
+
+    assert resultat is None
+    assert demande.statut == StatutMissionAmbulance.ANNULEE.value
+    assert session.est_validee
+    assert "manque de lit de déchocage (urgence vitale)" in demande.message_refus
+    assert "+261 20 22 279 79" in demande.message_refus
+    assert "+261 33 11 890 58" in demande.message_refus
+    assert "+261 20 22 200 40" in demande.message_refus
+
+
+def test_refus_demande_ambulance_est_possible_meme_si_le_lit_est_disponible():
+    mission_id = uuid.uuid4()
+    demande = SimpleNamespace(
+        id=mission_id,
+        statut=StatutMissionAmbulance.EN_ATTENTE_CONFIRMATION.value,
+        urgence_vitale=True,
+        patient_infectieux=False,
+    )
+    class Requete:
+        def __init__(self, modele):
+            self.modele = modele
+
+        def filter(self, *args):
+            return self
+
+        def with_for_update(self):
+            return self
+
+        def one_or_none(self):
+            return demande
+
+    class SessionFictive:
+        est_validee = False
+
+        def query(self, modele):
+            return Requete(modele)
+
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+
+    refuser_demande_ambulance(
+        mission_id,
+        RefusDemandeAmbulanceSchema(motifs=["lit_indisponible"]),
+        session,
+    )
+
+    assert demande.statut == StatutMissionAmbulance.ANNULEE.value
+    assert "manque de lit de déchocage" in demande.message_refus
+    assert session.est_validee
+
+
+def test_refus_demande_non_vitale_peut_indiquer_un_manque_de_lit():
+    mission_id = uuid.uuid4()
+    demande = SimpleNamespace(
+        id=mission_id,
+        statut=StatutMissionAmbulance.EN_ATTENTE_CONFIRMATION.value,
+        urgence_vitale=False,
+        patient_infectieux=False,
+        message_refus=None,
+    )
+
+    class Requete:
+        def filter(self, *args):
+            return self
+
+        def with_for_update(self):
+            return self
+
+        def one_or_none(self):
+            return demande
+
+    class SessionFictive:
+        est_validee = False
+
+        def query(self, modele):
+            assert modele is MissionAmbulance
+            return Requete()
+
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+    refuser_demande_ambulance(
+        mission_id,
+        RefusDemandeAmbulanceSchema(motifs=["lit_indisponible"]),
+        session,
+    )
+
+    assert demande.statut == StatutMissionAmbulance.ANNULEE.value
+    assert "manque de lit d'urgence" in demande.message_refus
+    assert session.est_validee
+
+
+def test_refus_demande_ambulance_persiste_message_si_ambulance_absente():
+    mission_id = uuid.uuid4()
+    demande = SimpleNamespace(
+        id=mission_id,
+        statut=StatutMissionAmbulance.EN_ATTENTE_CONFIRMATION.value,
+        urgence_vitale=False,
+        message_refus=None,
+    )
+
+    class Requete:
+        def __init__(self, modele):
+            self.modele = modele
+
+        def filter(self, *args):
+            return self
+
+        def with_for_update(self):
+            return self
+
+        def one_or_none(self):
+            return demande
+
+        def first(self):
+            assert self.modele is Ambulance
+            return None
+
+    class SessionFictive:
+        est_validee = False
+
+        def query(self, modele):
+            return Requete(modele)
+
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+
+    refuser_demande_ambulance(
+        mission_id,
+        RefusDemandeAmbulanceSchema(motifs=["ambulance_indisponible"]),
+        session,
+    )
+
+    assert demande.statut == StatutMissionAmbulance.ANNULEE.value
+    assert session.est_validee
+    assert "manque d'ambulance disponible" in demande.message_refus
+    assert "+261 20 22 200 40" in demande.message_refus
+
+
+def test_refus_demande_ambulance_est_possible_meme_si_une_ambulance_est_disponible():
+    mission_id = uuid.uuid4()
+    demande = SimpleNamespace(
+        id=mission_id,
+        statut=StatutMissionAmbulance.EN_ATTENTE_CONFIRMATION.value,
+        urgence_vitale=False,
+        message_refus=None,
+    )
+
+    class Requete:
+        def __init__(self, modele):
+            self.modele = modele
+
+        def filter(self, *args):
+            return self
+
+        def with_for_update(self):
+            return self
+
+        def one_or_none(self):
+            assert self.modele is MissionAmbulance
+            return demande
+
+        def first(self):
+            assert self.modele is Ambulance
+            return object()
+
+    class SessionFictive:
+        est_validee = False
+
+        def query(self, modele):
+            return Requete(modele)
+
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+    refuser_demande_ambulance(
+        mission_id,
+        RefusDemandeAmbulanceSchema(motifs=["ambulance_indisponible"]),
+        session,
+    )
+
+    assert demande.statut == StatutMissionAmbulance.ANNULEE.value
+    assert "manque d'ambulance disponible" in demande.message_refus
+    assert session.est_validee
+
+
+def test_refus_demande_ambulance_combine_manque_lit_et_ambulance():
+    mission_id = uuid.uuid4()
+    demande = SimpleNamespace(
+        id=mission_id,
+        statut=StatutMissionAmbulance.EN_ATTENTE_CONFIRMATION.value,
+        urgence_vitale=False,
+        patient_infectieux=True,
+        message_refus=None,
+    )
+
+    class Requete:
+        def filter(self, *args):
+            return self
+
+        def with_for_update(self):
+            return self
+
+        def one_or_none(self):
+            return demande
+
+    class SessionFictive:
+        est_validee = False
+
+        def query(self, modele):
+            assert modele is MissionAmbulance
+            return Requete()
+
+        def commit(self):
+            self.est_validee = True
+
+    session = SessionFictive()
+    refuser_demande_ambulance(
+        mission_id,
+        RefusDemandeAmbulanceSchema(
+            motifs=["lit_indisponible", "ambulance_indisponible"],
+        ),
+        session,
+    )
+
+    assert "manque de lit de salle septique" in demande.message_refus
+    assert "manque d'ambulance disponible" in demande.message_refus
+    assert session.est_validee
+
+
+def test_suivi_demande_ambulance_retourne_le_message_de_refus():
+    message = "Demande refusée. Contactez le CHU HJRA."
+    mission = MissionAmbulance(
+        id=uuid.uuid4(),
+        nom_patient="Rabe",
+        prenoms_patient="Miora",
+        adresse_destination="Anosy",
+        latitude_destination=-18.9,
+        longitude_destination=47.5,
+        distance_km=2,
+        tarif_base=0,
+        frais_retard=0,
+        montant_total=0,
+        statut=StatutMissionAmbulance.ANNULEE.value,
+        heure_depart=datetime.now(timezone.utc),
+        message_refus=message,
+    )
+
+    assert _sortie_mission(mission).message_refus == message
 
 
 def test_ambulance_keeps_legacy_compatibility_fields():

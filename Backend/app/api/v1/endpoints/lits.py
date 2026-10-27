@@ -45,22 +45,17 @@ from app.schemas.lit import (
 
 routeur = APIRouter(prefix="/lits", tags=["Lits d'urgence"])
 
-# Tout le personnel soignant/administratif peut consulter l'état des lits.
 ROLES_CONSULTATION = (
     RoleUtilisateur.SECRETAIRE,
     RoleUtilisateur.MEDECIN,
     RoleUtilisateur.SUPERADMIN,
 ) + tuple(ROLES_GESTION_URGENCES)
 
-
-# ---------- Consultation (personnel authentifié) ----------
-
 @routeur.get("", response_model=list[LitOut], dependencies=[Depends(exiger_roles(*ROLES_CONSULTATION))])
 def lister_lits(db: Session = Depends(obtenir_db)):
     """Liste tous les lits avec leur statut courant, triés par catégorie puis numéro."""
     actualiser_etats_temporises(db)
     return db.query(Lit).order_by(Lit.categorie, Lit.numero).all()
-
 
 @routeur.get(
     "/categories",
@@ -69,7 +64,6 @@ def lister_lits(db: Session = Depends(obtenir_db)):
 )
 def lister_categories_lits(db: Session = Depends(obtenir_db)):
     return db.query(CategorieLitInventaire).order_by(CategorieLitInventaire.nom).all()
-
 
 @routeur.get(
     "/resume",
@@ -95,7 +89,6 @@ def resumer_occupation(db: Session = Depends(obtenir_db)):
             )
         )
     return resultats
-
 
 def actualiser_etats_temporises(db: Session, maintenant: datetime | None = None) -> None:
     """Libère les réservations expirées et termine les bionettoyages échus."""
@@ -129,7 +122,6 @@ def actualiser_etats_temporises(db: Session, maintenant: datetime | None = None)
         lit.date_debut_nettoyage = None
     if reservations or nettoyages:
         db.commit()
-
 
 def _ajouter_evenement_historique(
     db: Session,
@@ -177,7 +169,6 @@ def _ajouter_evenement_historique(
         )
     )
 
-
 @routeur.get(
     "/historique",
     response_model=PageHistoriqueLitOut,
@@ -220,7 +211,6 @@ def consulter_historique_lits(
         offset=offset,
     )
 
-
 @routeur.get(
     "/historique/patients/{patient_historique_id}",
     response_model=DetailPatientHistoriqueOut,
@@ -258,7 +248,6 @@ def consulter_parcours_patient(
         items=evenements,
     )
 
-
 def _verifier_regles_admission(
     db: Session,
     lit: Lit,
@@ -278,15 +267,11 @@ def _verifier_regles_admission(
                 detail="La validation de facturation VIP est obligatoire avant l'attribution.",
             )
 
-
 def _identite_patient_inconnue(nom: str | None, prenoms: str | None) -> bool:
     return (
         (prenoms or "").strip().casefold() == "patient"
         and (nom or "").strip().casefold() in {"non renseigné", "non identifié"}
     )
-
-
-# ---------- Actions, réservées au personnel d'urgence et au SuperAdmin ----------
 
 ROLES_ACTIONS_LITS = tuple(ROLES_GESTION_URGENCES | {RoleUtilisateur.SUPERADMIN})
 
@@ -349,7 +334,6 @@ def occuper_lit(
     db.refresh(lit)
     return lit
 
-
 @routeur.post(
     "/{lit_id}/urgence-vitale",
     response_model=LitOut,
@@ -401,7 +385,6 @@ def admission_vitale(
     db.commit()
     db.refresh(lit)
     return lit
-
 
 @routeur.patch(
     "/{lit_id}/identite",
@@ -482,7 +465,6 @@ def completer_identite_lit(
     db.refresh(lit)
     return lit
 
-
 @routeur.post(
     "/{lit_source_id}/reserver-transfert",
     response_model=LitOut,
@@ -529,7 +511,6 @@ def reserver_lit_pour_transfert(
     db.commit()
     db.refresh(destination)
     return destination
-
 
 @routeur.post(
     "/{lit_destination_id}/confirmer-transfert",
@@ -621,7 +602,6 @@ def confirmer_transfert_lit(
     db.refresh(destination)
     return destination
 
-
 @routeur.post(
     "/{lit_destination_id}/annuler-reservation",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -650,7 +630,6 @@ def annuler_reservation_transfert(
     lit.urgence_vitale = False
     lit.facturation_vip_validee = False
     db.commit()
-
 
 @routeur.post(
     "/{lit_id}/liberer",
@@ -733,9 +712,6 @@ def liberer_lit(
     db.refresh(lit)
     return lit
 
-
-# ---------- Gestion de l'inventaire, réservée au SuperAdmin ----------
-
 @routeur.post(
     "",
     response_model=LitOut,
@@ -754,13 +730,11 @@ def creer_lit(donnees: CreationLitSchema, db: Session = Depends(obtenir_db)):
     db.refresh(nouveau_lit)
     return nouveau_lit
 
-
 def _cle_categorie(nom: str) -> str:
     sans_accents = unicodedata.normalize("NFKD", nom)
     ascii_nom = sans_accents.encode("ascii", "ignore").decode("ascii").lower()
     cle = re.sub(r"[^a-z0-9]+", "_", ascii_nom).strip("_")
     return cle[:50].rstrip("_")
-
 
 @routeur.post(
     "/categories",
@@ -789,7 +763,6 @@ def creer_categorie_lit(
     db.commit()
     db.refresh(categorie)
     return categorie
-
 
 @routeur.put(
     "/{lit_id}",
@@ -823,7 +796,6 @@ def modifier_lit(lit_id: uuid.UUID, donnees: ModificationLitSchema, db: Session 
     db.commit()
     db.refresh(lit)
     return lit
-
 
 @routeur.delete(
     "/{lit_id}",

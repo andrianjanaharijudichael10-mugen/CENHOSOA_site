@@ -95,7 +95,8 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
     if (estConnecte) {
       const missions = await listerMissionsAmbulancePatient(token);
       const missionSuivie = missions.find((element) => element.id === mission?.id)
-        || missions.find((element) => !STATUTS_TERMINES.includes(normaliserStatut(element.statut)));
+        || missions.find((element) => !STATUTS_TERMINES.includes(normaliserStatut(element.statut)))
+        || missions.find((element) => element.message_refus);
       if (missionSuivie) setMission((precedente) => ({ ...missionSuivie, simulation: precedente?.simulation }));
       else if (mission) setMission(null);
       return;
@@ -129,8 +130,9 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
           const missions = await listerMissionsAmbulancePatient(token);
           if (actif) {
             const active = missions.find((item) => !STATUTS_TERMINES.includes(normaliserStatut(item.statut)));
-            if (active) {
-              setMission(active);
+            const demandeRefusee = missions.find((item) => item.message_refus);
+            if (active || demandeRefusee) {
+              setMission(active || demandeRefusee);
               setEtape('suivi');
             }
           }
@@ -230,6 +232,7 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
 
   const statutActuel = normaliserStatut(mission?.statut);
   const demandeEnAttente = statutActuel === 'en_attente_confirmation';
+  const demandeRefusee = statutActuel === 'annulee' && Boolean(mission?.message_refus);
   const secondesRestantes = !demandeEnAttente && mission?.heure_depart && mission.duree_aller_minutes
     ? Math.max(0, Math.ceil((
       new Date(mission.heure_depart).getTime() + mission.duree_aller_minutes * 60000 - tempsActuel
@@ -339,10 +342,6 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
       setErreur('Sélectionnez une adresse proposée et attendez la simulation du trajet.');
       return;
     }
-    if (litsManquants.length) {
-      setErreur(`Capacité insuffisante : ${litsManquants.map(([, libelle]) => libelle).join(', ')}. Appelez immédiatement le standard.`);
-      return;
-    }
     setSoumissionEnCours(true);
     try {
       const itineraire = formulaire.simulation.itineraires[formulaire.itineraire_index];
@@ -414,7 +413,7 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
             </div>
           </div>
           {onFermer && (
-            <button type="button" onClick={onFermer} className="rounded-xl border border-[#0A2233]/10 px-4 py-2 text-sm font-semibold hover:bg-white">
+            <button type="button" onClick={onFermer} className="min-h-11 rounded-xl border border-[#0A2233]/10 px-4 py-2 text-sm font-semibold hover:bg-white">
               Retour
             </button>
           )}
@@ -446,7 +445,6 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
               </div>
               <button
                 type="button"
-                disabled={!nombreAmbulancesDisponibles}
                 onClick={() => { setModeUrgent(false); setErreur(''); setEtape('formulaire'); }}
                 className="mt-7 inline-flex items-center gap-3 rounded-2xl bg-[#0A2233] px-7 py-4 text-sm font-bold text-white shadow-lg shadow-[#0A2233]/20 transition hover:-translate-y-0.5 hover:bg-[#0F3D52] disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -455,7 +453,6 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
               <div>
                 <button
                   type="button"
-                  disabled={!nombreAmbulancesDisponibles}
                   onClick={() => { setModeUrgent(true); setErreur(''); setEtape('formulaire'); }}
                   className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-800 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -532,11 +529,11 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
               <fieldset className="grid gap-3 sm:grid-cols-2">
                 <legend className="mb-3 text-sm font-semibold">Informations médicales pour la régulation</legend>
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm">
-                  <input type="checkbox" checked={formulaire.urgence_vitale} onChange={(event) => modifierChamp('urgence_vitale', event.target.checked)} className="mt-1 accent-[#1F7A8C]" />
+                  <input type="checkbox" checked={formulaire.urgence_vitale} onChange={(event) => modifierChamp('urgence_vitale', event.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#1F7A8C]" />
                   <span><strong className="block">Urgence vitale (SMUR)</strong><span className="text-xs text-slate-500">Nécessite un lit de déchoquage disponible.</span></span>
                 </label>
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm">
-                  <input type="checkbox" checked={formulaire.patient_infectieux} onChange={(event) => modifierChamp('patient_infectieux', event.target.checked)} className="mt-1 accent-[#1F7A8C]" />
+                  <input type="checkbox" checked={formulaire.patient_infectieux} onChange={(event) => modifierChamp('patient_infectieux', event.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#1F7A8C]" />
                   <span><strong className="block">Patient infectieux</strong><span className="text-xs text-slate-500">{modeUrgent ? 'Si cette information est connue.' : 'Nécessite un lit de salle septique disponible.'}</span></span>
                 </label>
               </fieldset>
@@ -547,13 +544,13 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
                 </label>
               )}
               {!modeUrgent && litsManquants.length > 0 && (
-                <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm font-semibold text-red-800">
-                  Aucun lit disponible en {litsManquants.map(([, nom]) => nom).join(' et ')}. La demande est bloquée : appelez immédiatement le standard.
+                <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
+                  Aucun lit disponible en {litsManquants.map(([, nom]) => nom).join(' et ')} pour le moment. Vous pouvez transmettre la demande ; le régulateur vérifiera la disponibilité.
                 </div>
               )}
               <div className="flex flex-wrap justify-between gap-3 border-t border-slate-100 pt-5">
                 <button type="button" onClick={() => { setErreur(''); setEtape('accueil'); }} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold hover:bg-slate-50">Retour</button>
-                <button type="submit" disabled={soumissionEnCours || (!modeUrgent && (simulationEnCours || !formulaire.simulation || litsManquants.length > 0))} className={`inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 ${modeUrgent ? 'bg-red-700 hover:bg-red-800' : 'bg-[#0A2233] hover:bg-[#0F3D52]'}`}>
+                <button type="submit" disabled={soumissionEnCours || (!modeUrgent && (simulationEnCours || !formulaire.simulation))} className={`inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 ${modeUrgent ? 'bg-red-700 hover:bg-red-800' : 'bg-[#0A2233] hover:bg-[#0F3D52]'}`}>
                   {soumissionEnCours ? 'Envoi en cours…' : modeUrgent ? 'Envoyer la demande urgente' : 'Confirmer la demande'} <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
@@ -563,10 +560,10 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
               <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#1F7A8C]">Suivi de mission</p>
-                  <h2 className="mt-1 text-2xl font-semibold">{demandeEnAttente ? 'Demande transmise au régulateur' : 'Votre ambulance est en route'}</h2>
+                  <h2 className="mt-1 text-2xl font-semibold">{demandeRefusee ? 'Demande non prise en charge' : demandeEnAttente ? 'Demande transmise au régulateur' : 'Votre ambulance est en route'}</h2>
                   <p className="mt-2 text-sm text-slate-600">{mission?.ambulance_nom ? `${mission.ambulance_nom} · ` : ''}{mission?.destination}</p>
                 </div>
-                {!demandeEnAttente && <div className="rounded-2xl bg-[#0A2233] px-5 py-4 text-white">
+                {!demandeEnAttente && !demandeRefusee && <div className="rounded-2xl bg-[#0A2233] px-5 py-4 text-white">
                   <p className="flex items-center gap-2 text-xs font-semibold text-white/65"><TimerReset className="h-4 w-4 text-[#7FD1CB]" /> Arrivée estimée</p>
                   <p className="mt-1 font-mono text-2xl font-bold tabular-nums">{formaterDuree(secondesRestantes)}</p>
                 </div>}
@@ -574,6 +571,12 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
               {demandeEnAttente && (
                 <div role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
                   Votre demande est reçue. Un régulateur doit la confirmer et choisir une ambulance avant son départ.
+                </div>
+              )}
+              {demandeRefusee && (
+                <div role="alert" className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-900">
+                  <p className="font-bold">Le régulateur a refusé votre demande d’ambulance.</p>
+                  <p className="mt-2 whitespace-pre-line">{mission.message_refus}</p>
                 </div>
               )}
               {!estConnecte && mission?.patient_id == null && !estTerminee && (
@@ -619,21 +622,23 @@ export default function DemandeAmbulancePatient({ profil = null, onFermer }) {
                   <span className="mt-1 block whitespace-pre-wrap">{mission.informations_medicales}</span>
                 </p>
               )}
-              <div className="relative space-y-5 py-2">
-                {ETAPES_SUIVI.map((element, index) => {
-                  const accompli = index <= indexEtape || estTerminee;
-                  return (
-                    <div key={element.statut} className="flex items-center gap-4">
-                      <span className={`z-10 flex h-10 w-10 items-center justify-center rounded-full ${accompli ? 'bg-[#1F7A8C] text-white' : 'bg-slate-100 text-slate-400'}`}>
-                        {accompli ? <CheckCircle2 className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
-                      </span>
-                      <span className={`text-sm font-semibold ${accompli ? 'text-[#0A2233]' : 'text-slate-400'}`}>{element.label}</span>
-                    </div>
-                  );
-                })}
-                <div className="absolute bottom-7 left-5 top-7 w-px bg-slate-200" />
-              </div>
-              {estTerminee && <p className="mt-5 rounded-xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">Cette mission est terminée.</p>}
+              {!demandeRefusee && (
+                <div className="relative space-y-5 py-2">
+                  {ETAPES_SUIVI.map((element, index) => {
+                    const accompli = index <= indexEtape || estTerminee;
+                    return (
+                      <div key={element.statut} className="flex items-center gap-4">
+                        <span className={`z-10 flex h-10 w-10 items-center justify-center rounded-full ${accompli ? 'bg-[#1F7A8C] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                          {accompli ? <CheckCircle2 className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
+                        </span>
+                        <span className={`text-sm font-semibold ${accompli ? 'text-[#0A2233]' : 'text-slate-400'}`}>{element.label}</span>
+                      </div>
+                    );
+                  })}
+                  <div className="absolute bottom-7 left-5 top-7 w-px bg-slate-200" />
+                </div>
+              )}
+              {estTerminee && !demandeRefusee && <p className="mt-5 rounded-xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">Cette mission est terminée.</p>}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[#0A2233]/[0.04] p-4">
                 <p className="flex items-center gap-2 text-xs text-slate-600"><Navigation className="h-4 w-4 text-[#1F7A8C]" /> Actualisation automatique toutes les 15 secondes</p>
                 <button type="button" onClick={annulerSuiviLocal} className="text-sm font-bold text-[#1F7A8C] hover:underline">

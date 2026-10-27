@@ -1,11 +1,12 @@
 import uuid
 from datetime import datetime, timedelta, timezone
+from importlib import import_module
 
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-import app.models  # noqa: F401
+import_module("app.models")
 from app.api.v1.endpoints.lits import (
     confirmer_transfert_lit,
     consulter_historique_lits,

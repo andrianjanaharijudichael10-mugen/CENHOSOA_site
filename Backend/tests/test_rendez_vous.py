@@ -810,7 +810,7 @@ def test_doctor_can_move_queued_appointment_before_confirmation():
     assert resultat.numero_file == 4
 
 
-def test_doctor_can_confirm_appointment_without_sms_dependency():
+def test_doctor_can_confirm_appointment_without_messaging_dependency():
     patient = Patient(id=uuid.uuid4(), utilisateur_id=uuid.uuid4(), nom="Rabe", prenoms="Miora", telephone="+261331234567")
     utilisateur_patient = Utilisateur(
         id=patient.utilisateur_id,

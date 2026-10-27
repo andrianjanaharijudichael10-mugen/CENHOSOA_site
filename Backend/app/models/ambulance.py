@@ -102,6 +102,7 @@ class MissionAmbulance(Base):
         UUID(as_uuid=True), ForeignKey("lits.id", ondelete="SET NULL"), nullable=True
     )
     notes: Mapped[str | None] = mapped_column(nullable=True)
+    message_refus: Mapped[str | None] = mapped_column(nullable=True)
 
     ambulance = relationship("Ambulance", back_populates="missions")
     lit = relationship("Lit", foreign_keys=[lit_id])

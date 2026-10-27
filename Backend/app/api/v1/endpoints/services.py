@@ -14,17 +14,13 @@ from app.schemas.service import CreationServiceSchema, ModificationServiceSchema
 routeur = APIRouter(prefix="/services", tags=["Services"])
 
 EXTENSIONS_IMAGE_AUTORISEES = {".jpg", ".jpeg", ".png", ".webp"}
-TAILLE_MAX_IMAGE_OCTETS = 5 * 1024 * 1024  # 5 Mo
+TAILLE_MAX_IMAGE_OCTETS = 5 * 1024 * 1024
 DOSSIER_PHOTOS_RESPONSABLES = Path("app/static/uploads/services")
-
-
-# ---------- Consultation publique (patients, visiteurs non connectés) ----------
 
 @routeur.get("", response_model=list[ServiceOut])
 def lister_services(db: Session = Depends(obtenir_db)):
     """Liste les services actifs de l'hôpital. Accessible sans authentification."""
     return db.query(Service).filter(Service.est_actif.is_(True)).order_by(Service.nom).all()
-
 
 @routeur.get("/{service_id}", response_model=ServiceOut)
 def obtenir_service(service_id: uuid.UUID, db: Session = Depends(obtenir_db)):
@@ -38,9 +34,6 @@ def obtenir_service(service_id: uuid.UUID, db: Session = Depends(obtenir_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service introuvable.")
     return service
 
-
-# ---------- Gestion, réservée au SuperAdmin ----------
-
 @routeur.get(
     "/admin/tous",
     response_model=list[ServiceOut],
@@ -49,7 +42,6 @@ def obtenir_service(service_id: uuid.UUID, db: Session = Depends(obtenir_db)):
 def lister_tous_les_services(db: Session = Depends(obtenir_db)):
     """Liste tous les services, actifs et inactifs (réservé au SuperAdmin)."""
     return db.query(Service).order_by(Service.nom).all()
-
 
 @routeur.post(
     "",
@@ -66,7 +58,6 @@ def creer_service(donnees: CreationServiceSchema, db: Session = Depends(obtenir_
     db.commit()
     db.refresh(nouveau_service)
     return nouveau_service
-
 
 @routeur.put(
     "/{service_id}",
@@ -94,7 +85,6 @@ def modifier_service(service_id: uuid.UUID, donnees: ModificationServiceSchema, 
     db.commit()
     db.refresh(service)
     return service
-
 
 @routeur.post(
     "/{service_id}/photo-responsable",
@@ -133,7 +123,6 @@ async def televerser_photo_responsable(
     db.commit()
     db.refresh(service)
     return service
-
 
 @routeur.delete(
     "/{service_id}",

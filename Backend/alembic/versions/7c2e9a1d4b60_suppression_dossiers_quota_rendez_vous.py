@@ -2,15 +2,12 @@
 from alembic import op
 import sqlalchemy as sa
 
-
 revision = "7c2e9a1d4b60"
 down_revision = "6e8f1a2c4b57"
 branch_labels = None
 depends_on = None
 
-
 def upgrade() -> None:
-    # Keep existing medical records archived rather than deleting them.
     op.rename_table("consultations", "consultations_archives")
     for constraint in (
         "consultations_patient_id_fkey",
@@ -83,7 +80,6 @@ def upgrade() -> None:
         "quotas_rendez_vous_journaliers",
         ["service_id"],
     )
-
 
 def downgrade() -> None:
     op.drop_index(

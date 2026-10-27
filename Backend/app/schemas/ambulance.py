@@ -1,6 +1,7 @@
 """Schémas d'entrée et de sortie des ambulances et missions."""
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -201,10 +202,15 @@ class MissionAmbulanceOut(BaseModel):
     minutes_retard: int | None
     frais_retard: int
     cout_total: int
+    message_refus: str | None = None
 
 
 class ConfirmationDemandeAmbulanceSchema(BaseModel):
     ambulance_id: uuid.UUID
+
+
+class RefusDemandeAmbulanceSchema(BaseModel):
+    motifs: list[Literal["lit_indisponible", "ambulance_indisponible"]] = Field(min_length=1)
 
 
 class CompleterDemandeAmbulanceSchema(BaseModel):

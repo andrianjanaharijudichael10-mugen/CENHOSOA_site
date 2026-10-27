@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Ambulance, ArrowRight, CheckCircle2, MapPin, Navigation, ShieldCheck,
   TimerReset, UserRound, LogOut, AlertCircle, Clock, RefreshCw, Siren, X,
+  Search, Eye, Printer,
 } from 'lucide-react';
 import {
   confirmerDemandeAmbulance,
   creerMissionAmbulance,
+  refuserDemandeAmbulance,
   listerAmbulances, listerDemandesAmbulanceEnAttente, listerLieuxTana, listerLitsUrgenceDisponibles, listerMissionsAmbulances,
   simulerTrajetAmbulance, transitionnerMissionAmbulance,
   obtenirTokenStocke,
@@ -35,6 +37,41 @@ function formaterAriary(montant) {
 
 function formaterHeure(date) {
   return date ? new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(date)) : '—';
+}
+
+function formaterDateMission(date) {
+  if (!date || !Number.isFinite(new Date(date).getTime())) return 'Date inconnue';
+  return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short' }).format(new Date(date));
+}
+
+function dateLocaleCle(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function formaterMoisMission(mois) {
+  const numeroMois = Number(mois);
+  return new Intl.DateTimeFormat('fr-FR', { month: 'long' })
+    .format(new Date(2000, numeroMois - 1, 1));
+}
+
+function imprimerZone(classeImpression) {
+  const corps = document.body;
+  const selecteurZone = classeImpression === 'impression-detail-active'
+    ? '.zone-impression-detail'
+    : '.zone-impression-historique';
+  const zone = document.querySelector(selecteurZone);
+  if (!zone) return;
+  const copieImpression = zone.cloneNode(true);
+  copieImpression.classList.add('copie-impression');
+  corps.append(copieImpression);
+  const terminerImpression = () => {
+    corps.classList.remove(classeImpression);
+    copieImpression.remove();
+    window.removeEventListener('afterprint', terminerImpression);
+  };
+  corps.classList.add(classeImpression);
+  window.addEventListener('afterprint', terminerImpression, { once: true });
+  window.print();
 }
 
 function formaterDureeItineraire(minutes) {
@@ -108,12 +145,163 @@ function normaliserMission(mission) {
     heureFinBionettoyage: mission.heure_fin_bionettoyage,
     heurePriseEnCharge: mission.heure_prise_en_charge,
     heureRetour: mission.heure_retour,
-    minutesSurPlace: mission.minutes_sur_place,
     minutesRetard: mission.minutes_retard,
     fraisRetard: mission.frais_retard,
     coutTotal: mission.cout_total,
+    messageRefus: mission.message_refus,
     terminee: ['terminee', 'annulee'].includes(mission.statut),
   };
+}
+
+function DetailHistoriqueMission({ mission, fixerMissionDetail }) {
+  useEffect(() => {
+    const debordementPrecedent = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const fermerAvecEchap = (evenement) => {
+      if (evenement.key === 'Escape') fixerMissionDetail(null);
+    };
+    window.addEventListener('keydown', fermerAvecEchap);
+    return () => {
+      document.body.style.overflow = debordementPrecedent;
+      window.removeEventListener('keydown', fermerAvecEchap);
+    };
+  }, [fixerMissionDetail]);
+
+  const afficherHeure = (libelle, heure) => (
+    <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">{libelle}</dt>
+      <dd className="text-sm leading-relaxed text-[#43515A]">
+        {heure ? `${formaterDateMission(heure)} · ${formaterHeure(heure)}` : 'Non renseignée'}
+      </dd>
+    </div>
+  );
+
+  return (
+    <div
+      className="mobile-scroll-overlay fixed inset-0 z-[120] flex justify-center bg-[#081B29]/80 p-3 backdrop-blur-sm sm:p-6"
+      role="presentation"
+      onMouseDown={(evenement) => {
+        if (evenement.target === evenement.currentTarget) fixerMissionDetail(null);
+      }}
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titre-detail-mission"
+        className="zone-impression-detail modal-scrollbar grid h-[92dvh] max-h-[92dvh] w-full max-w-5xl grid-cols-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden overscroll-contain bg-[#F7F6F2] shadow-[0_32px_100px_rgba(0,0,0,0.35)] md:grid-cols-[0.8fr_1.2fr] md:grid-rows-1"
+      >
+        <div className="relative flex min-h-48 flex-col justify-between overflow-hidden bg-[#0A2233] p-6 text-white sm:min-h-64 sm:p-9 md:min-h-0">
+          <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#1F7A8C]/30 blur-3xl" />
+          <div className="relative flex items-start justify-between gap-4">
+            <div className="flex h-12 w-12 items-center justify-center border border-white/20 bg-white/10 text-[#7FD1CB]">
+              <Ambulance size={24} />
+            </div>
+            <button
+              type="button"
+              onClick={() => fixerMissionDetail(null)}
+              aria-label="Fermer les détails de la mission"
+              className="non-imprimable flex h-11 w-11 items-center justify-center border border-white/25 text-white/80 transition-colors hover:border-white hover:bg-white hover:text-[#0A2233] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7FD1CB]"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="relative mt-8">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7FD1CB]">
+              Historique des missions · {formaterDateMission(mission.heureDepart)}
+            </p>
+            <h2 id="titre-detail-mission" className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl">
+              {mission.patient}
+            </h2>
+            <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-white/70">
+              <MapPin size={16} className="mt-0.5 shrink-0 text-[#7FD1CB]" />
+              {mission.destination}
+            </p>
+          </div>
+          <p className="relative mt-8 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">
+            CENHOSOA <span className="mx-2 text-[#7FD1CB]">/</span> Transport sanitaire
+          </p>
+        </div>
+
+        <div className="modal-scrollbar relative min-h-0 overflow-y-auto overscroll-contain px-6 pb-8 pt-7 sm:px-9 sm:pb-10 sm:pt-9">
+          <div className="entete-impression mb-6 hidden items-center gap-5">
+            <img src={logoCenhosoa} alt="Logo CENHOSOA" />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide">Centre Hospitalier de Soavinandriana</p>
+              <h2 className="text-xl font-bold">Fiche détaillée de mission</h2>
+              <h1 className="nom-patient-impression mt-1 break-words text-2xl font-extrabold leading-tight">{mission.patient}</h1>
+              <p className="mt-1 text-xs">Mission du {formaterDateMission(mission.heureDepart)}</p>
+            </div>
+          </div>
+          <div className="mb-6 flex items-start justify-between gap-3 pr-10">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1F7A8C]">Détail de la mission</p>
+              <div className="mt-4 h-px w-12 bg-[#7FD1CB]" />
+            </div>
+            <button
+              type="button"
+              onClick={() => imprimerZone('impression-detail-active')}
+              className="non-imprimable inline-flex min-h-9 shrink-0 items-center gap-2 border border-[#0A2233]/15 px-3 text-xs font-semibold uppercase tracking-[0.1em] text-[#0A2233] transition-colors hover:border-[#1F7A8C] hover:bg-[#1F7A8C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C]"
+            >
+              <Printer size={15} />
+              <span>Imprimer</span>
+            </button>
+          </div>
+          <div className="mb-6 flex flex-wrap gap-2">
+            <span className="bg-[#0A2233] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+              {LIBELLES_ETAPES[mission.statut] || mission.statut}
+            </span>
+            {mission.urgenceVitale && <span className="bg-red-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-800">Urgence vitale</span>}
+            {mission.patientInfectieux && <span className="bg-amber-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-900">Patient infectieux</span>}
+          </div>
+          <dl className="divide-y divide-[#0A2233]/10 border-y border-[#0A2233]/10">
+            <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Ambulance</dt>
+              <dd className="text-sm leading-relaxed text-[#43515A]">{mission.ambulanceNom || 'Non renseignée'}{mission.ambulanceCode ? ` · ${mission.ambulanceCode}` : ''}</dd>
+            </div>
+            <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Distance totale</dt>
+              <dd className="text-sm leading-relaxed text-[#43515A]">{mission.distance} km · aller {mission.distanceAller} km · retour {mission.distanceRetour} km</dd>
+            </div>
+            <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Lit attribué</dt>
+              <dd className="text-sm leading-relaxed text-[#43515A]">{mission.litNumero || 'Aucun lit attribué'}{mission.litSecondaireNumero ? ` · ${mission.litSecondaireNumero}` : ''}</dd>
+            </div>
+            {mission.telephoneContact && (
+              <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Contact</dt>
+                <dd className="text-sm leading-relaxed text-[#43515A]">{mission.telephoneContact}</dd>
+              </div>
+            )}
+            {afficherHeure('Départ', mission.heureDepart)}
+            {afficherHeure('Arrivée au centre', mission.heureRetour)}
+            <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Retard communiqué par le chauffeur</dt>
+              <dd className="text-sm leading-relaxed text-[#43515A]">
+                {mission.minutesRetard !== null ? `${mission.minutesRetard} min` : 'Non renseigné'}
+              </dd>
+            </div>
+            {mission.motifInfectieux && (
+              <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Motif infectieux</dt>
+                <dd className="text-sm leading-relaxed text-[#43515A]">{mission.motifInfectieux}</dd>
+              </div>
+            )}
+            {mission.informationsMedicales && (
+              <div className="grid gap-1 py-3 sm:grid-cols-[150px_1fr] sm:gap-4">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1F7A8C]">Informations médicales</dt>
+                <dd className="whitespace-pre-wrap text-sm leading-relaxed text-[#43515A]">{mission.informationsMedicales}</dd>
+              </div>
+            )}
+          </dl>
+          <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-[#0A2233]/10 pt-4 text-sm">
+            <span className="text-[#43515A]">Tarif de base : {formaterAriary(mission.coutBase)}</span>
+            <span className="text-[#43515A]">Frais de retard : {formaterAriary(mission.fraisRetard)}</span>
+            <strong className="text-[#0A2233]">Total : {formaterAriary(mission.coutTotal)}</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 export default function GestionAmbulances({ profil, onDeconnexion, embedded = false }) {
@@ -141,9 +329,17 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
   const [retardsDeclares, fixerRetardsDeclares] = useState({});
   const [transitionEnCours, setTransitionEnCours] = useState('');
   const [confirmationEnCours, fixerConfirmationEnCours] = useState(false);
+  const [refusEnCours, fixerRefusEnCours] = useState(false);
+  const [motifRefus, fixerMotifRefus] = useState(null);
   const [ambulanceConfirmation, fixerAmbulanceConfirmation] = useState('');
   const [creationMissionOuverte, fixerCreationMissionOuverte] = useState(false);
   const [maintenant, fixerMaintenant] = useState(0);
+  const [rechercheHistorique, fixerRechercheHistorique] = useState('');
+  const [moisHistorique, fixerMoisHistorique] = useState('');
+  const [anneeHistorique, fixerAnneeHistorique] = useState('');
+  const [jourHistorique, fixerJourHistorique] = useState('');
+  const [historiqueDuJour, fixerHistoriqueDuJour] = useState(true);
+  const [missionDetail, fixerMissionDetail] = useState(null);
 
   const token = obtenirTokenStocke();
   const nomUtilisateur = [profil?.personnel?.prenoms, profil?.personnel?.nom].filter(Boolean).join(' ') || 'Personnel de régulation';
@@ -230,8 +426,125 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
   const missionsActives = useMemo(() => missions.filter((mission) => (
     !mission.terminee && mission.statut !== 'en_attente_confirmation'
   )), [missions]);
-  const missionsTerminees = useMemo(() => missions.filter((mission) => mission.terminee), [missions]);
+  const missionsTerminees = useMemo(() => missions
+    .filter((mission) => mission.terminee)
+    .sort((missionA, missionB) => {
+      const dateA = new Date(missionA.heureDepart).getTime();
+      const dateB = new Date(missionB.heureDepart).getTime();
+      return (Number.isFinite(dateB) ? dateB : 0) - (Number.isFinite(dateA) ? dateA : 0);
+    }), [missions]);
+  const anneesDisponibles = useMemo(() => {
+    const anneeActuelle = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, index) => anneeActuelle + index);
+  }, []);
+  const dateAujourdhui = new Date(maintenant);
+  const dateAujourdhuiCle = dateLocaleCle(dateAujourdhui);
+  const dateAujourdhuiTexte = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full' }).format(dateAujourdhui);
+  const anneeDateHistorique = historiqueDuJour
+    ? dateAujourdhui.getFullYear()
+    : Number(anneeHistorique || dateAujourdhui.getFullYear());
+  const moisDateHistorique = historiqueDuJour
+    ? dateAujourdhui.getMonth() + 1
+    : Number(moisHistorique || 0);
+  const nombreJoursMoisHistorique = moisDateHistorique
+    ? new Date(anneeDateHistorique, moisDateHistorique, 0).getDate()
+    : 31;
+  const selectionnerDateHistorique = (partie, valeur) => {
+    let annee = historiqueDuJour ? '' : anneeHistorique;
+    let mois = historiqueDuJour ? '' : moisHistorique;
+    let jour = historiqueDuJour ? '' : jourHistorique;
+    if (partie === 'annee') annee = valeur;
+    if (partie === 'mois') mois = valeur;
+    if (partie === 'jour') jour = valeur;
+
+    if (jour && mois) {
+      const dernierJour = new Date(Number(annee || dateAujourdhui.getFullYear()), Number(mois), 0).getDate();
+      jour = String(Math.min(Number(jour), dernierJour));
+    }
+
+    fixerAnneeHistorique(annee);
+    fixerMoisHistorique(mois);
+    fixerJourHistorique(jour);
+    fixerHistoriqueDuJour(false);
+  };
+  const afficherHistoriqueAujourdhui = () => {
+    fixerAnneeHistorique('');
+    fixerMoisHistorique('');
+    fixerJourHistorique('');
+    fixerHistoriqueDuJour(true);
+  };
+  const afficherToutHistorique = () => {
+    fixerAnneeHistorique('');
+    fixerMoisHistorique('');
+    fixerJourHistorique('');
+    fixerHistoriqueDuJour(false);
+  };
+  const rechercheNormaliseeHistorique = normaliserTexteLieu(rechercheHistorique);
+  const resumeDateHistorique = [
+    jourHistorique,
+    moisHistorique ? formaterMoisMission(moisHistorique) : '',
+    anneeHistorique,
+  ].filter(Boolean).join(' ');
+  const missionsHistoriqueFiltrees = missionsTerminees.filter((mission) => {
+    const dateMission = new Date(mission.heureDepart);
+    if (historiqueDuJour && dateLocaleCle(dateMission) !== dateAujourdhuiCle) return false;
+    if (!historiqueDuJour && anneeHistorique && dateMission.getFullYear() !== Number(anneeHistorique)) return false;
+    if (!historiqueDuJour && moisHistorique && dateMission.getMonth() + 1 !== Number(moisHistorique)) return false;
+    if (!historiqueDuJour && jourHistorique && dateMission.getDate() !== Number(jourHistorique)) return false;
+    if (!rechercheNormaliseeHistorique) return true;
+    return [
+      mission.patient,
+      mission.destination,
+      mission.ambulanceNom,
+      mission.ambulanceCode,
+      mission.litNumero,
+      mission.telephoneContact,
+      formaterDateMission(mission.heureDepart),
+    ].filter(Boolean).some((valeur) => normaliserTexteLieu(String(valeur)).includes(rechercheNormaliseeHistorique));
+  });
   const ambulanceChoisie = ambulances.find((ambulance) => ambulance.id === ambulanceSelectionnee);
+  const litsRequisDemande = demandeAConfirmer
+    ? [
+      ...(demandeAConfirmer.urgence_vitale ? ['dechocage'] : []),
+      ...(demandeAConfirmer.patient_infectieux ? ['salle_septique'] : []),
+      ...(!demandeAConfirmer.urgence_vitale && !demandeAConfirmer.patient_infectieux ? ['urgence'] : []),
+    ]
+    : [];
+  const litsManquantsDemande = chargement
+    ? []
+    : litsRequisDemande.filter(
+      (categorie) => !litsUrgenceDisponibles.some((lit) => lit.categorie === categorie),
+    );
+  const ambulanceManquanteDemande = !chargement
+    && !ambulances.some((ambulance) => ambulance.statut === 'disponible');
+  const ressourcesManquantesDemande = [
+    ...(litsManquantsDemande.length ? ['lit_indisponible'] : []),
+    ...(ambulanceManquanteDemande ? ['ambulance_indisponible'] : []),
+  ];
+  const motifsRefusDisponibles = demandeAConfirmer
+    ? [
+      {
+        valeur: 'lit_indisponible',
+        libelle: `Manque de lit disponible (${litsManquantsDemande.length
+          ? litsManquantsDemande.map((categorie) => ({
+            dechocage: 'déchoquage',
+            salle_septique: 'salle septique',
+            urgence: "d'urgence",
+          })[categorie]).join(' et ')
+          : litsRequisDemande.map((categorie) => ({
+            dechocage: 'déchoquage',
+            salle_septique: 'salle septique',
+            urgence: "d'urgence",
+          })[categorie]).join(' et ')})`,
+      },
+      { valeur: 'ambulance_indisponible', libelle: "Manque d'ambulance disponible" },
+    ]
+    : [];
+  const motifsRefusSelectionnes = ressourcesManquantesDemande.length
+    ? ressourcesManquantesDemande
+    : motifRefus && motifRefus.missionId === demandeAConfirmer?.id
+      ? motifRefus.valeurs
+      : [];
 
   const simulerTrajet = async () => {
     if (!destination.trim()) {
@@ -373,6 +686,10 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
 
   const confirmerDemandeEnAttente = async (evenement) => {
     evenement.preventDefault();
+    if (ressourcesManquantesDemande.length) {
+      fixerErreur('Cette demande ne peut pas être confirmée : une ambulance ou un lit requis est indisponible. Vous pouvez la refuser.');
+      return;
+    }
     const ambulanceSelectionneePourConfirmation = ambulanceConfirmation
       || ambulances.find((ambulance) => ambulance.statut === 'disponible')?.id;
     if (!demandeAConfirmer || !ambulanceSelectionneePourConfirmation) {
@@ -395,12 +712,236 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
     }
   };
 
+  const refuserDemandeEnAttente = async () => {
+    const motifs = motifsRefusSelectionnes.filter((motif) => motifsRefusDisponibles.some((option) => option.valeur === motif));
+    if (!demandeAConfirmer || !motifs.length) return;
+    fixerRefusEnCours(true);
+    fixerErreur('');
+    try {
+      await refuserDemandeAmbulance(token, demandeAConfirmer.id, motifs);
+      fixerDemandeAConfirmer(null);
+      fixerDemandeMasqueeId('');
+      fixerMotifRefus(null);
+      fixerRechargement((precedent) => precedent + 1);
+    } catch (err) {
+      fixerErreur(err.message || "Impossible d'envoyer le message de refus au patient.");
+      if (err.status === 409) fixerRechargement((precedent) => precedent + 1);
+    } finally {
+      fixerRefusEnCours(false);
+    }
+  };
+
   return (
     <div className={embedded ? 'espace font-body text-[#1E2333]' : 'espace min-h-screen bg-[#F4F2EE] font-body text-[#1E2333]'}>
+      <style>{`
+        @page { margin: 0; }
+        @page fiche-mission { size: A4 portrait; margin: 0; }
+        .zone-impression-detail { page: fiche-mission; }
+        @media print {
+          body.impression-historique-active > *:not(.copie-impression),
+          body.impression-detail-active > *:not(.copie-impression) {
+            display: none !important;
+          }
+          body.impression-historique-active > .copie-impression,
+          body.impression-detail-active > .copie-impression {
+            display: block !important;
+          }
+          body.impression-historique-active *,
+          body.impression-detail-active * { visibility: hidden !important; }
+          body.impression-historique-active .zone-impression-historique,
+          body.impression-historique-active .zone-impression-historique *,
+          body.impression-detail-active .zone-impression-detail,
+          body.impression-detail-active .zone-impression-detail * { visibility: visible !important; }
+          body.impression-historique-active .zone-impression-historique,
+          body.impression-detail-active .zone-impression-detail {
+            position: absolute !important;
+            inset: 12mm auto auto 12mm !important;
+            width: calc(100% - 24mm) !important;
+            max-width: none !important;
+            max-height: none !important;
+            height: auto !important;
+            overflow: visible !important;
+            background: #fff !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+          }
+          body.impression-historique-active .zone-impression-historique {
+            display: block !important;
+            animation: none !important;
+            transform: none !important;
+          }
+          body.impression-historique-active .zone-impression-historique,
+          body.impression-historique-active .zone-impression-historique * {
+            color: #111 !important;
+            font-family: Arial, sans-serif !important;
+            letter-spacing: normal !important;
+            text-shadow: none !important;
+          }
+          body.impression-historique-active .zone-impression-historique article {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 5mm 0 !important;
+            border: 0 !important;
+            border-bottom: 1px solid #bbb !important;
+            border-radius: 0 !important;
+            animation: none !important;
+            transform: none !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            box-shadow: none !important;
+          }
+          body.impression-historique-active .zone-impression-historique article > div,
+          body.impression-historique-active .zone-impression-historique article dl,
+          body.impression-historique-active .zone-impression-historique article dl > div {
+            display: block !important;
+            margin-top: 2mm !important;
+          }
+          body.impression-historique-active .zone-impression-historique article dt {
+            display: inline !important;
+            margin-right: 2mm !important;
+            font-weight: 700 !important;
+          }
+          body.impression-historique-active .zone-impression-historique article dd {
+            display: inline !important;
+            margin: 0 4mm 0 0 !important;
+          }
+          body.impression-historique-active .zone-impression-historique article p,
+          body.impression-historique-active .zone-impression-historique article span,
+          body.impression-historique-active .zone-impression-historique article dd {
+            font-size: 9pt !important;
+            line-height: 1.35 !important;
+          }
+          body.impression-historique-active .zone-impression-historique article h3 {
+            font-size: 12pt !important;
+            break-after: avoid;
+            page-break-after: avoid;
+          }
+          body.impression-historique-active .zone-impression-historique .entete-impression {
+            margin-bottom: 6mm !important;
+            padding-bottom: 4mm !important;
+            border-bottom: 2px solid #0A2233 !important;
+          }
+          body.impression-historique-active .entete-impression img {
+            width: 22mm !important;
+            height: 22mm !important;
+            object-fit: contain !important;
+          }
+          body.impression-detail-active .entete-impression img {
+            width: 22mm !important;
+            height: 22mm !important;
+            object-fit: contain !important;
+          }
+          body.impression-historique-active .zone-impression-historique .entete-impression h2 {
+            margin: 0 !important;
+            font-size: 18pt !important;
+            line-height: 1.2 !important;
+          }
+          body.impression-historique-active .zone-impression-historique .entete-impression p {
+            margin-top: 2mm !important;
+            font-size: 9pt !important;
+          }
+          body.impression-detail-active .zone-impression-detail { display: block !important; }
+          body.impression-detail-active .zone-impression-detail > div:first-child { display: none !important; }
+          body.impression-detail-active .zone-impression-detail {
+            box-sizing: border-box !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: auto !important;
+            bottom: auto !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
+            max-height: 297mm !important;
+            overflow: hidden !important;
+            padding: 10mm 12mm !important;
+            break-before: avoid-page !important;
+            break-after: avoid-page !important;
+            break-inside: avoid-page !important;
+            page-break-before: avoid !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+          }
+          body.impression-detail-active .zone-impression-detail > div:last-child {
+            box-sizing: border-box !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            background: #fff !important;
+            color: #111 !important;
+            padding: 0 !important;
+            font-family: Arial, sans-serif !important;
+            letter-spacing: normal !important;
+            font-size: 8pt !important;
+            line-height: 1.2 !important;
+          }
+          body.impression-detail-active .zone-impression-detail .entete-impression {
+            display: flex !important;
+            align-items: center !important;
+            gap: 5mm !important;
+            margin-bottom: 3mm !important;
+            padding-bottom: 3mm !important;
+            border-bottom: 2px solid #0A2233 !important;
+          }
+          body.impression-detail-active .zone-impression-detail .entete-impression h2 {
+            margin: 0 !important;
+            font-size: 11pt !important;
+            line-height: 1.1 !important;
+          }
+          body.impression-detail-active .zone-impression-detail .entete-impression .nom-patient-impression {
+            margin: 1mm 0 !important;
+            color: #0A2233 !important;
+            font-size: 22pt !important;
+            font-weight: 800 !important;
+            line-height: 1.1 !important;
+          }
+          body.impression-detail-active .zone-impression-detail .entete-impression p {
+            margin: 0 !important;
+            font-size: 8pt !important;
+          }
+          body.impression-detail-active .zone-impression-detail > div:last-child > .mb-6 {
+            margin-bottom: 2mm !important;
+          }
+          body.impression-detail-active .zone-impression-detail dl > div {
+            display: grid !important;
+            grid-template-columns: 48mm 1fr !important;
+            gap: 1mm !important;
+            padding: 1.5mm 0 !important;
+            border-bottom: 1px solid #bbb !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          body.impression-detail-active .zone-impression-detail dt,
+          body.impression-detail-active .zone-impression-detail dd {
+            color: #111 !important;
+            font-size: 8pt !important;
+            line-height: 1.2 !important;
+          }
+          body.impression-detail-active .zone-impression-detail dt {
+            font-weight: 700 !important;
+          }
+          body.impression-detail-active .zone-impression-detail,
+          body.impression-detail-active .zone-impression-detail * { color: #111 !important; }
+          body.impression-detail-active .zone-impression-detail .entete-impression { color: #111 !important; }
+          body.impression-detail-active .zone-impression-detail > div:last-child > .mt-6 {
+            margin-top: 3mm !important;
+            padding-top: 2mm !important;
+            font-size: 8pt !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          body.impression-historique-active .non-imprimable,
+          body.impression-detail-active .non-imprimable { display: none !important; }
+          body.impression-historique-active .entete-impression { display: flex !important; }
+        }
+      `}</style>
       <StylesEspace />
       {demandeAConfirmer && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm" role="presentation">
-          <section role="dialog" aria-modal="true" aria-labelledby="titre-demande-a-confirmer" className="max-h-[92dvh] w-full max-w-xl overflow-y-auto overscroll-contain rounded-3xl bg-white shadow-2xl">
+        <div className="mobile-scroll-overlay fixed inset-0 z-[100] flex justify-center bg-[#0A2233]/70 p-4 backdrop-blur-sm" role="presentation">
+          <section role="dialog" aria-modal="true" aria-labelledby="titre-demande-a-confirmer" className="mobile-scroll-dialog my-auto w-full max-w-xl overflow-y-auto overscroll-contain rounded-3xl bg-white shadow-2xl">
             <header className="flex items-start justify-between gap-4 bg-gradient-to-r from-red-700 to-red-600 px-6 py-5 text-white">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15"><Siren className="h-6 w-6" /></span>
@@ -430,9 +971,58 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
                   {ambulances.filter((ambulance) => ambulance.statut === 'disponible').map((ambulance) => <option key={ambulance.id} value={ambulance.id}>{ambulance.nom} · {ambulance.type}</option>)}
                 </select>
               </label>
+              {ressourcesManquantesDemande.length > 0 && (
+                <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm font-semibold text-red-800">
+                  Demande non confirmable : {[
+                    ...(litsManquantsDemande.length
+                      ? [`manque de lit disponible (${litsManquantsDemande.map((categorie) => ({
+                        dechocage: 'déchoquage',
+                        salle_septique: 'salle septique',
+                        urgence: "d'urgence",
+                      })[categorie]).join(' et ')})`]
+                      : []),
+                    ...(ambulanceManquanteDemande ? ["manque d'ambulance disponible"] : []),
+                  ].join(' et ')}. Refusez la demande ou attendez le rétablissement des disponibilités.
+                </div>
+              )}
+              {motifsRefusDisponibles.length > 0 && (
+                <fieldset className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                  <legend className="px-1 text-sm font-bold text-amber-950">Refuser la demande et informer le patient</legend>
+                  <p className="text-xs leading-relaxed text-amber-900">Les ressources indisponibles sont cochées automatiquement. Le message sera affiché dans le suivi du patient.</p>
+                  {motifsRefusDisponibles.map((option) => (
+                    <label key={option.valeur} className="flex cursor-pointer items-start gap-2 text-sm text-slate-800">
+                      <input
+                        type="checkbox"
+                        name="motif-refus-demande"
+                        value={option.valeur}
+                        checked={motifsRefusSelectionnes.includes(option.valeur)}
+                        disabled={ressourcesManquantesDemande.includes(option.valeur)}
+                        onChange={(event) => fixerMotifRefus((precedent) => {
+                          const valeursPrecedentes = precedent?.missionId === demandeAConfirmer.id
+                            ? precedent.valeurs
+                            : [];
+                          const valeurs = event.target.checked
+                            ? [...valeursPrecedentes, option.valeur]
+                            : valeursPrecedentes.filter((valeur) => valeur !== option.valeur);
+                          return { missionId: demandeAConfirmer.id, valeurs };
+                        })}
+                        className="mt-0.5 accent-amber-700"
+                      />
+                      <span>{option.libelle}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              )}
               <div className="flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-4">
-                <button type="button" onClick={() => { fixerDemandeMasqueeId(demandeAConfirmer.id); fixerDemandeAConfirmer(null); }} className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold">Plus tard</button>
-                <button type="submit" disabled={confirmationEnCours || !ambulances.some((ambulance) => ambulance.statut === 'disponible')} className="inline-flex items-center gap-2 rounded-xl bg-[#0A2233] px-5 py-3 text-sm font-bold text-white hover:bg-[#0F3D52] disabled:cursor-not-allowed disabled:opacity-50">
+                <button
+                  type="button"
+                  onClick={refuserDemandeEnAttente}
+                  disabled={refusEnCours || !motifsRefusSelectionnes.length}
+                  className="rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {refusEnCours ? 'Enregistrement du refus…' : 'Refuser et informer le patient'}
+                </button>
+                <button type="submit" disabled={confirmationEnCours || ressourcesManquantesDemande.length > 0 || !ambulances.some((ambulance) => ambulance.statut === 'disponible')} className="inline-flex items-center gap-2 rounded-xl bg-[#0A2233] px-5 py-3 text-sm font-bold text-white hover:bg-[#0F3D52] disabled:cursor-not-allowed disabled:opacity-50">
                   {confirmationEnCours ? 'Confirmation…' : 'Confirmer et assigner'} <CheckCircle2 className="h-4 w-4" />
                 </button>
               </div>
@@ -440,7 +1030,7 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
           </section>
         </div>
       )}
-      {!embedded && <header className="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-[#0A2233] via-[#0F3D52] to-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20 backdrop-blur-xl">
+      {!embedded && <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0A2233] text-white shadow-lg shadow-[#0A2233]/20">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <div className="group flex min-w-0 items-center space-x-3.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white p-1.5 shadow-md shadow-black/20 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2 sm:h-14 sm:w-14">
@@ -702,20 +1292,133 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
           </section>
         </div>
 
-        {missionsTerminees.length > 0 && (
-          <section aria-label="Missions terminées" className="apparition rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-sm font-bold text-slate-800">Missions terminées · {missionsTerminees.length}</h2>
+        (
+          <section aria-label="Missions terminées" className="zone-impression-historique apparition rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+            <div className="non-imprimable flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-slate-800">
+                  {historiqueDuJour
+                    ? `Historique du ${dateAujourdhuiTexte}`
+                    : resumeDateHistorique ? `Historique · ${resumeDateHistorique}` : 'Historique des missions'} · {missionsHistoriqueFiltrees.length} / {missionsTerminees.length}
+                </h2>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={afficherHistoriqueAujourdhui}
+                    aria-pressed={historiqueDuJour}
+                    className={`inline-flex min-h-9 items-center rounded-lg border px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] ${historiqueDuJour ? 'border-[#0F3D52] bg-[#0F3D52] text-white' : 'border-[#0F3D52]/20 text-[#0F3D52] hover:border-[#1F7A8C] hover:bg-[#EAF1F1]'}`}
+                  >
+                    Aujourd’hui · {dateAujourdhuiTexte}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={afficherToutHistorique}
+                    aria-pressed={!historiqueDuJour && !anneeHistorique && !moisHistorique && !jourHistorique}
+                    className={`inline-flex min-h-9 items-center rounded-lg border px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C] ${!historiqueDuJour && !anneeHistorique && !moisHistorique && !jourHistorique ? 'border-[#0F3D52] bg-[#0F3D52] text-white' : 'border-[#0F3D52]/20 text-[#0F3D52] hover:border-[#1F7A8C] hover:bg-[#EAF1F1]'}`}
+                  >
+                    Tout l’historique
+                  </button>
+                </div>
+              </div>
+              <div className="grid w-full grid-cols-1 gap-2 sm:max-w-5xl sm:grid-cols-4">
+                <label className="block">
+                  <span className="sr-only">Filtrer l’historique par année</span>
+                  <select
+                    value={historiqueDuJour ? String(dateAujourdhui.getFullYear()) : anneeHistorique}
+                    onChange={(event) => selectionnerDateHistorique('annee', event.target.value)}
+                    aria-label="Filtrer l’historique par année"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10"
+                  >
+                    <option value="">Toutes les années</option>
+                    {anneesDisponibles.map((annee) => (
+                      <option key={annee} value={annee}>{annee}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="sr-only">Filtrer l’historique par mois</span>
+                  <select
+                    value={historiqueDuJour ? String(dateAujourdhui.getMonth() + 1) : moisHistorique}
+                    onChange={(event) => selectionnerDateHistorique('mois', event.target.value)}
+                    aria-label="Filtrer l’historique par mois"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10"
+                  >
+                    <option value="">Tous les mois</option>
+                    {Array.from({ length: 12 }, (_, index) => String(index + 1)).map((mois) => (
+                      <option key={mois} value={mois}>{formaterMoisMission(mois)}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="sr-only">Filtrer l’historique par jour</span>
+                  <select
+                    value={historiqueDuJour ? String(dateAujourdhui.getDate()) : jourHistorique}
+                    onChange={(event) => selectionnerDateHistorique('jour', event.target.value)}
+                    aria-label="Filtrer l’historique par jour"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10"
+                  >
+                    <option value="">Tous les jours</option>
+                    {Array.from({ length: nombreJoursMoisHistorique }, (_, index) => index + 1).map((jour) => (
+                      <option key={jour} value={jour}>{jour}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="relative block">
+                  <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="search"
+                    value={rechercheHistorique}
+                    onChange={(event) => fixerRechercheHistorique(event.target.value)}
+                    placeholder="Rechercher une mission…"
+                    aria-label="Rechercher dans l’historique des missions"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1F7A8C] focus:ring-4 focus:ring-[#1F7A8C]/10"
+                  />
+                </label>
+              </div>
+            </div>
+            <div className="entete-impression mb-3 hidden items-center gap-5">
+              <img src={logoCenhosoa} alt="Logo CENHOSOA" />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide">Centre Hospitalier de Soavinandriana</p>
+                <h2 className="text-xl font-bold text-black">
+                  {historiqueDuJour
+                    ? `Historique des missions du ${dateAujourdhuiTexte}`
+                    : resumeDateHistorique ? `Historique des missions · ${resumeDateHistorique}` : 'Historique complet des missions'}
+                </h2>
+                <p className="mt-1 text-xs text-black">Imprimé le {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(dateAujourdhui)}</p>
+              </div>
+            </div>
+            <div className="non-imprimable mb-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => imprimerZone('impression-historique-active')}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#0F3D52] px-4 text-xs font-bold text-white transition hover:bg-[#0A2233] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C]"
+              >
+                <Printer size={16} />
+                <span>Imprimer l’historique affiché</span>
+              </button>
+            </div>
             <div className="mt-3 divide-y divide-slate-100">
-              {missionsTerminees.map((mission) => (
+              {missionsHistoriqueFiltrees.map((mission) => (
                 <article key={mission.id} className="apparition transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#1F7A8C]/10 py-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 className="text-sm font-bold text-slate-800">{mission.patient}</h3>
                       <p className="mt-0.5 text-xs text-slate-600">{mission.destination}</p>
                       {mission.telephoneContact && <p className="mt-1 text-xs text-slate-500">Contact : {mission.telephoneContact}</p>}
+                      <p className="mt-1 text-xs font-medium text-[#1F7A8C]">Mission du {formaterDateMission(mission.heureDepart)}</p>
                     </div>
                     <div className="flex w-full flex-col items-start gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                       <span className="text-sm font-bold text-[#0A2233]">{formaterAriary(mission.coutTotal)}</span>
+                      <button
+                        type="button"
+                        onClick={() => fixerMissionDetail(mission)}
+                        aria-label={`Voir les détails de la mission de ${mission.patient}`}
+                        className="inline-flex h-9 items-center justify-center gap-2 border border-[#0A2233]/15 px-3 text-xs font-semibold uppercase tracking-[0.1em] text-[#0A2233] transition-colors hover:border-[#1F7A8C] hover:bg-[#1F7A8C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A8C]"
+                      >
+                        <Eye size={15} />
+                        <span>Détails</span>
+                      </button>
                     </div>
                   </div>
                   {mission.informationsMedicales && <p className="mt-2 whitespace-pre-wrap text-xs text-slate-600"><strong>Informations médicales :</strong> {mission.informationsMedicales}</p>}
@@ -723,9 +1426,8 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
                     <div><dt className="text-slate-500">Ambulance</dt><dd className="font-semibold text-slate-700">{mission.ambulanceNom} · {mission.ambulanceCode}</dd></div>
                     <div><dt className="text-slate-500">Distance</dt><dd className="font-semibold text-slate-700">{mission.distance} km</dd></div>
                     <div><dt className="text-slate-500">Lit URGENCE</dt><dd className="font-semibold text-slate-700">{mission.litNumero || 'Aucun lit attribué'}</dd></div>
-                    <div><dt className="text-slate-500">Départ</dt><dd className="font-semibold text-slate-700">{formaterHeure(mission.heureDepart)}</dd></div>
-                    <div><dt className="text-slate-500">Retour au centre</dt><dd className="font-semibold text-slate-700">{formaterHeure(mission.heureRetour)}</dd></div>
-                    <div><dt className="text-slate-500">Chrono chauffeur</dt><dd className="font-semibold text-slate-700">{mission.minutesSurPlace ?? '—'} min</dd></div>
+                    <div><dt className="text-slate-500">Heure de départ</dt><dd className="font-semibold text-slate-700">{formaterHeure(mission.heureDepart)}</dd></div>
+                    <div><dt className="text-slate-500">Arrivée au centre</dt><dd className="font-semibold text-slate-700">{formaterHeure(mission.heureRetour)}</dd></div>
                     <div><dt className="text-slate-500">Retard</dt><dd className="font-semibold text-slate-700">{mission.minutesRetard ?? 0} min</dd></div>
                   </dl>
                   <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 border-t border-slate-100 pt-2 text-xs text-slate-600">
@@ -735,8 +1437,14 @@ export default function GestionAmbulances({ profil, onDeconnexion, embedded = fa
                   </div>
                 </article>
               ))}
+              {missionsHistoriqueFiltrees.length === 0 && (
+                <p className="py-8 text-center text-sm text-slate-500">Aucune mission ne correspond à votre recherche.</p>
+              )}
             </div>
           </section>
+        )
+        {missionDetail && (
+          <DetailHistoriqueMission mission={missionDetail} fixerMissionDetail={fixerMissionDetail} />
         )}
         <p className="flex items-center gap-1.5 text-[11px] text-slate-500"><ShieldCheck size={13} />La flotte, les missions et les coûts sont enregistrés par l’API. La distance est calculée sur le réseau routier OpenStreetMap.</p>
       </main>

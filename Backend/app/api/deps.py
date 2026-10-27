@@ -11,11 +11,7 @@ from app.db.session import obtenir_db
 from app.models.enums import RoleUtilisateur
 from app.models.utilisateur import Utilisateur
 
-# Affiche un simple champ "coller le token" dans Swagger, au lieu du
-# formulaire username/password d'OAuth2PasswordBearer (qui ne correspond
-# pas à notre endpoint /auth/connexion, lequel attend du JSON).
 schema_securite = HTTPBearer()
-
 
 def obtenir_utilisateur_courant(
     identifiants: HTTPAuthorizationCredentials = Depends(schema_securite),
@@ -45,7 +41,6 @@ def obtenir_utilisateur_courant(
             status_code=status.HTTP_403_FORBIDDEN, detail="Compte désactivé."
         )
     return utilisateur
-
 
 def exiger_roles(*roles_autorises: RoleUtilisateur):
     """Fabrique une dépendance qui n'autorise que les rôles listés."""
